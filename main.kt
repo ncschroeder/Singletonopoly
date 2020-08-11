@@ -1,16 +1,15 @@
 package commandline
 
 fun main() {
-//    var foo: Int
-//    println(foo)
-//    outer@ while (true) {
-//        Game()
-//        print("Would you like to play again? (y/n) ")
-//        inner@ while (true)
-//            when (readLine()) {
-//                "y", "Y" -> break@inner
-//                "n", "N" -> break@outer
-//                else -> println("Invalid input")
-//            }
-//    }
+    outer@ while (true) {
+        Game()
+        inner@ while (true) {
+            print("Would you like to play again? (y/n) ")
+            when (readLine()!!.toLowerCase()) {
+                "y" -> break@inner
+                "n" -> break@outer
+                else -> println("Invalid input")
+            }
+        }
+    }
 }

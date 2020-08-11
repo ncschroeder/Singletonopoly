@@ -5,11 +5,9 @@ import java.lang.NumberFormatException
 import kotlin.random.Random
 
 class PlayerManager {
-    private var numHumanPlayers = 0
-    private var numAIPlayers = 0
     private var currentPlayerIndex = 0
     private val players = mutableListOf<Player>()
-    val numPlayersInGame get() = Player.numPlayersInGame
+    val numberOfPlayersInGame get() = Player.numberOfPlayersInGame
 
     /**
      * This value should be assigned to a variable and then changes should be made to that variable
@@ -22,43 +20,45 @@ class PlayerManager {
         setup()
     }
 
-    fun setup() {
+    private fun setup() {
+        var numHumanPlayers: Int
+        val numAIPlayers = 0
         fun getDiceRoll() = Random.nextInt(1, 7)
+//        while (true) {
         while (true) {
-            while (true) {
-                print("How many human players? ")
-                val input = readLine()!!
-                try {
-                    numHumanPlayers = input.toInt()
-                } catch (e: NumberFormatException) {
-                    println("Invalid input")
-                    continue
-                }
-                if (numHumanPlayers in 0..8) break
-                println("The number of human players can be a minimum of 0 and a maximum of 8")
+            print("How many human players? ")
+            val input = readLine()!!
+            try {
+                numHumanPlayers = input.toInt()
+            } catch (e: NumberFormatException) {
+                println("Invalid input")
+                continue
             }
-
-            while (true) {
-                print("How many AI Players? ")
-                val input = readLine()!!
-                try {
-                    numAIPlayers = input.toInt()
-                } catch (e: NumberFormatException) {
-                    println("Invalid input")
-                    continue
-                }
-                if (numAIPlayers in 0..8) break
-                println("The number of AI Players can be a minimum of 0 and a maximum of 8")
-            }
-            if (numHumanPlayers + numAIPlayers in 2..8) break
-            println("Total number of players can be a minimum of 2 and a maximum of 8")
+            if (numHumanPlayers in 2..8) break
+            println("The number of human players can be a minimum of 2 and a maximum of 8")
         }
+
+//         AI player's moves are not currently implemented so this code is commented out
+//            while (true) {
+//                print("How many AI Players? ")
+//                val input = readLine()!!
+//                try {
+//                    numAIPlayers = input.toInt()
+//                } catch (e: NumberFormatException) {
+//                    println("Invalid input")
+//                    continue
+//                }
+//                if (numAIPlayers in 0..8) break
+//                println("The number of AI Players can be a minimum of 0 and a maximum of 8")
+//            }
+//            if (numHumanPlayers + numAIPlayers in 2..8) break
+//            println("Total number of players can be a minimum of 2 and a maximum of 8")
+//        }
 
         /**
          * The purpose of this class is to let Kotlin order the players based on dice rolls
          */
-        class PlayerOrdering(val name: String, val diceRoll: Int, val type: String) :
-            Comparable<PlayerOrdering> {
+        class PlayerOrdering(val name: String, val diceRoll: Int, val type: String) : Comparable<PlayerOrdering> {
             init {
                 println("$name got a $diceRoll for their beginning dice roll")
             }
@@ -67,40 +67,38 @@ class PlayerManager {
             override fun compareTo(other: PlayerOrdering) = other.diceRoll - this.diceRoll
         }
 
-        // Get player's names
-        val playerOrderingArray = arrayOfNulls<PlayerOrdering>(numHumanPlayers + numAIPlayers)
+        val playerOrderingList = mutableListOf<PlayerOrdering>()
         for (i in 0 until numHumanPlayers) {
-            print("Enter name for player ${i + 1} (Human Player) or enter nothing for \"Human Player ${i + 1}\": ")
+            print("Enter name for human player ${i + 1} or enter nothing for \"Human Player ${i + 1}\": ")
             val input = readLine()!!
             val name = if (input == "") "Human Player ${i + 1}" else input
-            playerOrderingArray[i] = PlayerOrdering(name, getDiceRoll() + getDiceRoll(), "Human")
+            playerOrderingList.add(PlayerOrdering(name, getDiceRoll() + getDiceRoll(), "Human"))
         }
 
         for (i in numHumanPlayers until numHumanPlayers + numAIPlayers) {
             print(
-                "Enter a name for player ${i + 1} (AI Player) or enter nothing for \"AI Player " +
+                "Enter a name for AI player ${i - numHumanPlayers + 1} or enter nothing for \"AI Player " +
                         "${i - numHumanPlayers + 1}\": "
             )
             val input = readLine()!!
             val name = if (input == "") "AI Player ${i - numHumanPlayers + 1}" else input
-            playerOrderingArray.set(i, PlayerOrdering(name, getDiceRoll() + getDiceRoll(), "AI"))
+            playerOrderingList.add(PlayerOrdering(name, getDiceRoll() + getDiceRoll(), "AI"))
         }
-        playerOrderingArray.sort()
+        playerOrderingList.sort()
 
         // Create and fill list of players
         for (i in 0 until numHumanPlayers + numAIPlayers) {
             players.add(
-                if (playerOrderingArray[i]!!.type.equals("Human")) HumanPlayer(
-                    playerOrderingArray[i]!!.name
-                )
-                else AIPlayer(playerOrderingArray[i]!!.name)
+                if (playerOrderingList[i].type == "Human") HumanPlayer(playerOrderingList[i].name)
+                else AIPlayer(playerOrderingList[i].name)
             )
         }
 
         println("The order of the players is ")
         for (player in players) println(player.name)
+        println()
 
-        // Set numbers
+        // Set numbers starting from 1
         for (i in players.indices) {
             players[i].number = i + 1
             println("The number for ${players[i].name} is ${players[i].number}")
@@ -112,8 +110,12 @@ class PlayerManager {
         players[currentPlayerIndex] = updatedPlayer
     }
 
-    fun updatePlayer(playerNumber: Int, updatedPlayer: Player) {
-        players[playerNumber - 1] = updatedPlayer
+    fun updatePlayer(updatedPlayer: Player) {
+        players[updatedPlayer.number - 1] = updatedPlayer
+    }
+
+    fun removePlayerFromGame(playerNumber: Int) {
+        players[playerNumber - 1].removeFromGame()
     }
 
     fun switchToNextPlayer() {
@@ -136,21 +138,44 @@ class PlayerManager {
         for (i in players.indices) if (i != currentPlayerIndex) players[i].money -= amount
     }
 
+    /**
+     * This function should be used during entropy card plays. The current player should be excluded.
+     */
+    fun getPlayersThatDontHaveEnoughMoney(moneyAmount: Int): List<Player> {
+        val playersThatDontHaveEnoughMoney = mutableListOf<Player>()
+        for ((index, player) in players.withIndex()) {
+            if (player.money < moneyAmount && index != currentPlayerIndex) {
+                playersThatDontHaveEnoughMoney.add(player)
+            }
+        }
+        return playersThatDontHaveEnoughMoney
+    }
+
     fun displayPositions() {
         for (player in players) {
-            println(
-                "${player.name}: " + if (player.isInGame) player.position else "Out of the game"
-            )
+            println("${player.name}: " + if (player.isInGame) player.position else "Out of the game")
         }
     }
 
-    fun getNumGolfCoursesOwned(playerNumber: Int) = players[playerNumber - 1].numGolfCoursesOwned
+    fun displayNumbers() {
+        for (player in players) {
+            println("Name: ${player.name}, " + if (player.isInGame) "Number: ${player.number}" else "Out of the game")
+        }
+    }
+
+    fun getNumGolfCoursesOwned(playerNumber: Int) = players[playerNumber - 1].numberOfGolfCoursesOwned
 
     fun getPlayerCopy(playerNumber: Int) = players[playerNumber - 1]
 
-    fun getNumbersOfPlayersInGame(): Set<Int> {
-        val numbers = mutableSetOf<Int>()
-        for (player in players) if (player.isInGame) numbers.add(player.number)
+    fun getNonCurrentPlayersInGame() =
+        players.filterIndexed { index, player -> index != currentPlayerIndex && player.isInGame }
+
+    /**
+     * Returns a list of numbers of players that are still in the game with the exception of the parameter playerNumber
+     */
+    fun getNumbersOfOtherPlayersInGame(playerNumber: Int): List<Int> {
+        val numbers = mutableListOf<Int>()
+        for (player in players) if (player.isInGame && player.number != playerNumber) numbers.add(player.number)
         return numbers
     }
 
@@ -162,7 +187,7 @@ class PlayerManager {
 
 abstract class Player(var name: String) {
     init {
-        numPlayersInGame++
+        numberOfPlayersInGame++
     }
 
     var isInGame = true
@@ -170,7 +195,7 @@ abstract class Player(var name: String) {
 
     fun removeFromGame() {
         isInGame = false
-        numPlayersInGame--
+        numberOfPlayersInGame--
     }
 
     var number = 0
@@ -194,23 +219,37 @@ abstract class Player(var name: String) {
             field = value
         }
 
-    var numGolfCoursesOwned = 0
+    var numberOfGolfCoursesOwned = 0
         private set
 
     fun addGolfCourse() {
-        numGolfCoursesOwned++
+        numberOfGolfCoursesOwned++
     }
 
     fun removeGolfCourse() {
-        if (numGolfCoursesOwned == 0) {
-            throw Exception("Can't have negative number of golf courses")
+        if (numberOfGolfCoursesOwned == 0) {
+            throw Exception("You've tried to remove a golf course from $name, who doesn't have any golf courses")
         }
-        numGolfCoursesOwned--
+        numberOfGolfCoursesOwned--
+    }
+
+    var numberOfSuperStoresOwned = 0
+        private set
+
+    fun addSuperStore() {
+        numberOfSuperStoresOwned++
+    }
+
+    fun removeSuperStore() {
+        if (numberOfSuperStoresOwned == 0) {
+            throw Exception("You've tried to remove a super store from $name, who doesn't have any super stores")
+        }
+        numberOfSuperStoresOwned--
     }
 
     var isOnVacation = false
         private set
-    var numTurnsOnVacation = 0
+    var numberOfTurnsOnVacation = 0
         private set
 
     fun sendToVacation(vacationPosition: Int) {
@@ -219,8 +258,8 @@ abstract class Player(var name: String) {
     }
 
     fun continueVacation() {
-        numTurnsOnVacation++
-        if (numTurnsOnVacation == 3) {
+        numberOfTurnsOnVacation++
+        if (numberOfTurnsOnVacation == 3) {
             // Take player off vacation automatically once 3 turns have been taken
             println("$name, you spent 3 turns on vacation so it is now over")
             isOnVacation = false
@@ -231,21 +270,21 @@ abstract class Player(var name: String) {
         isOnVacation = false
     }
 
-    var numGetOffVacationCardsOwned = 0
+    var numberOfGetOffVacationCardsOwned = 0
         private set
 
     fun addGetOffVacationCard() {
-        numGetOffVacationCardsOwned++
+        numberOfGetOffVacationCardsOwned++
     }
 
     fun removeGetOffVacationCard() {
-        numGetOffVacationCardsOwned--
+        numberOfGetOffVacationCardsOwned--
     }
 
-    val hasAGetOffVacationCard get() = numGetOffVacationCardsOwned > 0
+    val hasAGetOffVacationCard get() = numberOfGetOffVacationCardsOwned > 0
 
     companion object {
-        var numPlayersInGame = 0
+        var numberOfPlayersInGame = 0
     }
 }
 

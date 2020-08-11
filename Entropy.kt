@@ -28,7 +28,7 @@ class EntropyDeck {
 
     fun removeGetOffVacationCardAtTop() {
         // This should only be called when a "get off vacation" card is at the top
-        if (!cards[topIndex].type.equals("get off vacation free")) {
+        if (cards[topIndex].type != "get off vacation free") {
             throw Exception("The top card is not a get off vacation free card")
         }
         cards.removeAt(topIndex)
