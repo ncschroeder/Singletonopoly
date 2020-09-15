@@ -1,123 +1,169 @@
 package commandline
 
-import tornadofx.property
 import java.lang.Exception
 import java.lang.IllegalArgumentException
-import java.lang.StringBuilder
 
 class Board {
-    // Ordering will be changed
     private val boardSpaces = arrayOf(
         // Numbers in comments are the positions of each space on the board
         "Start", // 1
-        Street("Page Street", "Lambeth"), // 2
-        Street("Victoria Street", "Lambeth"), // 3
-        Street("Nottingham Avenue", "Lambeth"), // 4
-        GolfCourse("Granby Golf Club"),
-        Street("Luanda Street", "Monrovia"), // 5
-        Street("Kinshasa Street", "Monrovia"), // 6
-        Street("Lagos Avenue", "Monrovia"), // 7
-        Street("Osage Avenue", "Vauxhall"), // 8
-        Street("Camden Street", "Vauxhall"), // 9
-        Street("Ozark Avenue", "Vauxhall"), // 10
-        Street("Union Avenue", "Soulard"), // 11
-        Street("Labadie Street", "Soulard"), // 12
-        Street("Augusta Street", "Soulard"), // 13
-        Street("Phoenix Avenue", "Nicosia"), // 14
-        Street("Louisville Avenue", "Nicosia"), // 15
-        Street("Norfolk Street", "Nicosia"), // 16
-        Street("Euler Avenue", "Riemann"), // 17
-        Street("Ramanujan Street", "Riemann"), // 18
-        Street("Euclid Avenue", "Riemann"), // 19
-        Street("Dijkstra Street", "Gosling"), // 20
-        Street("Knuth Street", "Gosling"), // 21
-        Street("Prim Street", "Gosling"), // 22
-        Street("Ezio Avenue", "Little Italy"), // 23
-        Street("Venezia Street", "Little Italy"), // 24
-        Street("Firenze Street", "Little Italy"), // 25
-        SuperStore("J Mart"), // 26
-         // 27
-        GolfCourse("Monett Golf Club"), // 28
-        GolfCourse("Neosho Golf Club"), // 29
-        GolfCourse("Aurora Golf Club"), // 30
-        SuperStore("Super Store 2"), // 31
-        "Vacation", // 32
-        "Go On Vacation", // 33
-        "Draw Entropy Card" // 34
+        Street(name = "Page Street", neighborhoodNumber = 1, neighborhoodName = "Lambeth"), // 2
+        Street(name = "Victoria Street", neighborhoodNumber = 1, neighborhoodName = "Lambeth"), // 3
+        Street(name = "Nottingham Avenue", neighborhoodNumber = 1, neighborhoodName = "Lambeth"), // 4
+        GolfCourse(name = "Granby Golf Club"),
+        Street(name = "Luanda Street", neighborhoodNumber = 2, neighborhoodName = "Monrovia"), //
+        "Draw Entropy Card",
+        Street(name = "Kinshasa Street", neighborhoodNumber = 2, neighborhoodName = "Monrovia"), //
+        Street(name = "Lagos Avenue", neighborhoodNumber = 2, neighborhoodName = "Monrovia"), //
+        SuperStore(name = "Newton Super Store"),
+        "Break Time",
+        Street(name = "Osage Avenue", neighborhoodNumber = 3, neighborhoodName = "Vauxhall"), //
+        Street(name = "Camden Street", neighborhoodNumber = 3, neighborhoodName = "Vauxhall"), //
+        "Draw Entropy Card",
+        Street(name = "Ozark Avenue", neighborhoodNumber = 3, neighborhoodName = "Vauxhall"), //
+        Street(name = "Union Avenue", neighborhoodNumber = 4, neighborhoodName = "Soulard"), //
+        "Vacation",
+        Street(name = "Labadie Street", neighborhoodNumber = 4, neighborhoodName = "Soulard"), //
+        GolfCourse(name = "Monett Golf Club"),
+        Street(name = "Augusta Street", neighborhoodNumber = 4, neighborhoodName = "Soulard"), //
+        Street(name = "Phoenix Avenue", neighborhoodNumber = 5, neighborhoodName = "Nicosia"), //
+        "Draw Entropy Card",
+        Street(name = "Louisville Avenue", neighborhoodNumber = 5, neighborhoodName = "Nicosia"), //
+        Street(name = "Norfolk Street", neighborhoodNumber = 5, neighborhoodName = "Nicosia"), //
+        GolfCourse(name = "Neosho Golf Club"),
+        Street(name = "Euler Avenue", neighborhoodNumber = 6, neighborhoodName = "Gauss"), //
+        Street(name = "Ramanujan Street", neighborhoodNumber = 6, neighborhoodName = "Gauss"), //
+        "Draw Entropy Card",
+        Street(name = "Euclid Avenue", neighborhoodNumber = 6, neighborhoodName = "Gauss"), //
+        "Break Time",
+        "Go On Vacation",
+        Street(name = "Dijkstra Street", neighborhoodNumber = 7, neighborhoodName = "Gosling"), //
+        Street(name = "Knuth Street", neighborhoodNumber = 7, neighborhoodName = "Gosling"), //
+        SuperStore(name = "Leibniz Super Store"),
+        "Draw Entropy Card",
+        Street(name = "Prim Street", neighborhoodNumber = 7, neighborhoodName = "Gosling"), //
+        Street(name = "Ezio Avenue", neighborhoodNumber = 8, neighborhoodName = "Little Italy"), //
+        GolfCourse(name = "Aurora Golf Club"),
+        "Draw Entropy Card",
+        Street(name = "Venezia Street", neighborhoodNumber = 8, neighborhoodName = "Little Italy"), //
+        Street(name = "Firenze Street", neighborhoodNumber = 8, neighborhoodName = "Little Italy") //
     )
+
+    private val golfCourses = mutableListOf<GolfCourse>()
+    private val superStores = mutableListOf<SuperStore>()
 
     init {
         // Set positions of all properties
         for ((index, space) in boardSpaces.withIndex()) {
             if (space is Property) {
-                space.position = index + 1
-                boardSpaces[index] = space
-            }
-        }
-
-        // Set neighbors of all streets
-        val streets = boardSpaces.filterIsInstance<Street>()
-        for ((index, space) in boardSpaces.withIndex()) {
-            if (space is Street) {
-                val neighbors = arrayOf(0, 0)
-                var neighborIndex = 0
-                for (otherStreet in streets) {
-                    if (space.neighborhood == otherStreet.neighborhood && space.position != otherStreet.position) {
-                        neighbors[neighborIndex] = otherStreet.position!!
-                        if (neighborIndex == 1) break
-                        neighborIndex++
-                    }
+                val position = index + 1
+                space.position = position
+                when (space) {
+                    is GolfCourse -> golfCourses.add(space)
+                    is SuperStore -> superStores.add(space)
                 }
-                space.setNeighbors(neighbors)
-                boardSpaces[index] = space
             }
         }
 
-//        for (street in boardSpaces.filterIsInstance<Street>()) {
-//            println("The neighbors of ${street.name} are ${street.neighbor1Position} and ${street.neighbor2Position}")
-//        }
+        // Have all streets find their neighbors.
+        for (space in boardSpaces) {
+            if (space is Street) {
+                space.findNeighbors()
+            }
+        }
+
+//        val s = getStreet(2)
+//        println("neighbors of position 1 are ${s.neighbor1.name} and ${s.neighbor2.name}")
+//        println("There are golf courses at positions ${golfCoursePositions.joinToString(", ")}")
+//        println("There are super stores at positions ${superStorePositions.joinToString(", ")}")
     }
 
     val numberOfSpaces get() = boardSpaces.size
 
-    // This property might be used for AI players to determine whether or not they should pay to get off vacation
-    var numberOfUnownedProperties = 0
-        private set(value) {
-            if (value < 0) throw IllegalArgumentException("Can't have negative number of unowned properties")
-            field = value
-        }
-
-    init {
-        for (space in boardSpaces) {
-            if (space is Property) {
-                numberOfUnownedProperties++
-            }
-        }
-    }
-
+    /**
+     * Should be used by the player manager so that players know which position to go to when they are sent to vacation.
+     *
+     * @throws IllegalStateException if there is no space on the board that is a "Vacation" string.
+     */
     fun getVacationPosition(): Int {
         for ((index, space) in boardSpaces.withIndex()) {
             if (space == "Vacation") {
                 return index + 1
             }
         }
-        throw Exception("There is no space is a \"Vacation\" string")
+        throw IllegalStateException("There is no space that is a \"Vacation\" string")
     }
-//    var vacationPosition = 0
-//        private set
-//
-//    init {
-//        // Set the vacation position.
-//        for ((index, space) in boardSpaces.withIndex()) {
-//            if (space is String && space == "Vacation") {
-//                vacationPosition = index + 1
-//                break
-//            }
-//        }
-//    }
+
+    /**
+     * Prints information about all board spaces.
+     */
+    fun displaySpacesAndSimplePropertyInfo() {
+        println("\nBoard Spaces")
+        for ((index, space) in boardSpaces.withIndex()) {
+            println(
+                when (space) {
+                    is String -> "Position: ${index + 1}, Space: \"$space\""
+                    is Property -> space.lowDetailInfo
+                    else -> throw Exception("Invalid type at position ${index + 1}")
+                }
+            )
+        }
+        println()
+    }
+
+    /**
+     * Prints information about properties to the console.
+     */
+    fun displayPropertyInfo() {
+        println("\nBoard Property Info")
+        for (space in boardSpaces) {
+            if (space is Property) {
+                println(space.moderatelyDetailedInfo)
+            }
+        }
+        println()
+    }
+
+    fun displayModeratelyDetailedStreetInfo() {
+        println("\nModerately Detailed Street Info")
+        for (space in boardSpaces) {
+            if (space is Street) {
+                println(space.moderatelyDetailedInfo)
+            }
+        }
+        println()
+    }
+
+    fun displayHighlyDetailedStreetInfo() {
+        println("\nHighly Detailed Street Info")
+        for (space in boardSpaces) {
+            if (space is Street) {
+                println(space.highlyDetailedInfo)
+            }
+        }
+        println()
+    }
+
+    fun displayGolfCourseInfo() {
+        println("\nGolf Course Info")
+        for (golfCourse in golfCourses) {
+            println(golfCourse.moderatelyDetailedInfo)
+        }
+        println()
+    }
+
+    fun displaySuperStoreInfo() {
+        println("\nSuper Store Info")
+        for (superStore in superStores) {
+            println(superStore.moderatelyDetailedInfo)
+        }
+        println()
+    }
 
     /**
      * @return An Any object which can be cast as either a string or one of the property types.
+     *
+     * @throws ArrayIndexOutOfBoundsException if position is less than 1 or greater than the numberOfSpaces.
      */
     fun getBoardSpace(position: Int) = boardSpaces[position - 1]
 
@@ -127,7 +173,7 @@ class Board {
     fun getProperty(position: Int): Property {
         val property = getBoardSpace(position)
         if (property !is Property) {
-            throw IllegalArgumentException("Position $position is supposed to be a property but isn't")
+            throw IllegalArgumentException("Position $position is not a property")
         }
         return property
     }
@@ -137,7 +183,7 @@ class Board {
      * positions starting at 1.
      */
     private fun updateProperty(property: Property) {
-        boardSpaces[property.position!! - 1] = property
+        boardSpaces[property.position - 1] = property
     }
 
     /**
@@ -146,9 +192,25 @@ class Board {
     fun getStreet(position: Int): Street {
         val street = getBoardSpace(position)
         if (street !is Street) {
-            throw IllegalArgumentException("Position $position is supposed to be a street but isn't")
+            throw IllegalArgumentException("Position $position is not a street")
         }
         return street
+    }
+
+    fun getSuperStore(position: Int): SuperStore {
+        val superStore = getBoardSpace(position)
+        if (superStore !is SuperStore) {
+            throw IllegalArgumentException("Position $position is not a super store")
+        }
+        return superStore
+    }
+
+    fun getGolfCourse(position: Int): GolfCourse {
+        val golfCourse = getBoardSpace(position)
+        if (golfCourse !is GolfCourse) {
+            throw IllegalArgumentException("Position $position is not a golf course")
+        }
+        return golfCourse
     }
 
     /**
@@ -156,101 +218,29 @@ class Board {
      */
     fun playerHasAProperty(playerNumber: Int): Boolean {
         for (space in boardSpaces) {
-            if (space is Property && space.ownerNumber == playerNumber) return true
+            if (space is Property && space.ownerNumber == playerNumber) {
+                return true
+            }
         }
         return false
     }
 
     /**
-     * @return A List of properties owned by the player whose number is the playerNumber argument.
+     * Is used to select desired properties when trading.
+     *
+     * @return A map whose keys are the positions of properties owned by the player whose number is the playerNumber
+     * argument. The values are the properties at those positions. The keys are the positions since the player will
+     * be asked to enter the position of the properties they are selecting what they want to trade. Checking whether
+     * or not the input is a key of this map is how the input will be validated.
      */
-    fun getPropertiesOwnedBy(playerNumber: Int): Map<Int, Property> {
-        val propertiesMap = mutableMapOf<Int, Property>()
-        for (property in boardSpaces.filterIsInstance<Property>().filter { it.ownerNumber == playerNumber }) {
-            propertiesMap.put(property.position!!, property)
-        }
-        return propertiesMap
-    }
-
-    /**
-     * @return An array whose first element is a string that consists of info about properties that are owned by
-     * the player whose number is playerNumber. This string is to be displayed to the user. The second element is
-     * a set of valid property positions that is meant to be used to check the input of the user since the user
-     * is asked to type in the position of the property they would like to offer or want from another player.
-     */
-    fun getPropertyInfo(playerNumber: Int): Array<Any> {
-        val infoStringSB = StringBuilder("Property info:")
-        val validPropertyPositions = mutableSetOf<Int>()
-
-        for (property in boardSpaces.filterIsInstance<Property>().filter { it.ownerNumber == playerNumber }) {
-            infoStringSB.append("\n$property")
-            validPropertyPositions.add(property.position!!)
-        }
-
-        return arrayOf(infoStringSB.toString(), validPropertyPositions.toSet())
-    }
-//        boardSpaces.filterIsInstance<Property>().filter { it.ownerNumber == playerNumber }
-
-    fun setPropertyOwner(propertyPosition: Int, ownerNumber: Int, ownerName: String) {
-        val property = getProperty(propertyPosition)
-        if (!property.isOwned) {
-            numberOfUnownedProperties--
-        }
-        property.setOwner(ownerNumber, ownerName)
-        updateProperty(property)
-    }
-
-    /**
-     * Checks for any new neighborhoods that might be owned by a single player or were formerly owned by a
-     * single player and are now split between 2 players after a trade.
-     */
-    fun checkForNeighborhoodChanges(streetPosition: Int) {
-        val street = getStreet(streetPosition)
-        val neighbor1 = getStreet(street.neighbor1Position)
-        val neighbor2 = getStreet(street.neighbor2Position)
-
-        // The following condition should be true if a player owned all the streets in a neighborhood and then
-        // decided to trade one of those streets with another player.
-        if (street.neighborhoodOwnedBySinglePlayer) {
-            // Check if the neighborhood is still owned by a single player and make necessary changes if it isn't.
-            if (street.ownerNumber != neighbor1.ownerNumber || street.ownerNumber != neighbor2.ownerNumber) {
-                street.neighborhoodOwnedBySinglePlayer = false
-                neighbor1.neighborhoodOwnedBySinglePlayer = false
-                neighbor2.neighborhoodOwnedBySinglePlayer = false
-
-                updateProperty(street)
-                updateProperty(neighbor1)
-                updateProperty(neighbor2)
-
-                // The size of this set should be 2
-                val streetOwnerNames = setOf<String?>(
-                    street.ownerName,
-                    neighbor1.ownerName,
-                    neighbor2.ownerName
-                )
-
-                println(
-                    "The ${street.neighborhood} neighborhood is now split between " +
-                            streetOwnerNames.joinToString(" and ")
-                )
-            } else {
-                // This condition should be true if all the streets in a neighborhood were traded to another player.
-                println("The ${street.neighborhood} neighborhood is now owned by ${street.ownerName}")
+    fun getPropertyInfoMap(playerNumber: Int): Map<String, Property> {
+        val propertyMap = mutableMapOf<String, Property>()
+        for (space in boardSpaces) {
+            if (space is Property && space.ownerNumber == playerNumber) {
+                propertyMap[space.position.toString()] = space
             }
-
-        } else if (street.ownerNumber == neighbor1.ownerNumber && street.ownerNumber == neighbor2.ownerNumber) {
-            // This condition should be true if a player landed on a property, bought it, and it turns out
-            // that that player owns all the streets in that neighborhood.
-            street.neighborhoodOwnedBySinglePlayer = true
-            neighbor1.neighborhoodOwnedBySinglePlayer = true
-            neighbor2.neighborhoodOwnedBySinglePlayer = true
-
-            updateProperty(street)
-            updateProperty(neighbor1)
-            updateProperty(neighbor2)
-
-            println("The ${street.neighborhood} neighborhood is now owned by ${street.ownerName}")
         }
+        return propertyMap
     }
 
     /**
@@ -265,23 +255,27 @@ class Board {
         var playerCanPawnProperty = false
         var playerCanUnpawnProperty = false
 
-        for (property in boardSpaces.filterIsInstance<Property>().filter { it.ownerNumber == playerNumber }) {
-            if (property is Street && property.neighborhoodOwnedBySinglePlayer) {
-                if (!playerCanAddRestaurant && property.numberOfRestaurants < 5) {
-                    playerCanAddRestaurant = true
+        for (space in boardSpaces) {
+            if (space is Property && space.ownerNumber == playerNumber) {
+                if (space is Street && space.neighborhoodIsOwnedBySinglePlayer) {
+                    if (!playerCanAddRestaurant && space.numberOfRestaurants < 5) {
+                        playerCanAddRestaurant = true
+                    }
+
+                    if (!playerCanRemoveRestaurant && space.numberOfRestaurants > 0) {
+                        playerCanRemoveRestaurant = true
+                    }
                 }
 
-                if (!playerCanRemoveRestaurant && property.numberOfRestaurants > 0) {
-                    playerCanRemoveRestaurant = true
+                if (!playerCanPawnProperty && !space.isPawned &&
+                    (space !is Street || space.numberOfRestaurants == 0)
+                ) {
+                    playerCanPawnProperty = true
                 }
-            }
 
-            if (!playerCanPawnProperty && !property.isPawned) {
-                playerCanPawnProperty = true
-            }
-
-            if (!playerCanUnpawnProperty && property.isPawned) {
-                playerCanUnpawnProperty = true
+                if (!playerCanUnpawnProperty && space.isPawned) {
+                    playerCanUnpawnProperty = true
+                }
             }
         }
 
@@ -294,219 +288,86 @@ class Board {
     }
 
     /**
-     * Returns true if the player has at least one street that a restaurant can be added to and false otherwise
+     * Should be used to determine what a player can do with their properties when they need money immediately.
+     *
+     * @return A map whose keys are "pawn" and "remove restaurant" and values are boolean values .
      */
-    /*fun playerCanAddRestaurant(playerNumber: Int): Boolean {
+    fun getMoneyGainOptions(playerNumber: Int): Map<String, Boolean> {
+        var playerCanPawn = false
+        var playerCanRemoveRestaurant = false
+
         for (space in boardSpaces) {
-            if (space is Street && space.neighborhoodOwnedBySinglePlayer && space.ownerNumber == playerNumber
-                && space.numRestaurants < 5
+            if (space is Property && space.ownerNumber == playerNumber) {
+                if (!playerCanRemoveRestaurant && space is Street && space.numberOfRestaurants > 0) {
+                    playerCanRemoveRestaurant = true
+                }
+
+                if (!playerCanPawn && !space.isPawned) {
+                    playerCanPawn = true
+                }
+            }
+        }
+
+        return mapOf(
+            "pawn" to playerCanPawn,
+            "remove restaurant" to playerCanRemoveRestaurant
+        )
+    }
+
+    /**
+     * @return A map whose keys are the positions of streets where a restaurant can be added that are owned by the
+     * player whose number is the playerNumber argument. The values are the corresponding street objects.
+     */
+    fun getStreetsWhereRestaurantCanBeAdded(playerNumber: Int): Map<String, Street> {
+        val streets = mutableMapOf<String, Street>()
+        for (space in boardSpaces) {
+            if (space is Street && space.ownerNumber == playerNumber && !space.isPawned
+                && space.numberOfRestaurants < 5 && space.neighborhoodIsOwnedBySinglePlayer
             ) {
-                return true
+                streets[space.position.toString()] = space
             }
         }
-        return false
+        return streets
     }
 
-    fun displayStreetsWhereRestaurantCanBeAdded(playerNumber: Int) {
+    /**
+     * @return A map whose keys are positions of streets where a restaurant can be removed that are owned by the
+     * player whose number is the playerNumber argument. The values are the corresponding street objects.
+     */
+    fun getStreetsWhereRestaurantCanBeRemoved(playerNumber: Int): Map<String, Street> {
+        val streets = mutableMapOf<String, Street>()
         for (space in boardSpaces) {
-            if (space is Street && space.neighborhoodOwnedBySinglePlayer && space.ownerNumber == playerNumber
-                && space.numRestaurants < 5
+            if (space is Street && space.ownerNumber == playerNumber && space.numberOfRestaurants > 0) {
+                streets[space.position.toString()] = space
+            }
+        }
+        return streets
+    }
+
+    fun getPawnablePropertyMap(playerNumber: Int): Map<String, Property> {
+        val pawnablePropertiesMap = mutableMapOf<String, Property>()
+        for (space in boardSpaces) {
+            if (space is Property && space.ownerNumber == playerNumber && !space.isPawned
+                && (space !is Street || space.numberOfRestaurants == 0)
             ) {
-                println(
-                    """
-                    ${space.name}
-                    Number of restaurants: ${space.numRestaurants}
-                    Current fee: ${space.fee}
-                    Price to add another restaurant: ${space.restaurantPrice}
-                """.trimIndent()
-                )
+                pawnablePropertiesMap[space.position.toString()] = space
             }
         }
+        return pawnablePropertiesMap
     }
 
     /**
-     * This method should be used to verify that the user has entered a correct choice after being displayed the
-     * streets where a restaurant can be added in the above method.
+     * @return A map whose keys are the stringified positions of properties that can be unpawned that are owned by
+     * the player whose number is the playerNumber argument. The values are the corresponding property objects.
      */
-    fun restaurantCanBeAddedToStreet(playerNumber: Int, streetPosition: Int): Boolean {
-        if (streetPosition !in 1..numberOfSpaces) return false
-        val street = boardSpaces[streetPosition - 1]
-        if (street !is Street) return false
-        return street.neighborhoodOwnedBySinglePlayer && street.ownerNumber == playerNumber &&
-                street.numRestaurants < 5
-    }
-
-    fun getRestaurantAddingPrice(streetPosition: Int): Int {
-        val street = boardSpaces[streetPosition - 1] as Street
-        return street.restaurantPrice
-    }*/
-
-    /**
-     * @return A List of Street objects that can have a restaurant added to them by the player whose number is
-     * the playerNumber argument.
-     */
-    fun getStreetsWhereRestaurantCanBeAdded(playerNumber: Int) =
-        boardSpaces.filterIsInstance<Street>().filter {
-            it.ownerNumber == playerNumber && it.neighborhoodOwnedBySinglePlayer && it.numberOfRestaurants < 5
-        }
-
-    /**
-     * @return An array whose first element is a string that consists of resaurant addition info about streets with
-     * restaurants owned by the player whose number is playerNumber. This string is to be displayed to the user.
-     * The second element is a set of valid property positions that is meant to be used to check the input of the user
-     * since the user is asked to type in the position of the street they would like to add a restaurant to.
-     */
-    fun getRestaurantAdditionInfo(playerNumber: Int): Array<Any> {
-        val infoStringSB = StringBuilder("Streets where a restaurant can be added:")
-        val validStreetPositions = mutableSetOf<Int>()
-
-        for (street in boardSpaces.filterIsInstance<Street>().filter {
-            it.ownerNumber == playerNumber && it.numberOfRestaurants < 5
-        }) {
-            infoStringSB.append("\n${street.restaurantAddInfo}")
-            validStreetPositions.add(street.position!!)
-        }
-
-        return arrayOf(infoStringSB.toString(), validStreetPositions.toSet())
-    }
-
-    /**
-     * @return A List of Street objects that can have a restaurant removed from them by the player whose number is
-     * the playerNumber argument.
-     */
-    fun getStreetsWhereRestaurantCanBeRemoved(playerNumber: Int) =
-        boardSpaces.filterIsInstance<Street>().filter { it.ownerNumber == playerNumber && it.numberOfRestaurants > 0 }
-
-    /**
-     * @return An array whose first element is a string that consists of resaurant removal info about streets with
-     * restaurants owned by the player whose number is playerNumber. This string is to be displayed to the user.
-     * The second element is a set of valid property positions that is meant to be used to check the input of the user
-     * since the user is asked to type in the position of the street they would like to remove a restaurant from.
-     */
-    fun getRestaurantRemovalInfo(playerNumber: Int): Array<Any> {
-        val infoStringSB = StringBuilder("Streets where a restaurant can be removed:")
-        val validStreetPositions = mutableSetOf<Int>()
-
-        for (street in boardSpaces.filterIsInstance<Street>().filter {
-            it.ownerNumber == playerNumber && it.numberOfRestaurants > 0
-        }) {
-            infoStringSB.append("\n${street.restaurantRemoveInfo}")
-            validStreetPositions.add(street.position!!)
-        }
-
-        return arrayOf(infoStringSB.toString(), validStreetPositions.toSet())
-    }
-
-    /**
-     * Adds a restaurant to the street at the streetPosition argument.
-     */
-    fun addRestaurantToStreet(streetPosition: Int) {
-        val street = getStreet(streetPosition)
-        if (!street.neighborhoodOwnedBySinglePlayer) {
-            throw Exception("Can't add restaurant since whole neighborhood isn't owned by a single player")
-        }
-        street.addRestaurant()
-        updateProperty(street)
-    }
-
-    /**
-     * Removes a restaurant from the street at the streetPosition argument.
-     */
-    fun removeRestaurantFromStreet(streetPosition: Int) {
-        val street = getStreet(streetPosition)
-        street.removeRestaurant()
-        updateProperty(street)
-    }
-
-    /**
-     * @return The number of restaurants in the neighborhood of the street at streetPosition
-     */
-    fun getNeighborhoodRestaurantCount(streetPosition: Int): Int {
-        val street = getStreet(streetPosition)
-        val neighbor1 = getStreet(street.neighbor1Position)
-        val neighbor2 = getStreet(street.neighbor2Position)
-        return street.numberOfRestaurants + neighbor1.numberOfRestaurants + neighbor2.numberOfRestaurants
-    }
-
-    /**
-     * Removes all restaurants from the neighborhood that the street at the streetPosition argument is in.
-     */
-    fun removeRestaurantsFromNeighborhood(streetPosition: Int) {
-        val street = getStreet(streetPosition)
-        val neighbor1 = getStreet(street.neighbor1Position)
-        val neighbor2 = getStreet(street.neighbor2Position)
-
-        street.removeAllRestaurants()
-        neighbor1.removeAllRestaurants()
-        neighbor2.removeAllRestaurants()
-
-        updateProperty(street)
-        updateProperty(neighbor1)
-        updateProperty(neighbor2)
-    }
-
-    /**
-     * @return true if the player has at least one property that can be pawned and false otherwise
-     */
-    fun playerCanPawnProperty(playerNumber: Int): Boolean {
-        for (space in boardSpaces) {
-            if (space is Property && space.ownerNumber == playerNumber && !space.isPawned) {
-                return true
-            }
-        }
-        return false
-    }
-
-    /**
-     * @return true if the player has at least one property that can be unpawned and false otherwise
-     */
-    fun playerCanUnpawnProperty(playerNumber: Int): Boolean {
+    fun getUnpawnablePropertyMap(playerNumber: Int): Map<String, Property> {
+        val unpawnablePropertiesMap = mutableMapOf<String, Property>()
         for (space in boardSpaces) {
             if (space is Property && space.ownerNumber == playerNumber && space.isPawned) {
-                return true
+                unpawnablePropertiesMap[space.position.toString()] = space
             }
         }
-        return false
-    }
-
-    /**
-     * @return An array whose first element is a string that consists of pawn info about pawnable properties owned by
-     * the player whose number is playerNumber. This string is to be displayed to the user. The second element is a
-     * set of valid property positions that is meant to be used to check the input of the user since the user is asked
-     * to type in the position of the property they would like to pawn.
-     */
-    fun getPawnablePropertyInfo(playerNumber: Int): Array<Any> {
-        val validPropertyPositions = mutableSetOf<Int>()
-        val infoStringSB = StringBuilder("Pawnable Properties:")
-
-        for (property in boardSpaces.filterIsInstance<Property>().filter {
-            it.ownerNumber == playerNumber && !it.isPawned
-        }) {
-            infoStringSB.append("\n${property.pawnInfo}")
-            validPropertyPositions.add(property.position!!)
-        }
-
-        return arrayOf(infoStringSB.toString(), validPropertyPositions.toSet())
-    }
-
-    /**
-     * @return An array whose first element is a string that consists of unpawn info about unpawnable properties owned
-     * by the player whose number is playerNumber. This string is to be displayed to the user. The second element is a
-     * set of valid property positions that is meant to be used to check the input of the user since the user is asked
-     * to type in the position of the property they would like to unpawn.
-     */
-    fun getUnpawnablePropertyInfo(playerNumber: Int): Array<Any> {
-        val infoStringSB = StringBuilder("Unpawnable Properties:")
-        val validPropertyPositions = mutableSetOf<Int>()
-
-        for (property in boardSpaces.filterIsInstance<Property>().filter {
-            it.ownerNumber == playerNumber && it.isPawned
-        }) {
-            infoStringSB.append("\n${property.unpawnInfo}")
-            validPropertyPositions.add(property.position!!)
-        }
-
-        return arrayOf(infoStringSB.toString(), validPropertyPositions.toSet())
+        return unpawnablePropertiesMap
     }
 
     /**
@@ -517,284 +378,341 @@ class Board {
      */
     fun getRestaurantCount(playerNumber: Int): Int {
         var count = 0
-        for (street in boardSpaces.filterIsInstance<Street>().filter { it.ownerNumber == playerNumber }) {
-            count += street.numberOfRestaurants
+        for (space in boardSpaces) {
+            if (space is Street && space.ownerNumber == playerNumber) {
+                count += space.numberOfRestaurants
+            }
         }
         return count
     }
 
     /**
-     * Pawns the property at the position of the propertyPosition argument.
+     * @return A map whose keys are property names that come from the propertyNames argument. The values are the
+     * corresponding positions for those properties.
+     *
+     * @throws Exception if there is not a corresponding property for any of the property names in the propertyNames
+     * argument.
      */
-    fun pawnProperty(propertyPosition: Int) {
-        val property = getBoardSpace(propertyPosition)
-        if (property !is Property) {
-            throw Exception("Can't pawn a non-property board space")
+    fun getPropertyPositions(propertyNames: Array<String>): Map<String, Int> {
+        val propertyPositions = mutableMapOf<String, Int>()
+
+        // Initialize entries to have a value of 0
+        for (name in propertyNames) {
+            propertyPositions[name] = 0
         }
-        property.pawn()
-        updateProperty(property)
+
+        for (space in boardSpaces) {
+            if (space is Property && space.name in propertyPositions.keys) {
+                propertyPositions[space.name] = space.position
+            }
+        }
+
+        for (propertyPosition in propertyPositions) {
+            // The following condition will be true if a property was not found on the board. Throw an exception for
+            // this situation.
+            if (propertyPosition.value == 0) {
+                val propertyName = propertyPosition.key
+                throw Exception("$propertyName was not found on the board")
+            }
+        }
+
+//        for (pos in propertyPositions) {
+//            println("${pos.key} has a position of ${pos.value}")
+//        }
+
+        return propertyPositions
     }
 
-    /**
-     * Unpawns the property at the position of the propertyPosition argument.
-     */
-    fun unpawnProperty(propertyPosition: Int) {
-        val property = getBoardSpace(propertyPosition)
-        if (property !is Property) {
-            throw Exception("Can't pawn a non-property board space")
-        }
-        property.unpawn()
-        updateProperty(property)
-    }
-
-    /**
-     * Prints information about all board spaces to the console.
-     */
-    fun displaySpaces() {
-        println("Board Spaces")
-        for ((index, boardSpace) in boardSpaces.withIndex()) {
-            println(
-                if (boardSpace is String) "Position: ${index + 1}, Space: $boardSpace"
-                else boardSpace
-            )
+    fun makePropertiesUnowned(playerNumber: Int) {
+        for (space in boardSpaces) {
+            if (space is Property && space.ownerNumber == playerNumber) {
+                space.makeUnowned()
+            }
         }
     }
 
-    /**
-     * Prints information about properties to the console.
-     */
-    fun displayPropertyInfo() {
-        println("Board Property Info")
-        for (property in boardSpaces.filterIsInstance<Property>()) {
-            println(property + "\n")
+    fun transferOwnership(currentOwnerNumber: Int, newPlayerNumber: Int, newPlayerName: String) {
+        for (space in boardSpaces) {
+            if (space is Property && space.ownerNumber == currentOwnerNumber) {
+                space.setOwner(ownerNumber = newPlayerNumber, ownerName = newPlayerName)
+            }
+        }
+    }
+
+    abstract inner class Property(val name: String) {
+        /**
+         * Position should only be set by the board during it's instantiation.
+         *
+         * @throws Exception if position is attempted to be set to 0 or if it's attempted to be set when it's not 0,
+         * which would be anytime after the first time it's set.
+         */
+        open var position = 0
+            set(value) {
+                if (value == 0) {
+                    throw IllegalArgumentException("Property position cannot be set to 0")
+                }
+                if (field != 0) {
+                    throw IllegalStateException("Property position can only be set once at the beginning of the game")
+                }
+                field = value
+            }
+
+        protected abstract val typeString: String
+        val typeStringLowerCase get() = typeString.toLowerCase()
+
+        open val lowDetailInfo get() = "Position: $position, Type: $typeString, Name: $name"
+
+        open val moderatelyDetailedInfo: String
+            get() {
+                var string = "Position: $position, Name: $name, Type: $typeString, "
+                string +=
+                    if (isOwned) {
+                        "Owner Name: $ownerName, Owner Number: $ownerNumber, Pawned: ${if (isPawned) "Yes" else "No"}"
+                    } else {
+                        "Unowned"
+                    }
+                return string
+            }
+
+        // 512 is the purchase price for golf courses and super stores so this value will be in this class and
+        // for streets, this property will be overridden.
+        open val purchasePrice get() = 512
+
+        val pawnPrice get() = purchasePrice / 2
+        val unpawnPrice get() = (pawnPrice * 1.1).toInt()
+
+        /**
+         * Is equal to 0 if the property is not owned and the owner number otherwise.
+         */
+        var ownerNumber = 0
+            private set
+
+        /**
+         * Is equal to "Unowned" if the property is not owned and the owner name otherwise.
+         */
+        var ownerName = "Unowned"
+            private set
+
+        val isOwned get() = ownerNumber != 0
+
+        fun setOwner(ownerNumber: Int, ownerName: String) {
+            this.ownerNumber = ownerNumber
+            this.ownerName = ownerName
+        }
+
+        open fun makeUnowned() {
+            ownerNumber = 0
+            ownerName = "Unowned"
+            isPawned = false
+        }
+
+        var isPawned = false
+            private set
+
+        fun pawn() {
+            isPawned = true
+        }
+
+        fun unpawn() {
+            isPawned = false
+        }
+
+        val pawnInfo get() = "Position: $position, Name: $name, Type: $typeString, Pawn Price: $pawnPrice"
+        val unpawnInfo get() = "Postion: $position, Name: $name, Type: $typeString, Unpawn Price: $unpawnPrice"
+
+        // String concatenation
+        operator fun plus(otherString: String) = this.toString() + otherString
+    }
+
+    private val streetPriceConstant = 128
+
+    inner class Street(name: String, private val neighborhoodNumber: Int, val neighborhoodName: String) : Property(name) {
+        override val typeString = "Street"
+        override val lowDetailInfo get() = super.lowDetailInfo + ", Neighborhood: $neighborhoodName"
+
+        override val moderatelyDetailedInfo: String
+            get() {
+                var string = "Position: $position, Name: $name, Type: Street, Neighborhood: $neighborhoodName, "
+                string +=
+                    if (isOwned) {
+                        "Owner Name: $ownerName, Owner Number: $ownerNumber, Number of Restaurants: " +
+                                "$numberOfRestaurants,\n\tCurrent fee: $${getCurrentFee()}, Pawned: " +
+                                if (isPawned) "Yes" else "No"
+                    } else {
+                        "Unowned"
+                    }
+                return string
+            }
+
+        val highlyDetailedInfo
+            get() = "Position: $position, Name: $name, Neighborhood: $neighborhoodName, " +
+                    "Purchase Price: $$purchasePrice, Pawned: ${if (isPawned) "Yes" else "No"}, " +
+                    "Pawn Price: $$pawnPrice, Unpawn Price: $$unpawnPrice,\n\t" +
+                    "Number of Restaurants: $numberOfRestaurants, " +
+                    "Restaurant Adding Price: $$restaurantAddPrice, Restaurant Removal Gain: " +
+                    "$$restaurantRemoveGain, Is neighborhood owned by single player? " +
+                    (if (neighborhoodIsOwnedBySinglePlayer) "Yes" else "No") +
+                    ", Current fee: $${getCurrentFee()},\n\tFee when neighborhood is not owned " +
+                    "by single player: $$startingFee, Fees when neighborhood is owned by single player: " +
+                    "0 restaurants: $${getFeeWhenNeighborhoodIsOwned(numberOfRestaurants = 0)}, " +
+                    "1 restaurant: $${getFeeWhenNeighborhoodIsOwned(numberOfRestaurants = 1)},\n\t" +
+                    "2 restaurants: $${getFeeWhenNeighborhoodIsOwned(numberOfRestaurants = 2)}, " +
+                    "3 restaurants: $${getFeeWhenNeighborhoodIsOwned(numberOfRestaurants = 3)}, " +
+                    "4 restaurants: $${getFeeWhenNeighborhoodIsOwned(numberOfRestaurants = 4)}, " +
+                    "5 restaurants: $${getFeeWhenNeighborhoodIsOwned(numberOfRestaurants = 5)}"
+
+        var numberOfRestaurants = 0
+            private set
+
+        lateinit var neighbor1: Street
+        lateinit var neighbor2: Street
+
+        fun findNeighbors() {
+            // Create a neighborhood search range. The board's positions start at 1 and end at numberOfSpaces so
+            // the range must be within those boundaries. If boundaries are not a problem, have the range start at the
+            // space 4 spaces before the position of this street and have the range end at the space 4 spaces after
+            // the position of this street.
+            val neighborhoodSearchRangeMin = Math.max(1, position - 4)
+            val neighborhoodSearchRangeMax = Math.min(numberOfSpaces, position + 4)
+            val neighborhoodSearchRange = neighborhoodSearchRangeMin..neighborhoodSearchRangeMax
+
+            val neighborsList = mutableListOf<Street>()
+
+            for (i in neighborhoodSearchRange) {
+                val boardSpace = getBoardSpace(i)
+                if (boardSpace is Street && boardSpace.neighborhoodNumber == this.neighborhoodNumber && this != boardSpace) {
+                    neighborsList.add(boardSpace)
+                }
+            }
+
+            neighbor1 = neighborsList.component1()
+            neighbor2 = neighborsList.component2()
+        }
+
+        val neighborhoodIsOwnedBySinglePlayer
+            get() = this.isOwned && this.ownerNumber == neighbor1.ownerNumber && this.ownerNumber == neighbor2.ownerNumber
+
+        fun getCurrentFee(): Int {
+            if (!isOwned || isPawned) {
+                return 0
+            }
+            if (!neighborhoodIsOwnedBySinglePlayer) {
+                return startingFee
+            }
+            return getFeeWhenNeighborhoodIsOwned(numberOfRestaurants = this.numberOfRestaurants)
+        }
+
+        /**
+         * @return startingFee * 2 if there are no restaurants, startingFee * 4 if there is 1 restaurant,
+         * startingFee * 6 if there are 2 restaurants, and so on.
+         */
+        private fun getFeeWhenNeighborhoodIsOwned(numberOfRestaurants: Int) =
+            if (numberOfRestaurants in 0..5) startingFee * (2 + (numberOfRestaurants * 2))
+            else throw Exception("Invalid number of restaurants: $numberOfRestaurants")
+
+        val neighborhoodRestaurantCount
+            get() = this.numberOfRestaurants + neighbor1.numberOfRestaurants + neighbor2.numberOfRestaurants
+
+        fun removeRestaurantsFromNeighborhood() {
+            this.removeAllRestaurants()
+            neighbor1.removeAllRestaurants()
+            neighbor2.removeAllRestaurants()
+        }
+
+        override val purchasePrice get() = neighborhoodNumber * streetPriceConstant
+        private val startingFee get() = purchasePrice / 8
+        val restaurantAddPrice get() = purchasePrice / 2
+        val restaurantRemoveGain get() = restaurantAddPrice / 2
+
+        val restaurantAddInfo
+            get() = "Position: $position, Name: $name, Neighborhood: $neighborhoodName, " +
+                    "Restaurant Adding Price: $$restaurantAddPrice"
+        val restaurantRemoveInfo
+            get() = "Position: $position, Name: $name, Neighborhood: $neighborhoodName, " +
+                    "Restaurant removal gain: $$restaurantRemoveGain"
+
+        /**
+         * @throws Exception if this method is called on a street that already has the maximum amount of restaurants,
+         * which is 5.
+         */
+        fun addRestaurant() {
+            if (numberOfRestaurants == 5) {
+                throw Exception("Cannot add a restaurant to $name since it has 5 restaurants")
+            }
+            numberOfRestaurants++
+        }
+
+        /**
+         * @throws Exception if this method is called on a street that doesn't have any restaurants.
+         */
+        fun removeRestaurant() {
+            if (numberOfRestaurants == 0) {
+                throw Exception("You've tried to remove a restaurant from $name, which doesn't have any restaurants")
+            }
+            numberOfRestaurants--
+        }
+
+        fun removeAllRestaurants() {
+            numberOfRestaurants = 0
+        }
+    }
+
+    inner class SuperStore(name: String) : Property(name) {
+        override val typeString = "Super Store"
+
+        /**
+         * @param totalDiceRoll Should be the sum of 2 dice rolls.
+         *
+         * @return An array that consists of 3 values. The first is a boolean value for if both super stores
+         * are owned by the same person. The second is an int for the what the totalDiceRoll is multiplied by
+         * to get the fee. The third is the fee.
+         */
+        fun getFeeInfo(totalDiceRoll: Int): Array<Any> {
+            val bothSuperStoresOwnedBySamePerson: Boolean
+            val multiplier: Int
+            val fee: Int
+            if (this.isOwned) {
+                val otherSuperStore = superStores.single { it != this }
+                bothSuperStoresOwnedBySamePerson = otherSuperStore.ownerNumber == this.ownerNumber
+                multiplier = if (bothSuperStoresOwnedBySamePerson) 16 else 8
+                fee = totalDiceRoll * multiplier
+            } else {
+                bothSuperStoresOwnedBySamePerson = false
+                multiplier = 0
+                fee = 0
+            }
+
+            return arrayOf(bothSuperStoresOwnedBySamePerson, multiplier, fee)
+        }
+    }
+
+    inner class GolfCourse(name: String) : Property(name) {
+        override val typeString = "Golf Course"
+
+        /**
+         * @return An Array of 2 Ints. The first is how many golf courses are owned by the owner of this golf course,
+         * or 0 if this method is called on a golf course that is unowned. The second is the fee.
+         */
+        fun getFeeInfo(): Array<Int> {
+            var numberOfGolfCoursesOwned = 0
+            val fee: Int
+            if (this.isOwned) {
+                for (golfCourse in golfCourses) {
+                    if (golfCourse.ownerNumber == this.ownerNumber) {
+                        numberOfGolfCoursesOwned++
+                    }
+                }
+                fee = when (numberOfGolfCoursesOwned) {
+                    1 -> purchasePrice / 8
+                    2 -> purchasePrice / 4
+                    3 -> purchasePrice / 2
+                    4 -> purchasePrice
+                    else -> throw Exception("Invalid number of golf courses: $numberOfGolfCoursesOwned")
+                }
+            } else {
+                fee = 0
+            }
+            return arrayOf(numberOfGolfCoursesOwned, fee)
         }
     }
 }
-
-//    fun getSuperStoreAt(position: Int) = boardSpaces.get(position) as commandline.SuperStore
-//    fun getGolfCourseAt(position: Int) = boardSpaces.get(position) as commandline.GolfCourse
-
-//    fun getStreetAt(position: Int) = boardSpaces.get(position) as commandline.Street
-
-//    fun getTypeAt(position: Int): String {
-//        val boardSpace = boardSpaces.get(position)
-//        return when(boardSpace) {
-//            is String -> boardSpace
-//            is commandline.Street, is commandline.GolfCourse, is commandline.SuperStore -> "property"
-//            else -> throw Exception("Type is not a string, street, super store, nor golf course, so it's invalid")
-//        }
-//    }
-//
-//    fun getPropertyType(position: Int): String {
-//        return when (boardSpaces[position]) {
-//            is Street -> "street"
-//            is GolfCourse -> "golf course"
-//            is SuperStore -> "super store"
-//            else -> throw Exception("")
-//        }
-//    }
-//
-//    fun getPropertyName(position: Int): String {
-//        val property = boardSpaces[position] as Property
-//        return property.name
-//    }
-//
-//    fun getNeighborhood(position: Int): String {
-//        val street = boardSpaces[position] as commandline.Street
-//        return street.neighborhood
-//    }
-//
-//    fun propertyIsOwned(position: Int): Boolean {
-//        val property = boardSpaces[position] as commandline.Property
-//        return property.isOwned
-//    }
-//
-//    fun propertyIsPawned(position: Int): Boolean {
-//        val property = boardSpaces[position] as commandline.Property
-//        return property.isPawned
-//    }
-//
-//    fun getPropertyOwnerIndexNumber(position: Int): Int {
-//        val property = boardSpaces[position] as commandline.Property
-//        return property.ownerIndexNumber
-//    }
-
-
-//    private abstract inner class commandline.Property(val name: String) {
-//        abstract var purchasePrice: Int
-//        var position = 0
-//        val pawnPrice get() = purchasePrice / 2
-//        val isOwned get() = ownerIndexNumber != -1
-//        var ownerIndexNumber = -1
-//            private set
-//
-//        //        get() {
-////            if (field == -1) throw Exception("No owner of $name")
-////            return field
-////        }
-//        var ownerName = "Unowned"
-//            private set
-//        var isPawned = false
-//            private set
-//
-//        fun setOwner(ownerIndexNumber: Int, ownerName: String) {
-//            this.ownerIndexNumber = ownerIndexNumber
-//            this.ownerName = ownerName
-//        }
-//
-//        fun pawn() {
-//            isPawned = true
-//        }
-//
-//        fun unpawn() {
-//            isPawned = false
-//        }
-//    }
-
-//    private inner class commandline.Street(name: String, val neighborhood: String) : commandline.Property(name) {
-//        var numRestaurants = 0
-//        private lateinit var rentalPrices: Array<Int>
-//        var rentalPrice = rentalPrices[0]
-//        var neighborhoodOwned = false
-//        val restaurantPrice = 100
-//        override var purchasePrice = 0
-//
-//        init {
-//            when (neighborhood) {
-//                "neighborhood 1" -> {
-//                    purchasePrice = 50
-//                    rentalPrices = arrayOf(0, 0, 0, 0, 0, 0)
-//                }
-//                "neighborhood 2" -> {
-//                    purchasePrice = 100
-//                }
-//                "neighborhood 3" -> {
-//                    purchasePrice = 50
-//                    rentalPrices = arrayOf(0, 0, 0, 0, 0, 0)
-//                }
-//                "neighborhood 4" -> {
-//                    purchasePrice = 50
-//                    rentalPrices = arrayOf(0, 0, 0, 0, 0, 0)
-//                }
-//                "neighborhood 5" -> {
-//                    purchasePrice = 50
-//                    rentalPrices = arrayOf(0, 0, 0, 0, 0, 0)
-//                }
-//                "neighborhood 6" -> {
-//                    purchasePrice = 50
-//                    rentalPrices = arrayOf(0, 0, 0, 0, 0, 0)
-//                }
-//                "neighborhood 7" -> {
-//                    purchasePrice = 50
-//                    rentalPrices = arrayOf(0, 0, 0, 0, 0, 0)
-//                }
-//                "neighborhood 8" -> {
-//                    purchasePrice = 50
-//                    rentalPrices = arrayOf(0, 0, 0, 0, 0, 0)
-//                }
-//                else -> throw Exception("Invalid neighborhood: $neighborhood")
-//            }
-//        }
-//
-//        override fun toString(): String {
-//            val string = "Type: commandline.Street\nNeighborhood: $neighborhood\n" + if (isOwned) "Owner Name: $ownerName" +
-//                    "\nNumber of restaurants: $numRestaurants" else "Unowned"
-//            return string
-//        }
-//
-//        fun neighborhoodIsNowOwned() {
-//            neighborhoodOwned = true
-//            rentalPrice = rentalPrices[0] * 2
-//        }
-//
-//        fun addRestaurant() {
-//            numRestaurants++
-//            rentalPrice = rentalPrices[numRestaurants]
-//        }
-//    }
-//
-//    fun getStreetFee(position: Int): Int {
-//        val street = boardSpaces[position] as Street
-//        return street.rentalPrice
-//    }
-//
-//    private inner class SuperStore(name: String, override var purchasePrice: Int, val otherSuperStoreSpace: Int) :
-//        Property(name) {
-//        override fun toString(): String {
-//            return "Type: Super Store\nOwner Name: $ownerName\nOwner index number: $ownerIndexNumber"
-//        }
-//    }
-//
-//    var bothSuperStoresOwnedBySamePerson = false
-//
-//    fun getSuperStoreFee(diceRoll: Int) = diceRoll * if (bothSuperStoresOwnedBySamePerson) 10 else 5
-//
-//    private inner class GolfCourse(name: String) : Property(name) {
-//        override var purchasePrice = 200
-//        override fun toString(): String {
-//            return "Type: Golf Course\nOwner Name: $ownerName\nOwner index number: $ownerIndexNumber"
-//        }
-//    }
-//
-//    fun getGolfCourseFee(numGolfCoursesOwned: Int): Int {
-//        return when (numGolfCoursesOwned) {
-//            1 -> 50
-//            2 -> 100
-//            3 -> 200
-//            4 -> 400
-//            else -> throw Exception("Invalid number of golf courses")
-//        }
-//    }
-
-//    fun getStreetName(position: Int): String {
-//        val street = boardSpaces[position] as Property
-//        return street.name
-//    }
-//
-//    fun getGolfCourseName(position: Int): String {
-//        val golfCourse = boardSpaces[position] as Property
-//        return golfCourse.name
-//    }
-//
-//    fun getSuperStoreName(position: Int): String {
-//        val superStore = boardSpaces[position] as Property
-//        return superStore.name
-//    }
-//
-//    fun streetIsOwned(position: Int): Boolean {
-//        val street = boardSpaces[position] as Property
-//        return street.isOwned
-//    }
-//
-//    fun golfCourseIsOwned(position: Int): Boolean {
-//        val golfCourse = boardSpaces[position] as Property
-//        return golfCourse.isOwned
-//    }
-//
-//    fun superStoreIsOwned(position: Int): Boolean {
-//        val superStore = boardSpaces[position] as Property
-//        return superStore.isOwned
-//    }
-//    fun hasPropertyAt(position: Int) = boardSpaces[position] is Property
-//
-//    fun hasOwnedPropertyAt(position: Int): Boolean {
-//        val property = boardSpaces[position]
-//        if (property !is commandline.Property) throw Exception("")
-//        return property.isOwned
-//    }
-//
-//    fun hasStreetAt(position: Int) = boardSpaces[position] is Street
-//
-//    fun hasGolfCourseAt(position: Int) = boardSpaces[position] is GolfCourse
-//
-//    fun hasSuperStoreAt(position: Int) = boardSpaces[position] is SuperStore
-//
-//    fun hasDrawEntropyCardSpaceAt(position: Int): Boolean {
-//        val space = boardSpaces[position]
-//        return space is String && space.equals("draw entropy card")
-//    }
-//
-//    fun hasEffectlessSpaceAt(position: Int): Boolean {
-//        val space = boardSpaces[position]
-//        return space is String && (space.equals("start") || space.equals("Vacation"))
-//    }
