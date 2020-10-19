@@ -1,13 +1,14 @@
-package commandline
-
 fun main() {
-    outer@ while (true) {
+    while (true) {
         Game()
-        inner@ while (true) {
+        playAgainAskingLoop@ while (true) {
             print("Would you like to play again? (y/n) ")
             when (readLine()!!.toLowerCase()) {
-                "y" -> break@inner
-                "n" -> break@outer
+                "y" -> {
+                    println()
+                    break@playAgainAskingLoop
+                }
+                "n" -> return
                 else -> println("Invalid input")
             }
         }

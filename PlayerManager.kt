@@ -1,211 +1,23 @@
-package commandline
-
 import kotlin.random.Random
 
 /**
- * This class is used for interacting with players and
+ * PlayerManager class is used for creating, storing, and accessing player objects.
  */
 class PlayerManager {
-    private val players = mutableListOf<Player>()
-
-    init {
-        setup()
-    }
-
-    private fun setup() {
-        var numberOfPlayers: Int?
-        while (true) {
-            print("How many players? ")
-            numberOfPlayers = readLine()!!.toIntOrNull()
-            if (numberOfPlayers == null || numberOfPlayers !in 2..8) {
-                println("The number of players must be a number which can be a minimum of 2 and a maximum of 8")
-            } else {
-                break
-            }
-        }
-
-        /**
-         * The purpose of this class is to let Kotlin order the players based on dice rolls
-         */
-        class PlayerOrdering(val name: String) : Comparable<PlayerOrdering> {
-            var totalDiceRoll = 0
-            fun generateDiceRoll() = Random.nextInt(1, 7)
-
-            init {
-                val diceRoll1 = generateDiceRoll()
-                val diceRoll2 = generateDiceRoll()
-                totalDiceRoll = diceRoll1 + diceRoll2
-                println(
-                    "$name got a $diceRoll1 and a $diceRoll2 for their beginning dice roll for " +
-                            "a total of $totalDiceRoll"
-                )
-            }
-
-            // Make it so that when we sort an array or list of PlayerOrderings, higher dice rolls are first
-            override fun compareTo(other: PlayerOrdering) = other.totalDiceRoll - this.totalDiceRoll
-
-            /**
-             * @return A Player object with the same name as this playerOrdering object and the number that is
-             * passed in as an argument.
-             */
-            fun toPlayer(number: Int) = Player(name, number)
-        }
-
-        val playerOrderingList = mutableListOf<PlayerOrdering>()
-
-        for (i in 1..numberOfPlayers!!) {
-            print("\nEnter name for player $i or enter nothing for \"Player $i\": ")
-            val input = readLine()!!
-            val name =
-                if (input.isEmpty()) {
-                    "Player $i"
-                } else {
-                    input
-                }
-            playerOrderingList.add(PlayerOrdering(name))
-        }
-        println()
-
-        playerOrderingList.sort()
-
-        for ((index, playerOrdering) in playerOrderingList.withIndex()) {
-            val playerNumber = index + 1
-            players.add(playerOrdering.toPlayer(playerNumber))
-        }
-
-        println("The order of the players is ")
-        for (player in players) {
-            println(player.name)
-        }
-        println()
-
-        for (player in players) {
-            println("The number for ${player.name} is ${player.number}")
-        }
-        println()
-    }
-
-    val numberOfPlayersInGame: Int
-        get() {
-            var count = 0
-            for (player in players) {
-                if (player.isInGame) {
-                    count++
-                }
-            }
-            return count
-        }
-
-    val onePlayerIsInGame get() = numberOfPlayersInGame == 1
-
-    private var currentPlayerIndex = 0
-
     /**
-     * Is equal to a reference of the current player. If this value gets assigned to a variable, any changes made to
-     * that variables will also be the same changes made to the player object in the players list.
+     * Player class consists of data that is unique to each player and functions that can be performed on that data.
      */
-    val currentPlayer get() = players[currentPlayerIndex]
-
-    /**
-     * @return A reference to a player object that this player manager has. If this value gets assigned to a
-     * variable, any changes made to that variable will also be the same changes made to the player object in
-     * the players list.
-     */
-    fun getPlayer(playerNumber: Int) = players[playerNumber - 1]
-
-    /**
-     * Saves all the changes made to the updatedPlayer argument. The player manager knows which player is
-     * which based on their numbers.
-     */
-    fun updatePlayer(updatedPlayer: Player) {
-        players[updatedPlayer.number - 1] = updatedPlayer
-    }
-
-//    fun removePlayerFromGame(playerNumber: Int) {
-//        players[playerNumber - 1].removeFromGame()
-//    }
-
-    fun switchToNextPlayer() {
-        do {
-            currentPlayerIndex = (currentPlayerIndex + 1) % players.size
-        } while (!players[currentPlayerIndex].isInGame)
-    }
-
-    fun displayPlayerInfo() {
-        println("\nPlayer Info")
-        for (player in players) {
-            println(player)
-        }
-        println()
-    }
-
-    /**
-     * @return A list of numbers of players that are still in the game with the exception of the
-     * excludingPlayerNumber argument.
-     */
-    fun getNumbersOfOtherPlayersInGame(excludingPlayerNumber: Int): List<Int> {
-        val numbers = mutableListOf<Int>()
-        for (player in players) {
-            if (player.isInGame && player.number != excludingPlayerNumber) {
-                numbers.add(player.number)
-            }
-        }
-        return numbers
-    }
-
-    /**
-     * @return A map whose keys are the numbers of players in the games and the values are those player objects.
-     * The only player not in this map is the player whose number is the excludingPlayerNumber argument.
-     */
-    fun getMapOfOtherPlayersInGame(excludingPlayerNumber: Int): Map<Int, Player> {
-        val mapOfPlayersInGame = mutableMapOf<Int, Player>()
-        for (player in players) {
-            if (player.isInGame && player.number != excludingPlayerNumber) {
-                mapOfPlayersInGame[player.number] = player
-            }
-        }
-        return mapOfPlayersInGame
-    }
-
-    /**
-     * @return The name of the only player left in the game.
-     *
-     * Throws an exception if the player manager has more than 1 player that is in the game.
-     */
-    fun getWinnerName() = players.single { it.isInGame }.name
-
-
-    /**
-     * This is the position that players will go to when they get sent to vacation is constant so have it be
-     * set and send players to this position when necessary. The proper value for this should be acquired from
-     * the board object. This should only be set once at the beginning.
-     *
-     * @throws IllegalArgumentException if this is attempted to be set to a non-positive value.
-     * @throws IllegalStateException if this is attempted to be set to something different after it has already
-     * been set.
-     */
-    var vacationPosition = 0
-        set(value) {
-            if (value <= 0) {
-                throw IllegalArgumentException("Vacation position can only be set to a positive value")
-            }
-            if (field != 0 && field != value) {
-                throw IllegalStateException("Vacation position can only be set once")
-            }
-            field = value
-        }
-
-    inner class Player(val name: String, val number: Int) {
+    inner class Player(val name: String) {
         override fun toString(): String {
             var string = "Name: $name, "
-            if (isInGame) {
-                string += "Number: $number, Position: $position, Money: $$money"
-                if (hasAGetOffVacationCard) {
-                    string += ", Get Off Vacation Free cards: $numberOfGetOffVacationCardsOwned"
+            string +=
+                if (isInGame) {
+                    "Position: $position, Money: $$money, Are they on vacation?: " +
+                            "${if (isOnVacation) "Yes" else "No"}, Get Off Vacation Free cards: " +
+                            numberOfGetOffVacationCardsOwned
+                } else {
+                    "Out of the game"
                 }
-            } else {
-                string += "Out of the game"
-            }
             return string
         }
 
@@ -231,7 +43,7 @@ class PlayerManager {
             }
 
         /**
-         * @throws IllegalArgumentException if position is set to an Int less than 1
+         * @throws IllegalArgumentException if position is set to a value less than 1.
          */
         var position = 1
             set(value) {
@@ -240,6 +52,14 @@ class PlayerManager {
                 }
                 field = value
             }
+
+        /**
+         * Increments money by 512 and prints that this player has made a revolution.
+         */
+        fun hasMadeARevolution() {
+            println("$name has just made a revolution")
+            money += 512
+        }
 
         var isInGame = true
             private set
@@ -254,6 +74,10 @@ class PlayerManager {
         var numberOfTurnsOnVacation = 0
             private set
 
+        /**
+         * Makes the player be on vacation and changes the position of this player to the vacation position which
+         * comes from the player manager that this player object came from.
+         */
         fun sendToVacation() {
             isOnVacation = true
             position = vacationPosition
@@ -264,23 +88,22 @@ class PlayerManager {
          * has reached 3.
          */
         fun continueVacation() {
+            if (!isOnVacation) {
+                throw IllegalStateException("$name is not on vacation so they can't continue their vacation")
+            }
             numberOfTurnsOnVacation++
             if (numberOfTurnsOnVacation == 3) {
-                println("$name, you spent 3 turns on vacation so it is now over")
-                isOnVacation = false
-                numberOfTurnsOnVacation = 0
+                println("$name has spent 3 turns on vacation so it is now over")
+                removeFromVacation()
             }
         }
 
-        /**
-         * Should be called when a player pays to get off vacation or uses a "Get Off Vacation Free" card.
-         */
         fun removeFromVacation() {
             isOnVacation = false
+            numberOfTurnsOnVacation = 0
         }
 
         var numberOfGetOffVacationCardsOwned = 0
-            private set
 
         /**
          * Increments the number of Get Off Vacation Free card owned.
@@ -309,14 +132,137 @@ class PlayerManager {
          */
         val hasAGetOffVacationCard get() = numberOfGetOffVacationCardsOwned > 0
     }
-}
 
-//    override fun addMoney(amount: Int) {
-//        super.addMoney(amount)
-//        println("$name gained $$amount and now has $$money")
-//    }
-//
-//    override fun removeMoney(amount: Int) {
-//        super.removeMoney(amount)
-//        println("$name lost $$amount and now has $$money")
-//    }
+    private val players = mutableListOf<Player>()
+
+    val numberOfPlayersInGame: Int
+        get() {
+            var count = 0
+            for (player in players) {
+                if (player.isInGame) {
+                    count++
+                }
+            }
+            return count
+        }
+
+    val onePlayerIsInGame get() = numberOfPlayersInGame == 1
+
+    private var currentPlayerIndex = 0
+
+    val currentPlayer get() = players[currentPlayerIndex]
+
+    /**
+     * Makes currentPlayer equal to the player whose turn is next.
+     */
+    fun switchToNextPlayer() {
+        do {
+            currentPlayerIndex = (currentPlayerIndex + 1) % players.size
+        } while (!players[currentPlayerIndex].isInGame)
+    }
+
+    fun displayPlayerInfo() {
+        println("\nPlayer Info")
+        for (player in players) {
+            println(player)
+        }
+        println()
+    }
+
+    /**
+     * @return A list of players that are still in the game with the exception of the excludingPlayer argument.
+     */
+    fun getListOfOtherPlayersInGame(excludingPlayer: Player) = players.filter { it.isInGame && it != excludingPlayer }
+
+    /**
+     * This is the position that players will go to when they get sent to vacation. The proper value for this should
+     * be acquired from the board object. This should only be set once at the beginning.
+     */
+    private var vacationPosition = 0
+
+    /**
+     * @return The name of the only player left in the game.
+     * @throws Exception if the player manager has more than 1 player that is in the game.
+     */
+    fun getWinnerName() = players.single { it.isInGame }.name
+
+    /**
+     * First sets the vacationPosition property of this class to the value that is passed in as an argument.
+     * Then asks how many players there are and what each player wants their name to be.
+     */
+    fun setup(vacationPosition: Int) {
+        this.vacationPosition = vacationPosition
+
+        var numberOfPlayers: Int?
+        while (true) {
+            print("How many players? ")
+            numberOfPlayers = readLine()!!.toIntOrNull()
+            if (numberOfPlayers == null || numberOfPlayers !in 2..8) {
+                println("The number of players must be a number in the range of 2 to 8 inclusive")
+            } else {
+                break
+            }
+        }
+
+        /**
+         * The purpose of this class is to let Kotlin order the players based on dice rolls
+         */
+        class PlayerOrdering(val name: String) : Comparable<PlayerOrdering> {
+            var totalDiceRoll = 0
+            fun getDiceRoll() = Random.nextInt(1, 7)
+
+            init {
+                val diceRoll1 = getDiceRoll()
+                val diceRoll2 = getDiceRoll()
+                totalDiceRoll = diceRoll1 + diceRoll2
+                println(
+                    "$name got a $diceRoll1 and a $diceRoll2 for their beginning dice roll for " +
+                            "a total of $totalDiceRoll"
+                )
+            }
+
+            /**
+             * Makes it so that when we sort an array or list of PlayerOrderings, higher dice rolls are first.
+             */
+            override fun compareTo(other: PlayerOrdering) = other.totalDiceRoll - this.totalDiceRoll
+
+            /**
+             * @return A Player object with the same name as this object.
+             */
+            fun toPlayer() = Player(name)
+        }
+
+        val playerOrderingList = mutableListOf<PlayerOrdering>()
+        val namesSet = mutableSetOf<String>()
+        var playerNumber = 1
+        do {
+            print("\nEnter a unique name for player $playerNumber or enter nothing for \"Player $playerNumber\": ")
+            val input = readLine()!!
+            val name: String
+            if (input.isEmpty()) {
+                name = "Player $playerNumber"
+            } else if (input in namesSet) {
+                println("$input is already a name for another player, you must select a unique name")
+                continue
+            } else {
+                name = input
+            }
+            namesSet.add(name)
+            playerOrderingList.add(PlayerOrdering(name))
+            playerNumber++
+        } while (playerNumber <= numberOfPlayers!!)
+        println()
+
+        playerOrderingList.sort()
+
+        for (playerOrdering in playerOrderingList) {
+            players.add(playerOrdering.toPlayer())
+        }
+
+        println("The order of the players is ")
+        for (player in players) {
+            println(player.name)
+        }
+        println()
+    }
+}

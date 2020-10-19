@@ -1,12 +1,10 @@
-package commandline
-
-
 /**
- * The Entropy Deck is implemented by using a List of Entropy Cards, having an Int represent the top index,
- * using a property to access the top card, which is the element in the List at the top index,
+ * Consists of the data and functions for a deck of action cards.
  */
-class ActionDeck() {
+class ActionDeck {
     /**
+     * ActionCard class.
+     *
      * @param type is used to determine what action to take and is not displayed to the players of the game.
      * The different types and their descriptions:
      * "money loss": Makes a player lose money.
@@ -15,10 +13,12 @@ class ActionDeck() {
      * that are still in the game.
      * "other players to player" Requires all other players that are still in the game to pay money to the
      * player that drew this card.
-     * "get off vacation free": Allows the player to get off vacation free. This card will be removed from
-     * the deck until the player that drew it uses it or trades it to another player who uses it.
+     * "get off vacation free": Allows the player to get off vacation for free. This card will be removed from
+     * the deck and given to the player that drew it. When that player uses this card or trades it another player and
+     * that player uses this card, Another card of this type gets inserted at the bottom of the deck.
+     * "go on vacation": Sends the player that drew this card to vacation.
      * "relative position change" Requires the player to move positions relative to their current position.
-     * For example, 4 positions ahead or positions back.
+     * For example, 4 positions ahead or 4 positions back.
      * "absolute position change" Requires the player to a given position on the board.
      * "property maintenance" Requires the player to pay a fee to the bank for every restaurant they own.
      *
@@ -34,6 +34,7 @@ class ActionDeck() {
      * meaning that the total amount of money that the player receives is the amount of other players in the game
      * multiplied by this value.
      * "get off vacation free": Not used so 0.
+     * "go on vacation": Not used so 0.
      * "relative position change": The amount of spaces forward the player must move. That means that if the value is
      * negative, the player moves backward.
      * "absolute position change": The position on the board the player must move to.
@@ -44,8 +45,8 @@ class ActionDeck() {
     private val cards = mutableListOf(
         ActionCard(
             type = "absolute position change",
-            message = "Donald Knuth once said\n\'Programs are meant to be read by humans and only incidentally for " +
-                    "computers to execute\'.\nMove to Knuth Street.",
+            message = "Computer scientist Donald Knuth once said\n\'Programs are meant to be read by humans and only " +
+                    "incidentally for computers to execute\'.\nMove to Knuth Street.",
             value = 0
         ),
         ActionCard(
@@ -53,27 +54,37 @@ class ActionDeck() {
             message = "Lagos is the most populated city in Africa. Move to Lagos Avenue.",
             value = 0
         ),
-        ActionCard(type = "money loss", message = "You lose $200", value = 200),
-        ActionCard(type = "money loss", message = "You lose $200", value = 200),
-        ActionCard(type = "money gain", message = "You receive $200", value = 200),
-        ActionCard(type = "money gain", message = "You receive $200", value = 200),
-        ActionCard(type = "player to other players", message = "You must pay every other player $25", value = 25),
-        ActionCard(type = "other players to player", message = "You receive $25 from every other player", value = 25),
-        ActionCard(type = "get off vacation free", message = "Get off vacation free", value = 0),
-        ActionCard(type = "get off vacation free", message = "Get off vacation free", value = 0),
+        ActionCard(type = "money loss", message = "You lose $256", value = 256),
+        ActionCard(type = "money loss", message = "You lose $128", value = 128),
+        ActionCard(type = "money gain", message = "You receive $256", value = 256),
+        ActionCard(type = "money gain", message = "You receive $128", value = 128),
+        ActionCard(type = "player to other players", message = "You must pay every other player $32", value = 32),
+        ActionCard(type = "other players to player", message = "You receive $32 from every other player", value = 32),
+        ActionCard(
+            type = "get off vacation free",
+            message = "Get Off Vacation Free. Keep this card and use it when needed, or trade it.",
+            value = 0
+        ),
+        ActionCard(
+            type = "get off vacation free",
+            message = "Get Off Vacation Free. Keep this card and use it when needed, or trade it.",
+            value = 0
+        ),
+        ActionCard(type = "go on vacation", message = "Go On Vacation", value = 0),
+        ActionCard(type = "go on vacation", message = "Go On Vacation", value = 0),
         ActionCard(type = "relative position change", message = "Move ahead 4 spaces", value = 4),
         ActionCard(type = "relative position change", message = "Move back 4 spaces", value = -4),
         ActionCard(type = "relative position change", message = "Move ahead 8 spaces", value = 8),
         ActionCard(type = "relative position change", message = "Move back 8 spaces", value = -8),
         ActionCard(
             type = "property maintenance",
-            message = "You must pay $50 per restaurant for maintenance",
-            value = 50
+            message = "You must pay $64 per restaurant for maintenance",
+            value = 64
         ),
         ActionCard(
             type = "property maintenance",
-            message = "You must pay $25 per restaurant for maintenance",
-            value = 25
+            message = "You must pay $32 per restaurant for maintenance",
+            value = 32
         )
     )
 
@@ -81,10 +92,13 @@ class ActionDeck() {
      * Some of the cards require a player to move to a specific space on the board. The values of those cards are
      * dependent on the locations of those spaces on the board. A map containing these values should be passed in as
      * an argument for this method and then the values of the appropriate cards are changed.
+     *
+     * @throws NoSuchElementException if propertyPositions does not have entries whose keys are "Knuth Steet"
+     * and "Lagos Avenue".
      */
     fun setPropertyPositions(propertyPositions: Map<String, Int>) {
-        cards[0].value = propertyPositions["Knuth Street"]!!
-        cards[1].value = propertyPositions["Lagos Avenue"]!!
+        cards[0].value = propertyPositions.getValue("Knuth Street")
+        cards[1].value = propertyPositions.getValue("Lagos Avenue")
     }
 
     fun shuffle() {
@@ -93,16 +107,23 @@ class ActionDeck() {
 
     private var topIndex = 0
 
+    /**
+     * The card at the top of the deck.
+     */
     val topCard get() = cards[topIndex]
 
     /**
-     * Makes it so that topCard is equal to a different card the next time it's accessed.
+     * Makes it so that the card that used to be the top card is now the bottom card and the card that used to be
+     * 2nd from the top is now the top card.
      */
     fun moveTopCardToBottom() {
         // Make topIndex go back to the beginning once it reaches the end.
         topIndex = (topIndex + 1) % cards.size
     }
 
+    /**
+     * @throws IllegalStateException if the top card does not have the type "get off vacation free".
+     */
     fun removeGetOffVacationCardAtTop() {
         // This should only be called when a "get off vacation free" card is at the top.
         if (topCard.type != "get off vacation free") {
@@ -119,7 +140,11 @@ class ActionDeck() {
     }
 
     fun insertGetOffVacationCardAtBottom() {
-        val newCard = ActionCard(type = "get off vacation free", message = "Get off vacation free", value = 0)
+        val newCard = ActionCard(
+            type = "get off vacation free",
+            message = "Get Off Vacation Free. Keep this card and use it when needed, or trade it.",
+            value = 0
+        )
         if (topIndex == 0) {
             // Add to the end of the cards List.
             cards.add(newCard)
