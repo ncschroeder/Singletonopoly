@@ -78,7 +78,7 @@ the deck and goes to the player that drew it. When the player uses that card, it
 When a player lands on the "Go On Vacation" space on the board, draws a card from the action deck with this same
 message, or rolls doubles 3 times in a row, that player's position will be changed to a designated "Vacation" space
 on the board. The player is stuck on this space for as long as they are on vacation. On the player's next turn, they
-will have the choice of either trying to roll doubles, paying $50 to get off vacation, or using a
+will have the choice of either trying to roll doubles, paying $128 to get off vacation, or using a
 "Get Off Vacation Free" card if they drew one from the action deck. If they choose to roll doubles and then succeed,
 the player is off vacation. A player can be on vacation for a maximum of 3 turns by choosing to roll doubles each time.
 After failing to roll doubles for 3 turns in a row, they get off vacation.
