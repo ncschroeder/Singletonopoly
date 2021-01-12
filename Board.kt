@@ -1,9 +1,10 @@
 import java.lang.Exception
 import java.lang.IllegalArgumentException
+import java.lang.StringBuilder
 import kotlin.math.roundToInt
 
 /**
- * Consists of data and functions about properties and other spaces on the board.
+ * Board class consists of data and functions about properties and other spaces on the board.
  */
 class Board {
     /**
@@ -19,7 +20,7 @@ class Board {
         /**
          * Either "Street", "Golf Course", or "Super Store".
          */
-        abstract val typeString: String
+        abstract val type: String
 
 
         /**
@@ -27,15 +28,23 @@ class Board {
          */
         // For super stores and golf courses, this info will do. For streets, the neighborhood will also
         // be mentioned. This is done by overriding.
-        open val lowDetailInfo get() = "Position: $position, Type: $typeString, Name: $name"
+        open val lowDetailInfo get() = "Position: $position, Type: $type, Name: $name"
 
         /**
          * Mentions everything in lowDetailInfo. If this property is owned, the owner name, fee info, and
          * pawn status are also mentioned.
          */
-        abstract val moderatelyDetailedInfo: String
+        abstract val moderateDetailInfo: String
 
+        /**
+         * The player that owns this property or null if this property is unowned. This should be set to a player
+         * after this property is bought.
+         */
         var owner: PlayerManager.Player? = null
+
+        /**
+         * Equivalent to "owner != null".
+         */
         val isOwned get() = owner != null
 
         // Purchase price for golf courses and super stores is 512 so this value will be in this class and for
@@ -84,7 +93,7 @@ class Board {
     }
 
     inner class Street(name: String, val neighborhoodNumber: Int, val neighborhoodName: String) : Property(name) {
-        override val typeString = "Street"
+        override val type = "Street"
 
         /**
          * Consists of the position, type, name, and neighborhood.
@@ -95,10 +104,8 @@ class Board {
          * Mentions everything in lowDetailInfo. If this street is owned, the owner name, number of restaurants,
          * pawn status, and current fee are mentioned as well.
          */
-        override val moderatelyDetailedInfo: String
-            get() {
-                var string = "$lowDetailInfo, "
-                string +=
+        override val moderateDetailInfo
+            get() = "$lowDetailInfo, " +
                     if (isOwned) {
                         "Owner Name: ${owner!!.name},  Number of Restaurants: " +
                                 "$numberOfRestaurants,\n\tPawned: ${if (isPawned) "Yes" else "No"}, " +
@@ -106,13 +113,11 @@ class Board {
                     } else {
                         "Unowned"
                     }
-                return string
-            }
 
         /**
          * Mentions just about everything that can be mentioned about this street.
          */
-        val highlyDetailedInfo: String
+        val highDetailInfo: String
             get() {
                 return "$lowDetailInfo, ${if (isOwned) "Owner Name: ${owner!!.name}" else "Unowned"}, " +
                         "Purchase Price: $$purchasePrice, Pawned: ${if (isPawned) "Yes" else "No"}, " +
@@ -173,15 +178,15 @@ class Board {
          * @throws IllegalArgumentException if the numberOfRestaurants argument is not in the range of 0 to 5 inclusive.
          */
         private fun getFeeWhenNeighborhoodIsOwned(numberOfRestaurants: Int) =
-            when (numberOfRestaurants) {
-                0 -> startingFee * 2
-                1 -> startingFee * 4
-                2 -> startingFee * 6
-                3 -> startingFee * 8
-                4 -> startingFee * 10
-                5 -> startingFee * 12
-                else -> throw IllegalArgumentException("Invalid number of restaurants: $numberOfRestaurants")
-            }
+                when (numberOfRestaurants) {
+                    0 -> startingFee * 2
+                    1 -> startingFee * 4
+                    2 -> startingFee * 6
+                    3 -> startingFee * 8
+                    4 -> startingFee * 10
+                    5 -> startingFee * 12
+                    else -> throw IllegalArgumentException("Invalid number of restaurants: $numberOfRestaurants")
+                }
 
         /**
          * The number of restaurants in the same neighborhood as this street.
@@ -239,7 +244,7 @@ class Board {
         fun removeRestaurant() {
             if (numberOfRestaurants == 0) {
                 throw IllegalStateException(
-                    "Cannot remove a restaurant from $name, since it doesn't have any restaurants"
+                        "Cannot remove a restaurant from $name, since it doesn't have any restaurants"
                 )
             }
             numberOfRestaurants--
@@ -256,12 +261,10 @@ class Board {
     }
 
     inner class SuperStore(name: String) : Property(name) {
-        override val typeString = "Super Store"
+        override val type = "Super Store"
 
-        override val moderatelyDetailedInfo: String
-            get() {
-                var string = "$lowDetailInfo, "
-                string +=
+        override val moderateDetailInfo
+            get() = "$lowDetailInfo, " +
                     if (isOwned) {
                         val multiplier = getFeeData(totalDiceRoll = 0).getValue("multiplier")
                         "Owner Name: ${owner!!.name}, Pawned: ${if (isPawned) "Yes" else "No"}, " +
@@ -269,8 +272,6 @@ class Board {
                     } else {
                         "Unowned"
                     }
-                return string
-            }
 
         /**
          * @param totalDiceRoll Should be the sum of 2 dice rolls.
@@ -296,28 +297,24 @@ class Board {
             }
 
             return mapOf(
-                "both super stores owned by same person" to bothSuperStoresOwnedBySamePerson,
-                "multiplier" to multiplier,
-                "fee" to fee
+                    "both super stores owned by same person" to bothSuperStoresOwnedBySamePerson,
+                    "multiplier" to multiplier,
+                    "fee" to fee
             )
         }
     }
 
     inner class GolfCourse(name: String) : Property(name) {
-        override val typeString = "Golf Course"
+        override val type = "Golf Course"
 
-        override val moderatelyDetailedInfo: String
-            get() {
-                var string = "$lowDetailInfo, "
-                string +=
+        override val moderateDetailInfo
+            get() = "$lowDetailInfo, " +
                     if (isOwned) {
                         "Owner Name: ${owner!!.name}, Pawned: ${if (isPawned) "Yes" else "No"}, " +
                                 "Current Fee: $${feeData.getValue("fee")}"
                     } else {
                         "Unowned"
                     }
-                return string
-            }
 
         /**
          * A map that consists of 2 entries. The first has the key "number of golf courses owned", and the value of
@@ -346,8 +343,8 @@ class Board {
                 }
 
                 return mapOf(
-                    "number of golf courses owned" to numberOfGolfCoursesOwned,
-                    "fee" to fee
+                        "number of golf courses owned" to numberOfGolfCoursesOwned,
+                        "fee" to fee
                 )
             }
     }
@@ -356,48 +353,48 @@ class Board {
      * Consists of strings and properties that are ordered according to their position on the board.
      */
     private val boardSpaces = arrayOf(
-        // Numbers in comments are the positions of each space on the board
-        "Start", // 1
-        Street(name = "Page Street", neighborhoodNumber = 1, neighborhoodName = "Lambeth"), // 2
-        Street(name = "Victoria Street", neighborhoodNumber = 1, neighborhoodName = "Lambeth"), // 3
-        Street(name = "Nottingham Avenue", neighborhoodNumber = 1, neighborhoodName = "Lambeth"), // 4
-        GolfCourse(name = "Granby Golf Club"), // 5
-        Street(name = "Luanda Street", neighborhoodNumber = 2, neighborhoodName = "Monrovia"), // 6
-        "Draw Action Card", // 7
-        Street(name = "Kinshasa Street", neighborhoodNumber = 2, neighborhoodName = "Monrovia"), // 8
-        Street(name = "Lagos Avenue", neighborhoodNumber = 2, neighborhoodName = "Monrovia"), // 9
-        SuperStore(name = "Newton Super Store"), // 10
-        "Break Time", // 11
-        Street(name = "Osage Avenue", neighborhoodNumber = 3, neighborhoodName = "Vauxhall"), // 12
-        Street(name = "Camden Avenue", neighborhoodNumber = 3, neighborhoodName = "Vauxhall"), //13
-        "Draw Action Card", // 14
-        Street(name = "Ozark Avenue", neighborhoodNumber = 3, neighborhoodName = "Vauxhall"), // 15
-        Street(name = "Sullivan Avenue", neighborhoodNumber = 4, neighborhoodName = "Shadyside"), // 16
-        "Vacation", // 17
-        Street(name = "Labadie Street", neighborhoodNumber = 4, neighborhoodName = "Shadyside"), // 18
-        GolfCourse(name = "Monett Golf Club"), // 19
-        Street(name = "Augusta Street", neighborhoodNumber = 4, neighborhoodName = "Shadyside"), // 20
-        Street(name = "Ezio Avenue", neighborhoodNumber = 5, neighborhoodName = "Little Italy"), // 21
-        "Draw Action Card", // 22
-        Street(name = "Venezia Street", neighborhoodNumber = 5, neighborhoodName = "Little Italy"), // 23
-        Street(name = "Firenze Street", neighborhoodNumber = 5, neighborhoodName = "Little Italy"), // 24
-        GolfCourse(name = "Neosho Golf Club"), // 25
-        Street(name = "Euler Avenue", neighborhoodNumber = 6, neighborhoodName = "Gauss"), // 26
-        Street(name = "Ramanujan Street", neighborhoodNumber = 6, neighborhoodName = "Gauss"), // 27
-        "Draw Action Card", // 28
-        Street(name = "Euclid Avenue", neighborhoodNumber = 6, neighborhoodName = "Gauss"), // 29
-        "Break Time", // 30
-        "Go On Vacation", // 31
-        Street(name = "Dijkstra Street", neighborhoodNumber = 7, neighborhoodName = "Gates"), // 32
-        Street(name = "Knuth Street", neighborhoodNumber = 7, neighborhoodName = "Gates"), // 33
-        SuperStore(name = "Leibniz Super Store"), // 34
-        "Draw Action Card", // 35
-        Street(name = "Ritchie Avenue", neighborhoodNumber = 7, neighborhoodName = "Gates"), // 36
-        Street(name = "Phoenix Avenue", neighborhoodNumber = 8, neighborhoodName = "Nicosia"), // 37
-        GolfCourse(name = "Aurora Golf Club"), // 38
-        "Draw Action Card", // 39
-        Street(name = "Louisville Avenue", neighborhoodNumber = 8, neighborhoodName = "Nicosia"), // 40
-        Street(name = "Norfolk Street", neighborhoodNumber = 8, neighborhoodName = "Nicosia") // 41
+            // Numbers in comments are the positions of each space on the board
+            "Start", // 1
+            Street(name = "Page Street", neighborhoodNumber = 1, neighborhoodName = "Lambeth"), // 2
+            Street(name = "Victoria Street", neighborhoodNumber = 1, neighborhoodName = "Lambeth"), // 3
+            Street(name = "Nottingham Avenue", neighborhoodNumber = 1, neighborhoodName = "Lambeth"), // 4
+            GolfCourse(name = "Granby Golf Club"), // 5
+            Street(name = "Luanda Street", neighborhoodNumber = 2, neighborhoodName = "Monrovia"), // 6
+            "Draw Action Card", // 7
+            Street(name = "Kinshasa Street", neighborhoodNumber = 2, neighborhoodName = "Monrovia"), // 8
+            Street(name = "Lagos Avenue", neighborhoodNumber = 2, neighborhoodName = "Monrovia"), // 9
+            SuperStore(name = "Newton Super Store"), // 10
+            "Break Time", // 11
+            Street(name = "Osage Avenue", neighborhoodNumber = 3, neighborhoodName = "Vauxhall"), // 12
+            Street(name = "Camden Avenue", neighborhoodNumber = 3, neighborhoodName = "Vauxhall"), //13
+            "Draw Action Card", // 14
+            Street(name = "Ozark Avenue", neighborhoodNumber = 3, neighborhoodName = "Vauxhall"), // 15
+            Street(name = "Sullivan Avenue", neighborhoodNumber = 4, neighborhoodName = "Shadyside"), // 16
+            "Vacation", // 17
+            Street(name = "Labadie Street", neighborhoodNumber = 4, neighborhoodName = "Shadyside"), // 18
+            GolfCourse(name = "Monett Golf Club"), // 19
+            Street(name = "Augusta Street", neighborhoodNumber = 4, neighborhoodName = "Shadyside"), // 20
+            Street(name = "Ezio Avenue", neighborhoodNumber = 5, neighborhoodName = "Little Italy"), // 21
+            "Draw Action Card", // 22
+            Street(name = "Venezia Street", neighborhoodNumber = 5, neighborhoodName = "Little Italy"), // 23
+            Street(name = "Firenze Street", neighborhoodNumber = 5, neighborhoodName = "Little Italy"), // 24
+            GolfCourse(name = "Neosho Golf Club"), // 25
+            Street(name = "Euler Avenue", neighborhoodNumber = 6, neighborhoodName = "Gauss"), // 26
+            Street(name = "Ramanujan Street", neighborhoodNumber = 6, neighborhoodName = "Gauss"), // 27
+            "Draw Action Card", // 28
+            Street(name = "Euclid Avenue", neighborhoodNumber = 6, neighborhoodName = "Gauss"), // 29
+            "Break Time", // 30
+            "Go On Vacation", // 31
+            Street(name = "Dijkstra Street", neighborhoodNumber = 7, neighborhoodName = "Gates"), // 32
+            Street(name = "Knuth Street", neighborhoodNumber = 7, neighborhoodName = "Gates"), // 33
+            SuperStore(name = "Leibniz Super Store"), // 34
+            "Draw Action Card", // 35
+            Street(name = "Ritchie Avenue", neighborhoodNumber = 7, neighborhoodName = "Gates"), // 36
+            Street(name = "Phoenix Avenue", neighborhoodNumber = 8, neighborhoodName = "Nicosia"), // 37
+            GolfCourse(name = "Aurora Golf Club"), // 38
+            "Draw Action Card", // 39
+            Street(name = "Louisville Avenue", neighborhoodNumber = 8, neighborhoodName = "Nicosia"), // 40
+            Street(name = "Norfolk Street", neighborhoodNumber = 8, neighborhoodName = "Nicosia") // 41
     )
 
     /**
@@ -479,100 +476,86 @@ class Board {
         throw IllegalStateException("There is no space that is a \"Vacation\" string")
     }
 
-    /**
-     * Prints information about all board spaces.
-     */
-    fun displaySpacesAndSimplePropertyInfo() {
-        println("\nBoard Spaces")
-        for ((index, space) in boardSpaces.withIndex()) {
-            println(
-                when (space) {
-                    is String -> "Position: ${index + 1}, Space: \"$space\""
-                    is Property -> space.lowDetailInfo
-                    else -> throw Exception("Invalid type at position ${index + 1}")
-                }
-            )
+    val spacesAndSimplePropertyInfo: String
+        get() {
+            val sb = StringBuilder()
+            sb.append("Board Spaces")
+            for ((index, space) in boardSpaces.withIndex()) {
+                sb.append("\n").append(
+                        when (space) {
+                            is String -> "Position: ${index + 1}, Space: \"$space\""
+                            is Property -> space.lowDetailInfo
+                            else -> throw Exception("Invalid type at position ${index + 1}")
+                        }
+                )
+            }
+            return sb.toString()
         }
-        println()
-    }
 
-    /**
-     * Prints moderately detailed info about all properties on the board.
-     *
-     * @param owner Have this be null or just nothing to have the information about all properties displayed. Set
-     * this to one of the players in the game to be this in order to display info only about properties owned
-     * by that player.
-     */
-    fun displayModeratelyDetailedPropertyInfo(owner: PlayerManager.Player? = null) {
-        if (owner == null) {
-            println("\nBoard Property Info")
+    val moderateDetailPropertyInfo: String
+        get() {
+            val sb = StringBuilder("Moderately Detailed Property Info")
             for (space in boardSpaces) {
                 if (space is Property) {
-                    println(space.moderatelyDetailedInfo)
+                    sb.append("\n").append(space.moderateDetailInfo)
                 }
             }
+            return sb.toString()
+        }
+
+    fun getModerateDetailPropertyInfoOfPlayer(player: PlayerManager.Player): String {
+        if (playerHasAProperty(player)) {
+            val sb = StringBuilder("Moderately detailed info for properties owned by ${player.name}")
+            for (space in boardSpaces) {
+                if (space is Property && space.owner == player) {
+                    sb.append("\n").append(space.moderateDetailInfo)
+                }
+            }
+            return sb.toString()
         } else {
-            if (playerHasAProperty(owner)) {
-                println("\nInfo for properties owned by ${owner.name}")
-                for (space in boardSpaces) {
-                    if (space is Property && space.owner == owner) {
-                        println(space.moderatelyDetailedInfo)
-                    }
+            return "${player.name} doesn't own any properties"
+        }
+    }
+
+    val moderateDetailStreetInfo: String
+        get() {
+            val sb = StringBuilder("Moderately Detailed Street Info")
+            for (space in boardSpaces) {
+                if (space is Street) {
+                    sb.append("\n").append(space.moderateDetailInfo)
                 }
-            } else {
-                println("\n${owner.name} doesn't own any properties")
             }
+            return sb.toString()
         }
-        println()
-    }
 
-    /**
-     * Prints moderately detailed info about all streets on the board.
-     */
-    fun displayModeratelyDetailedStreetInfo() {
-        println("\nModerately Detailed Street Info")
-        for (space in boardSpaces) {
-            if (space is Street) {
-                println(space.moderatelyDetailedInfo)
+    val highDetailStreetInfo: String
+        get() {
+            val sb = StringBuilder("Highly Detailed Street Info")
+            for (space in boardSpaces) {
+                if (space is Street) {
+                    sb.append("\n").append(space.highDetailInfo)
+                }
             }
+            return sb.toString()
         }
-        println()
-    }
 
-    /**
-     * Prints highly detailed info about all streets on the board.
-     */
-    fun displayHighlyDetailedStreetInfo() {
-        println("\nHighly Detailed Street Info")
-        for (space in boardSpaces) {
-            if (space is Street) {
-                println(space.highlyDetailedInfo)
+    val golfCourseInfo: String
+        get() {
+            var info = "Golf Course Info"
+            for (golfCourse in golfCourses) {
+                info += "\n" + golfCourse.moderateDetailInfo
             }
+            return info
         }
-        println()
-    }
 
-    /**
-     * Prints moderately detailed info about all golf courses on the board.
-     */
-    fun displayGolfCourseInfo() {
-        println("\nGolf Course Info")
-        for (golfCourse in golfCourses) {
-            println(golfCourse.moderatelyDetailedInfo)
+    val superStoreInfo: String
+        get() {
+            var info = "Super store info"
+            for (superStore in superStores) {
+                info += "\n" + superStore.moderateDetailInfo
+            }
+            return info
         }
-        println()
-    }
-
-    /**
-     * Prints moderately detailed info about all super stores on the board.
-     */
-    fun displaySuperStoreInfo() {
-        println("\nSuper Store Info")
-        for (superStore in superStores) {
-            println(superStore.moderatelyDetailedInfo)
-        }
-        println()
-    }
 
     /**
      * @return An Any object which can be cast as either a string or one of the property types.
@@ -625,10 +608,10 @@ class Board {
         }
 
         return mapOf(
-            "add restaurant" to playerCanAddRestaurant,
-            "remove restaurant" to playerCanRemoveRestaurant,
-            "pawn" to playerCanPawnProperty,
-            "unpawn" to playerCanUnpawnProperty
+                "add restaurant" to playerCanAddRestaurant,
+                "remove restaurant" to playerCanRemoveRestaurant,
+                "pawn" to playerCanPawnProperty,
+                "unpawn" to playerCanUnpawnProperty
         )
     }
 
@@ -638,23 +621,14 @@ class Board {
      * @return A map whose keys are "pawn" and "remove restaurant" and values are boolean values .
      */
     fun getMoneyGainOptions(player: PlayerManager.Player): Map<String, Boolean> {
-        var playerCanPawn = false
-        var playerCanRemoveRestaurant = false
-
-        for (space in boardSpaces) {
-            if (space is Property && space.owner == player) {
-                if (!playerCanRemoveRestaurant && space is Street && space.numberOfRestaurants > 0) {
-                    playerCanRemoveRestaurant = true
-                }
-                if (!playerCanPawn && !space.isPawned && (space !is Street || space.numberOfRestaurants == 0)) {
-                    playerCanPawn = true
-                }
-            }
-        }
-
+        // getPossiblePropertyActions already does the work so use that and then extract the "pawn" and
+        // "remove restaurant" entries from that map and return a new map
+        val possiblePropertyActions = getPossiblePropertyActions(player)
+        val playerCanPawn = possiblePropertyActions.getValue("pawn")
+        val playerCanRemoveRestaurant = possiblePropertyActions.getValue("remove restaurant")
         return mapOf(
-            "pawn" to playerCanPawn,
-            "remove restaurant" to playerCanRemoveRestaurant
+                "pawn" to playerCanPawn,
+                "remove restaurant" to playerCanRemoveRestaurant
         )
     }
 
@@ -680,7 +654,7 @@ class Board {
         val streets = mutableMapOf<String, Street>()
         for (space in boardSpaces) {
             if (space is Street && space.owner == player && !space.isPawned
-                && space.neighborhoodIsOwnedBySinglePlayer && space.numberOfRestaurants < 5
+                    && space.neighborhoodIsOwnedBySinglePlayer && space.numberOfRestaurants < 5
             ) {
                 streets[space.position.toString()] = space
             }
@@ -710,7 +684,7 @@ class Board {
         val pawnablePropertiesMap = mutableMapOf<String, Property>()
         for (space in boardSpaces) {
             if (space is Property && space.owner == player && !space.isPawned
-                && (space !is Street || space.numberOfRestaurants == 0)
+                    && (space !is Street || space.numberOfRestaurants == 0)
             ) {
                 pawnablePropertiesMap[space.position.toString()] = space
             }

@@ -1,5 +1,7 @@
+import java.lang.StringBuilder
+
 /**
- * Consists of the data and functions for a deck of action cards.
+ * ActionDeck class consists of the data and functions for a deck of action cards.
  */
 class ActionDeck {
     /**
@@ -43,49 +45,49 @@ class ActionDeck {
     data class ActionCard(val type: String, val message: String, var value: Int)
 
     private val cards = mutableListOf(
-        ActionCard(
-            type = "absolute position change",
-            message = "Computer scientist Donald Knuth once said\n\'Programs are meant to be read by humans and only " +
-                    "incidentally for computers to execute\'.\nMove to Knuth Street.",
-            value = 0
-        ),
-        ActionCard(
-            type = "absolute position change",
-            message = "Lagos is the most populated city in Africa. Move to Lagos Avenue.",
-            value = 0
-        ),
-        ActionCard(type = "money loss", message = "You lose $256", value = 256),
-        ActionCard(type = "money loss", message = "You lose $128", value = 128),
-        ActionCard(type = "money gain", message = "You receive $256", value = 256),
-        ActionCard(type = "money gain", message = "You receive $128", value = 128),
-        ActionCard(type = "player to other players", message = "You must pay every other player $32", value = 32),
-        ActionCard(type = "other players to player", message = "You receive $32 from every other player", value = 32),
-        ActionCard(
-            type = "get off vacation free",
-            message = "Get Off Vacation Free. Keep this card and use it when needed, or trade it.",
-            value = 0
-        ),
-        ActionCard(
-            type = "get off vacation free",
-            message = "Get Off Vacation Free. Keep this card and use it when needed, or trade it.",
-            value = 0
-        ),
-        ActionCard(type = "go on vacation", message = "Go On Vacation", value = 0),
-        ActionCard(type = "go on vacation", message = "Go On Vacation", value = 0),
-        ActionCard(type = "relative position change", message = "Move ahead 4 spaces", value = 4),
-        ActionCard(type = "relative position change", message = "Move back 4 spaces", value = -4),
-        ActionCard(type = "relative position change", message = "Move ahead 8 spaces", value = 8),
-        ActionCard(type = "relative position change", message = "Move back 8 spaces", value = -8),
-        ActionCard(
-            type = "property maintenance",
-            message = "You must pay $64 per restaurant for maintenance",
-            value = 64
-        ),
-        ActionCard(
-            type = "property maintenance",
-            message = "You must pay $32 per restaurant for maintenance",
-            value = 32
-        )
+            ActionCard(
+                    type = "absolute position change",
+                    message = "Computer scientist Donald Knuth once said\n\'Programs are meant to be read by humans and only " +
+                            "incidentally for computers to execute\'.\nMove to Knuth Street.",
+                    value = 0
+            ),
+            ActionCard(
+                    type = "absolute position change",
+                    message = "Lagos is the most populated city in Africa. Move to Lagos Avenue.",
+                    value = 0
+            ),
+            ActionCard(type = "money loss", message = "You lose $256", value = 256),
+            ActionCard(type = "money loss", message = "You lose $128", value = 128),
+            ActionCard(type = "money gain", message = "You receive $256", value = 256),
+            ActionCard(type = "money gain", message = "You receive $128", value = 128),
+            ActionCard(type = "player to other players", message = "You must pay every other player $32", value = 32),
+            ActionCard(type = "other players to player", message = "You receive $32 from every other player", value = 32),
+            ActionCard(
+                    type = "get off vacation free",
+                    message = "Get Off Vacation Free. Keep this card and use it when needed, or trade it.",
+                    value = 0
+            ),
+            ActionCard(
+                    type = "get off vacation free",
+                    message = "Get Off Vacation Free. Keep this card and use it when needed, or trade it.",
+                    value = 0
+            ),
+            ActionCard(type = "go on vacation", message = "Go On Vacation", value = 0),
+            ActionCard(type = "go on vacation", message = "Go On Vacation", value = 0),
+            ActionCard(type = "relative position change", message = "Move ahead 4 spaces", value = 4),
+            ActionCard(type = "relative position change", message = "Move back 4 spaces", value = -4),
+            ActionCard(type = "relative position change", message = "Move ahead 8 spaces", value = 8),
+            ActionCard(type = "relative position change", message = "Move back 8 spaces", value = -8),
+            ActionCard(
+                    type = "property maintenance",
+                    message = "You must pay $64 per restaurant for maintenance",
+                    value = 64
+            ),
+            ActionCard(
+                    type = "property maintenance",
+                    message = "You must pay $32 per restaurant for maintenance",
+                    value = 32
+            )
     )
 
     /**
@@ -141,9 +143,9 @@ class ActionDeck {
 
     fun insertGetOffVacationCardAtBottom() {
         val newCard = ActionCard(
-            type = "get off vacation free",
-            message = "Get Off Vacation Free. Keep this card and use it when needed, or trade it.",
-            value = 0
+                type = "get off vacation free",
+                message = "Get Off Vacation Free. Keep this card and use it when needed, or trade it.",
+                value = 0
         )
         if (topIndex == 0) {
             // Add to the end of the cards List.
@@ -155,17 +157,15 @@ class ActionDeck {
         }
     }
 
-    /**
-     * Prints data of the cards in the deck. This should be used only for testing and debugging purposes.
-     */
-    fun displayCards() {
-        println("Top of deck")
+    override fun toString(): String {
+        val sb = StringBuilder("Top of deck\n")
         for (i in topIndex until cards.size) {
-            println(cards[i])
+            sb.append(cards[i]).append("\n")
         }
         for (i in 0 until topIndex) {
-            println(cards[i])
+            sb.append(cards[i]).append("\n")
         }
-        println("Bottom of deck")
+        sb.append("Bottom of deck")
+        return sb.toString()
     }
 }
