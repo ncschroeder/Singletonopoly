@@ -1,21 +1,21 @@
-import kotlin.random.Random
-
 /**
- * PlayerManager class is used for storing and accessing player objects and calling functions related to them.
+ * PlayerManager class is used for creating, storing, and accessing player objects and calling functions related to them.
  */
 class PlayerManager {
+
     /**
      * Player class consists of data that is unique to each player and functions that can be performed on that data.
      */
     inner class Player(val name: String) {
-        override fun toString() = "Name: $name, " +
-                if (isInGame) {
-                    "Position: $position, Money: $$money, Are they on vacation?: " +
-                            "${if (isOnVacation) "Yes" else "No"}, Get Off Vacation Free cards: " +
-                            numberOfGetOffVacationCardsOwned
-                } else {
-                    "Out of the game"
-                }
+        val info
+            get() = "Name: $name, " +
+                    if (isInGame) {
+                        "Position: $position, Money: $$money, Are they on vacation?: " +
+                                "${if (isOnVacation) "Yes" else "No"}, Get Off Vacation Free cards: " +
+                                numberOfGetOffVacationCardsOwned
+                    } else {
+                        "Out of the game"
+                    }
 
         /**
          * @throws IllegalArgumentException if a player's money amount is attempted to be set to a value less
@@ -35,7 +35,7 @@ class PlayerManager {
         var position = 1
             set(value) {
                 if (value < 1) {
-                    throw IllegalArgumentException("Position must be positive but it was set it to $value")
+                    throw IllegalArgumentException("invalid nonpositive position: $value")
                 }
                 field = value
             }
@@ -50,6 +50,9 @@ class PlayerManager {
         var isOnVacation = false
             private set
 
+        /**
+         * @throws IllegalArgumentException if numberOfTurnsOnVacation is set to a negative value.
+         */
         var numberOfTurnsOnVacation = 0
             set(value) {
                 if (value < 0) {
@@ -75,6 +78,9 @@ class PlayerManager {
             numberOfTurnsOnVacation = 0
         }
 
+        /**
+         * @throws IllegalArgumentException if numberOfGetOffVacationCardsOwned is set to a negative value.
+         */
         var numberOfGetOffVacationCardsOwned = 0
             set(value) {
                 if (value < 0) {
@@ -83,25 +89,14 @@ class PlayerManager {
                 field = value
             }
 
-        /**
-         * Increments the number of Get Off Vacation Free card owned.
-         */
         fun addGetOffVacationCard() {
             numberOfGetOffVacationCardsOwned++
         }
 
         /**
-         * Decrements the number of Get Off Vacation Free cards owned.
-         *
-         * @throws IllegalStateException if this method is called on a player that doesn't have any
-         * Get Off Vacation Free cards.
+         * @throws IllegalArgumentException if numberOfGetOffVacation cards is 0.
          */
         fun removeGetOffVacationCard() {
-            if (numberOfGetOffVacationCardsOwned == 0) {
-                throw IllegalStateException(
-                        "You've tried to remove a Get Off Vacation Free card from $name, who doesn't have any"
-                )
-            }
             numberOfGetOffVacationCardsOwned--
         }
 
@@ -113,18 +108,9 @@ class PlayerManager {
 
     private val players = mutableListOf<Player>()
 
-    val numberOfPlayersInGame: Int
-        get() {
-            var count = 0
-            for (player in players) {
-                if (player.isInGame) {
-                    count++
-                }
-            }
-            return count
-        }
-
-    val onePlayerIsInGame get() = numberOfPlayersInGame == 1
+    fun addPlayer(name: String) {
+        players.add(Player(name))
+    }
 
     private var currentPlayerIndex = 0
 
@@ -139,17 +125,27 @@ class PlayerManager {
         } while (!players[currentPlayerIndex].isInGame)
     }
 
-    override fun toString(): String {
-        var string = "Player Info"
-        for (player in players) {
-            string += "\n" + player
+    val playerInfo: String
+        get() {
+            val sb = StringBuilder("Player Info")
+            for (player in players) {
+                sb.append('\n').append(player.info)
+            }
+            return sb.toString()
         }
-        return string
-    }
 
-    fun addPlayer(name: String) {
-        players.add(Player(name))
-    }
+    val numberOfPlayersInGame: Int
+        get() {
+            var count = 0
+            for (player in players) {
+                if (player.isInGame) {
+                    count++
+                }
+            }
+            return count
+        }
+
+    val onePlayerIsInGame get() = numberOfPlayersInGame == 1
 
     /**
      * @return A list of players that are still in the game with the exception of the excludingPlayer argument.
@@ -164,7 +160,7 @@ class PlayerManager {
 
     /**
      * @return The name of the only player left in the game.
-     * @throws Exception if the player manager has more than 1 player that is in the game.
+     * @throws Exception if there is more than 1 player that is in the game.
      */
     fun getWinnerName() = players.single { it.isInGame }.name
 }

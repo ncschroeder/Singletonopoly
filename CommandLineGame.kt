@@ -38,16 +38,39 @@ class CommandLineGame {
         play()
     }
 
+    /**
+     * @return An random Int that is greater than or equal to 1 and less than or equal to 6.
+     */
+    fun getDiceRoll() = Random.nextInt(1, 7)
+
+    fun printInvalidInput() {
+        println("Invalid input")
+    }
+
+    fun printMoneyGainUpdate(player: PlayerManager.Player, moneyGain: Int) {
+        println("${player.name} has gained $$moneyGain and now has $${player.money}")
+    }
+
+    fun printMoneyLossUpdate(player: PlayerManager.Player, moneyLoss: Int) {
+        println("${player.name} has lost $$moneyLoss and now has $${player.money}")
+    }
+
+    fun currentPlayerMadeRevolution() {
+        println("${currentPlayer.name} has made a revolution!")
+        currentPlayer.money += 512
+        printMoneyGainUpdate(player = currentPlayer, moneyGain = 512)
+    }
+
     fun setup() {
+        // Get number of players
         var numberOfPlayers: Int?
         while (true) {
-            print("How many players? ")
+            println("How many players? This number must be greater than or equal to 2 and less than or equal to 8")
             numberOfPlayers = readLine()!!.toIntOrNull()
-            if (numberOfPlayers == null || numberOfPlayers !in 2..8) {
-                println("The number of players must be a number in the range of 2 to 8 inclusive")
-            } else {
+            if (numberOfPlayers in 2..8) {
                 break
             }
+            printInvalidInput()
         }
 
         /**
@@ -61,6 +84,7 @@ class CommandLineGame {
         val playerOrderingList = mutableListOf<PlayerOrdering>()
         val namesSet = mutableSetOf<String>()
         var playerNumber = 1
+        // Get unique names of players and then get a dice roll for them to determine starting order
         while (playerNumber <= numberOfPlayers!!) {
             print("\nEnter a unique name for player $playerNumber or enter nothing for \"Player $playerNumber\": ")
             val input = readLine()!!
@@ -90,19 +114,23 @@ class CommandLineGame {
         println("\nThe order of the players is")
         for (playerOrdering in playerOrderingList) {
             println(playerOrdering.name)
-            playerManager.addPlayer(playerOrdering.name)
+            playerManager.addPlayer(name = playerOrdering.name)
         }
         println()
 
         currentPlayer = playerManager.currentPlayer
-        playerManager.vacationPosition = board.getVacationPosition()
+        playerManager.vacationPosition = board.vacationPosition
 
+        // Get positions of certain properties from the board and then give those positions to the action deck.
         val propertiesUsedByActionDeck = arrayOf("Knuth Street", "Lagos Avenue")
-        val propertyPositions = board.getPropertyPositions(propertiesUsedByActionDeck)
+        val propertyPositions = board.getPropertyPositions(propertyNames = propertiesUsedByActionDeck)
         actionDeck.setPropertyPositions(propertyPositions)
         actionDeck.shuffle()
     }
 
+    /**
+     * Calls all functions needed to play the game.
+     */
     fun play() {
         gameLoop@ while (true) {
             // The gameOver and turnOver variables might change during the functions that get called so these
@@ -134,28 +162,6 @@ class CommandLineGame {
     }
 
     /**
-     * @return An random Int that is greater than or equal to 1 and less than or equal to 6.
-     */
-    fun getDiceRoll() = Random.nextInt(1, 7)
-
-    fun endTurn() {
-        if (turnOver) {
-            turnOver = false
-        }
-        if (goAgain) {
-            goAgain = false
-        } else {
-            playerManager.switchToNextPlayer()
-            currentPlayer = playerManager.currentPlayer
-        }
-        println("End of turn. Type \"c\" and press enter to continue.")
-        while (readLine()!!.toLowerCase() != "c") {
-            // Do nothing
-        }
-        println()
-    }
-
-    /**
      * Asks the current player about any actions they would like to do before they roll and take their turn. These
      * actions include viewing info about the board, properties on it, or other players; initiating a trade with
      * other players, dropping out of the game, ending the game, adding or removing restaurants from streets they
@@ -164,10 +170,10 @@ class CommandLineGame {
     fun askAboutPreRollAction() {
         var possiblePropertyActions = board.getPossiblePropertyActions(currentPlayer)
         preRollActionAskLoop@ while (true) {
-            val playerCanAddRestaurant = possiblePropertyActions.getValue("add restaurant")
-            val playerCanRemoveRestaurant = possiblePropertyActions.getValue("remove restaurant")
-            val playerCanPawn = possiblePropertyActions.getValue("pawn")
-            val playerCanUnpawn = possiblePropertyActions.getValue("unpawn")
+            val playerCanAddRestaurant = Board.PropertyAction.ADD_RESTAURANT in possiblePropertyActions
+            val playerCanRemoveRestaurant = Board.PropertyAction.REMOVE_RESTAURANT in possiblePropertyActions
+            val playerCanPawn = Board.PropertyAction.PAWN in possiblePropertyActions
+            val playerCanUnpawn = Board.PropertyAction.UNPAWN in possiblePropertyActions
 
             println(
                     """
@@ -183,17 +189,17 @@ class CommandLineGame {
                     """.trimIndent()
             )
 
-            if (playerCanAddRestaurant) {
-                println("ar: Add a restaurant to one of your properties")
-            }
-            if (playerCanRemoveRestaurant) {
-                println("rr: Remove a restaurant from one of your properties")
-            }
             if (playerCanPawn) {
                 println("pa: Pawn one of your properties")
             }
             if (playerCanUnpawn) {
                 println("u: Unpawn one of your properties")
+            }
+            if (playerCanAddRestaurant) {
+                println("ar: Add a restaurant to one of your streets")
+            }
+            if (playerCanRemoveRestaurant) {
+                println("rr: Remove a restaurant from one of your streets")
             }
 
             val input = readLine()!!.toLowerCase()
@@ -202,8 +208,8 @@ class CommandLineGame {
                 // During some of these cases, possiblePropertyActions gets refreshed to check for changes
                 "tt" -> return
                 "s" -> println(board.spacesAndSimplePropertyInfo)
-                "pr" -> askAboutDisplayingPropertyInfo(currentPlayer)
-                "pl" -> println(playerManager)
+                "pr" -> askAboutDisplayingPropertyInfo(playerWhoWantsToKnow = currentPlayer)
+                "pl" -> println(playerManager.playerInfo)
                 "mt" -> {
                     askAboutTrading(
                             initiatingPlayer = currentPlayer,
@@ -228,7 +234,7 @@ class CommandLineGame {
                                 return
                             }
                             "n" -> break@dropOutAskLoop
-                            else -> println("Invalid input")
+                            else -> printInvalidInput()
                         }
                     }
                 }
@@ -242,26 +248,8 @@ class CommandLineGame {
                                 return
                             }
                             "n" -> break@endGameAskLoop
-                            else -> println("Invalid input")
+                            else -> printInvalidInput()
                         }
-                    }
-                }
-
-                "ar" -> {
-                    if (playerCanAddRestaurant) {
-                        askAboutAddingRestaurant()
-                        possiblePropertyActions = board.getPossiblePropertyActions(currentPlayer)
-                    } else {
-                        println("Invalid input")
-                    }
-                }
-
-                "rr" -> {
-                    if (playerCanRemoveRestaurant) {
-                        askAboutRemovingRestaurant(currentPlayer)
-                        possiblePropertyActions = board.getPossiblePropertyActions(currentPlayer)
-                    } else {
-                        println("Invalid input")
                     }
                 }
 
@@ -270,7 +258,7 @@ class CommandLineGame {
                         askAboutPawningProperty(currentPlayer)
                         possiblePropertyActions = board.getPossiblePropertyActions(currentPlayer)
                     } else {
-                        println("Invalid input")
+                        printInvalidInput()
                     }
                 }
 
@@ -279,11 +267,29 @@ class CommandLineGame {
                         askAboutUnpawningProperty()
                         possiblePropertyActions = board.getPossiblePropertyActions(currentPlayer)
                     } else {
-                        println("Invalid input")
+                        printInvalidInput()
                     }
                 }
 
-                else -> println("Invalid input")
+                "ar" -> {
+                    if (playerCanAddRestaurant) {
+                        askAboutAddingRestaurant()
+                        possiblePropertyActions = board.getPossiblePropertyActions(currentPlayer)
+                    } else {
+                        printInvalidInput()
+                    }
+                }
+
+                "rr" -> {
+                    if (playerCanRemoveRestaurant) {
+                        askAboutRemovingRestaurant(currentPlayer)
+                        possiblePropertyActions = board.getPossiblePropertyActions(currentPlayer)
+                    } else {
+                        printInvalidInput()
+                    }
+                }
+
+                else -> printInvalidInput()
             }
             println()
         }
@@ -331,765 +337,6 @@ class CommandLineGame {
                     }
             )
             println()
-        }
-    }
-
-    /**
-     * Asks the current player what they would like to do for their turn when they are on vacation.
-     * @throws IllegalStateException if the current player is not on vacation.
-     */
-    fun doVacationAction() {
-        if (!currentPlayer.isOnVacation) {
-            throw IllegalStateException("Current player is not on vacation")
-        }
-        println(
-                "${currentPlayer.name}, you're on vacation and this is your " +
-                        when (currentPlayer.numberOfTurnsOnVacation) {
-                            0 -> "first"
-                            1 -> "second"
-                            2 -> "third (last)"
-                            else -> throw IllegalStateException(
-                                    "Shouldn't be on vacation at this point. " +
-                                            "Number of turns on vacation: ${currentPlayer.numberOfTurnsOnVacation}"
-                            )
-                        }
-                        + " turn on vacation"
-        )
-
-        val feeToGetOffVacation = 128
-        vacationActionAskLoop@ while (true) {
-            println(
-                    """
-                Would you like to:
-                1: Pay $$feeToGetOffVacation to get off vacation
-                2: Try to roll doubles
-            """.trimIndent()
-            )
-            if (currentPlayer.hasAGetOffVacationCard) {
-                println("3: Use a get off vacation card")
-            }
-
-            when (readLine()) {
-                "1" -> {
-                    if (currentPlayer.money < feeToGetOffVacation) {
-                        askAboutGettingMoney(
-                                player = currentPlayer,
-                                moneyNeeded = feeToGetOffVacation,
-                                playerHasChoice = true
-                        )
-
-                        // The following condition will be true if the player couldn't gather the money or
-                        // changed their mind.
-                        if (currentPlayer.money < feeToGetOffVacation) {
-                            continue@vacationActionAskLoop
-                        }
-                    }
-                    println("${currentPlayer.name} has chosen to pay so they will get to take their turn")
-                    currentPlayer.money -= feeToGetOffVacation
-                    printMoneyLossUpdate(player = currentPlayer, moneyLoss = feeToGetOffVacation)
-                    currentPlayer.removeFromVacation()
-                    return
-                }
-
-                "2" -> {
-                    val diceRoll1 = getDiceRoll()
-                    val diceRoll2 = getDiceRoll()
-                    println("${currentPlayer.name} rolled a $diceRoll1 and a $diceRoll2")
-                    if (diceRoll1 == diceRoll2) {
-                        println("These are doubles so they are off vacation")
-                        currentPlayer.removeFromVacation()
-                        currentPlayer.position += (diceRoll1 + diceRoll2)
-                        evaluatePosition()
-                    } else {
-                        currentPlayer.numberOfTurnsOnVacation++
-                        if (currentPlayer.numberOfTurnsOnVacation == 3) {
-                            println("${currentPlayer.name} has spent 3 turns on vacation so it is now over")
-                            currentPlayer.removeFromVacation()
-                        }
-                    }
-                    turnOver = true
-                    return
-                }
-
-                "3" -> {
-                    if (currentPlayer.hasAGetOffVacationCard) {
-                        println(
-                                "${currentPlayer.name} has chosen to use a get off vacation card so they " +
-                                        "get to take their turn"
-                        )
-                        currentPlayer.removeFromVacation()
-                        currentPlayer.removeGetOffVacationCard()
-                        actionDeck.insertGetOffVacationCardAtBottom()
-                        return
-                    } else {
-                        println("Invalid input")
-                    }
-                }
-
-                else -> println("Invalid input")
-            }
-        }
-    }
-
-    fun printMoneyGainUpdate(player: PlayerManager.Player, moneyGain: Int) {
-        println("${player.name} has gained $$moneyGain and now has $${player.money}")
-    }
-
-    fun printMoneyLossUpdate(player: PlayerManager.Player, moneyLoss: Int) {
-        println("${player.name} has lost $$moneyLoss and now has $${player.money}")
-    }
-
-    fun currentPlayerMadeRevolution() {
-        println("${currentPlayer.name} has made a revolution!")
-        currentPlayer.money += 512
-        printMoneyGainUpdate(player = currentPlayer, moneyGain = 512)
-    }
-
-    fun rollDiceAndMove() {
-        val diceRoll1 = getDiceRoll()
-        val diceRoll2 = getDiceRoll()
-        val totalDiceRoll = diceRoll1 + diceRoll2
-        println("${currentPlayer.name} rolled a $diceRoll1 and a $diceRoll2, for a total of $totalDiceRoll")
-        if (diceRoll1 == diceRoll2) {
-            numberOfDoubleRolls++
-            if (numberOfDoubleRolls == 3) {
-                println("${currentPlayer.name} rolled doubles 3 times in a row so they go to vacation")
-                numberOfDoubleRolls = 0
-                currentPlayer.sendToVacation()
-                turnOver = true
-                return
-            }
-            println("${currentPlayer.name} rolled doubles so they get to go again")
-            goAgain = true
-        } else if (numberOfDoubleRolls > 0) {
-            numberOfDoubleRolls = 0
-        }
-
-        if (currentPlayer.position + totalDiceRoll > board.numberOfSpaces) {
-            currentPlayer.position = (currentPlayer.position + totalDiceRoll) % board.numberOfSpaces
-            currentPlayerMadeRevolution()
-        } else {
-            currentPlayer.position += totalDiceRoll
-        }
-    }
-
-    /**
-     * Evaluates the position that the current player has landed on and takes appropriate action.
-     */
-    fun evaluatePosition() {
-        print("${currentPlayer.name} has landed on position ${currentPlayer.position} which is ")
-        when (val currentBoardSpace = board.getBoardSpace(currentPlayer.position)) {
-            is String -> {
-                println("\"$currentBoardSpace\".")
-                when (currentBoardSpace) {
-                    "Start", "Vacation", "Break Time" -> println("This space has no effect")
-
-                    "Go On Vacation" -> {
-                        currentPlayer.sendToVacation()
-                        // Following condition will be true if the player rolled doubles. The player will not get to
-                        // go again for this case.
-                        if (goAgain) {
-                            goAgain = false
-                        }
-                    }
-
-                    "Draw Action Card" -> {
-                        println(
-                                "${currentPlayer.name} draws a card from the action deck and it says " +
-                                        "\"${actionDeck.topCard.message}\""
-                        )
-                        when (actionDeck.topCard.type) {
-                            "money gain" -> {
-                                val moneyGain = actionDeck.topCard.value
-                                actionDeck.moveTopCardToBottom()
-                                currentPlayer.money += moneyGain
-                                printMoneyGainUpdate(player = currentPlayer, moneyGain = moneyGain)
-                            }
-
-                            "money loss" -> {
-                                val moneyLoss = actionDeck.topCard.value
-                                actionDeck.moveTopCardToBottom()
-                                if (currentPlayer.money < moneyLoss) {
-                                    askAboutGettingMoney(
-                                            player = currentPlayer,
-                                            moneyNeeded = moneyLoss,
-                                            playerHasChoice = false
-                                    )
-
-                                    // Following condition is true if the player decided to drop out of the game
-                                    // in the askAboutGettingMoney function.
-                                    if (!currentPlayer.isInGame) {
-                                        if (!gameOver) {
-                                            println(
-                                                    "${currentPlayer.name} has dropped out so their properties are " +
-                                                            "now unowned"
-                                            )
-                                            board.makePropertiesUnowned(currentPlayer)
-                                        }
-                                        return
-                                    }
-                                }
-                                currentPlayer.money -= moneyLoss
-                                printMoneyLossUpdate(player = currentPlayer, moneyLoss = moneyLoss)
-                            }
-
-                            "other players to player" -> {
-                                val moneyReceivedFromEachPlayer = actionDeck.topCard.value
-                                actionDeck.moveTopCardToBottom()
-                                for (otherPlayer in playerManager.getListOfOtherPlayersInGame(
-                                        excludingPlayer = currentPlayer
-                                )) {
-                                    if (otherPlayer.money < moneyReceivedFromEachPlayer) {
-                                        askAboutGettingMoney(
-                                                player = otherPlayer,
-                                                moneyNeeded = moneyReceivedFromEachPlayer,
-                                                playerHasChoice = false
-                                        )
-                                        // Following condition is true if the other player decided to drop out in the
-                                        // askAboutGettingMoney function
-                                        if (!otherPlayer.isInGame) {
-                                            if (gameOver) {
-                                                return
-                                            }
-                                            println(
-                                                    "${otherPlayer.name} has dropped out so their money and properties " +
-                                                            "will go to ${currentPlayer.name}"
-                                            )
-                                            currentPlayer.money += otherPlayer.money
-                                            printMoneyGainUpdate(player = currentPlayer, moneyGain = otherPlayer.money)
-                                            board.transferOwnership(
-                                                    currentOwner = otherPlayer,
-                                                    newOwner = currentPlayer
-                                            )
-                                            continue
-                                        }
-                                    }
-                                    otherPlayer.money -= moneyReceivedFromEachPlayer
-                                    printMoneyLossUpdate(player = otherPlayer, moneyLoss = moneyReceivedFromEachPlayer)
-                                    currentPlayer.money += moneyReceivedFromEachPlayer
-                                    printMoneyGainUpdate(player = currentPlayer, moneyGain = moneyReceivedFromEachPlayer)
-                                }
-                            }
-
-                            "player to other players" -> {
-                                val moneyOwedToEachPlayer = actionDeck.topCard.value
-                                actionDeck.moveTopCardToBottom()
-                                val totalMoneyOwed =
-                                        moneyOwedToEachPlayer * (playerManager.numberOfPlayersInGame - 1)
-                                if (currentPlayer.money < totalMoneyOwed) {
-                                    askAboutGettingMoney(
-                                            player = currentPlayer,
-                                            moneyNeeded = totalMoneyOwed,
-                                            playerHasChoice = false
-                                    )
-                                    // Following condition is true if the current player decided to drop out in the
-                                    // askAboutGettingMoney function
-                                    if (!currentPlayer.isInGame) {
-                                        if (!gameOver) {
-                                            println(
-                                                    "${currentPlayer.name} has dropped out so their properties are " +
-                                                            "now unowned"
-                                            )
-                                            board.makePropertiesUnowned(currentPlayer)
-                                        }
-                                        return
-                                    }
-                                }
-
-                                for (otherPlayer in playerManager.getListOfOtherPlayersInGame(
-                                        excludingPlayer = currentPlayer
-                                )) {
-                                    currentPlayer.money -= moneyOwedToEachPlayer
-                                    printMoneyLossUpdate(player = currentPlayer, moneyLoss = moneyOwedToEachPlayer)
-                                    otherPlayer.money += moneyOwedToEachPlayer
-                                    printMoneyGainUpdate(player = otherPlayer, moneyGain = moneyOwedToEachPlayer)
-                                }
-                            }
-
-                            "absolute position change" -> {
-                                val newPosition = actionDeck.topCard.value
-                                actionDeck.moveTopCardToBottom()
-                                if (newPosition < currentPlayer.position) {
-                                    currentPlayerMadeRevolution()
-                                }
-                                currentPlayer.position = newPosition
-                                evaluatePosition()
-                            }
-
-                            "relative position change" -> {
-                                val positionChange = actionDeck.topCard.value
-                                actionDeck.moveTopCardToBottom()
-                                if (positionChange > 0) {
-                                    if (currentPlayer.position + positionChange > board.numberOfSpaces) {
-                                        currentPlayer.position =
-                                                (currentPlayer.position + positionChange) % board.numberOfSpaces
-                                        currentPlayerMadeRevolution()
-                                    } else {
-                                        currentPlayer.position += positionChange
-                                    }
-                                } else {
-                                    if (currentPlayer.position + positionChange < 1) {
-                                        currentPlayer.position =
-                                                board.numberOfSpaces + (currentPlayer.position + positionChange)
-                                    } else {
-                                        // Move the player back since positionChange is negative.
-                                        currentPlayer.position += positionChange
-                                    }
-                                }
-                                evaluatePosition()
-                            }
-
-                            "get off vacation free" -> {
-                                actionDeck.removeGetOffVacationCardAtTop()
-                                currentPlayer.addGetOffVacationCard()
-                            }
-
-                            "go on vacation" -> {
-                                actionDeck.moveTopCardToBottom()
-                                currentPlayer.sendToVacation()
-                                // Following condition will be true if doubles were rolled. The player will not get
-                                // to go again for this case.
-                                if (goAgain) {
-                                    goAgain = false
-                                }
-                            }
-
-                            "property maintenance" -> {
-                                val feePerRestaurant = actionDeck.topCard.value
-                                val restaurantCount = board.getRestaurantCount(currentPlayer)
-                                actionDeck.moveTopCardToBottom()
-                                if (restaurantCount == 0) {
-                                    println(
-                                            "${currentPlayer.name} doesn't have any restaurants so they don't have to " +
-                                                    "pay anything"
-                                    )
-                                } else {
-                                    val maintenanceFee = feePerRestaurant * restaurantCount
-                                    println(
-                                            "${currentPlayer.name} has $restaurantCount restaurants and must pay " +
-                                                    "$$feePerRestaurant per restaurant so they owe $$maintenanceFee."
-                                    )
-                                    if (currentPlayer.money < maintenanceFee) {
-                                        askAboutGettingMoney(
-                                                player = currentPlayer,
-                                                moneyNeeded = maintenanceFee,
-                                                playerHasChoice = false
-                                        )
-                                        // The following condition is true if the player decided to drop out of
-                                        // the game in the askAboutGettingMoney function.
-                                        if (!currentPlayer.isInGame) {
-                                            if (!gameOver) {
-                                                println(
-                                                        "${currentPlayer.name} has dropped out so their properties are " +
-                                                                "now unowned"
-                                                )
-                                                board.makePropertiesUnowned(currentPlayer)
-                                            }
-                                            return
-                                        }
-                                    }
-                                    currentPlayer.money -= maintenanceFee
-                                    printMoneyLossUpdate(player = currentPlayer, moneyLoss = maintenanceFee)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            is Board.Property -> {
-                print("${currentBoardSpace.name}, which is a ${currentBoardSpace.type.toLowerCase()}")
-                if (currentBoardSpace is Board.Street) {
-                    print(" in the ${currentBoardSpace.neighborhoodName} neighborhood")
-                }
-                if (currentBoardSpace.isOwned) {
-                    val owner = currentBoardSpace.owner!!
-                    print(" that is owned ")
-                    if (owner == currentPlayer) {
-                        println("by themself.")
-                        return
-                    }
-                    println("by ${owner.name}.")
-                    if (currentBoardSpace.isPawned) {
-                        println("This property is pawned so ${currentPlayer.name} doesn't have to pay a fee.")
-                        return
-                    }
-                    val fee: Int
-                    when (currentBoardSpace) {
-                        is Board.Street -> {
-                            fee = currentBoardSpace.currentFee
-                            println(
-                                    "There " +
-                                            when (currentBoardSpace.numberOfRestaurants) {
-                                                0 -> "are no restaurants"
-                                                1 -> "is a restaurant"
-                                                in 2..5 -> "are ${currentBoardSpace.numberOfRestaurants} restaurants"
-                                                else -> throw IllegalArgumentException(
-                                                        "Invalid number of restaurants: ${currentBoardSpace.numberOfRestaurants}"
-                                                )
-                                            }
-                                            + " on this street and the fee is $$fee."
-                            )
-                        }
-
-                        is Board.GolfCourse -> {
-                            val feeData = currentBoardSpace.feeData
-                            val numberOfGolfCoursesOwned = feeData.getValue("number of golf courses owned")
-                            fee = feeData.getValue("fee")
-                            println(
-                                    "${owner.name} owns $numberOfGolfCoursesOwned " +
-                                            (if (numberOfGolfCoursesOwned == 1) "golf course" else "golf courses") +
-                                            " and the fee is $$fee"
-                            )
-                        }
-
-                        is Board.SuperStore -> {
-                            val diceRoll1 = getDiceRoll()
-                            val diceRoll2 = getDiceRoll()
-                            val feeData = currentBoardSpace.getFeeData(totalDiceRoll = diceRoll1 + diceRoll2)
-                            val bothSuperStoresOwnedBySamePerson =
-                                    feeData.getValue("both super stores owned by same person") as Boolean
-                            val multiplier = feeData.getValue("multiplier")
-                            fee = feeData.getValue("fee") as Int
-
-                            println(
-                                    //TODO
-                                    if (bothSuperStoresOwnedBySamePerson) {
-                                        "${owner.name} owns both super stores so you have to roll the dice " +
-                                                "and pay $multiplier times that amount."
-                                    } else {
-                                        "This is the only super store that ${owner.name} owns so you have " +
-                                                "to roll the dice and pay $multiplier times that amount"
-                                    }
-                                            + "\nYou rolled a $diceRoll1 and a $diceRoll2 for a total of " +
-                                            "${diceRoll1 + diceRoll2} so you have to pay $$fee"
-                            )
-                        }
-
-                        else -> throw IllegalArgumentException(
-                                "Board space is not a street, golf course, nor super store."
-                        )
-                    }
-
-                    if (currentPlayer.money < fee) {
-                        askAboutGettingMoney(
-                                player = currentPlayer,
-                                moneyNeeded = fee,
-                                playerHasChoice = false
-                        )
-                        // Following condition is true if the current player decided to drop out in the
-                        // askAboutGettingMoney function.
-                        if (!currentPlayer.isInGame) {
-                            // Following condition is true if there are at least 2 players remaining after the current
-                            // player decided to drop out.
-                            if (!gameOver) {
-                                // Give all money and properties to the owner of the property.
-                                println(
-                                        "${currentPlayer.name} has dropped out of the game so their money and " +
-                                                "properties will go to ${owner.name}"
-                                )
-                                owner.money += currentPlayer.money
-                                printMoneyGainUpdate(player = owner, moneyGain = currentPlayer.money)
-                                board.transferOwnership(
-                                        currentOwner = currentPlayer,
-                                        newOwner = owner
-                                )
-                            }
-                            return
-                        }
-                        println(
-                                "${currentPlayer.name} has gathered the $$fee that they need to pay the " +
-                                        "fee to ${owner.name}"
-                        )
-                    }
-                    currentPlayer.money -= fee
-                    printMoneyLossUpdate(currentPlayer, fee)
-                    owner.money += fee
-                    printMoneyGainUpdate(owner, fee)
-
-                } else {
-                    // This block of code is for when a player lands on an unowned property
-                    print(
-                            " that is unowned.\n${currentPlayer.name}, you have $${currentPlayer.money}. Would you " +
-                                    "like to buy it for $${currentBoardSpace.purchasePrice}? (y/n) "
-                    )
-                    while (true) {
-                        when (readLine()!!.toLowerCase()) {
-                            "y" -> {
-                                if (currentPlayer.money < currentBoardSpace.purchasePrice) {
-                                    askAboutGettingMoney(
-                                            player = currentPlayer,
-                                            moneyNeeded = currentBoardSpace.purchasePrice,
-                                            playerHasChoice = true
-                                    )
-
-                                    // The following condition will be true if the player originally decided
-                                    // that they would buy the property but either couldn't gather the money
-                                    // for it or changed their mind.
-                                    if (currentPlayer.money < currentBoardSpace.purchasePrice) {
-                                        println("${currentPlayer.name} is not buying this property")
-                                        return
-                                    }
-
-                                    println(
-                                            "${currentPlayer.name} has gathered the $${currentBoardSpace.purchasePrice} " +
-                                                    "that they need to buy ${currentBoardSpace.name}"
-                                    )
-                                }
-
-                                currentBoardSpace.owner = currentPlayer
-                                currentPlayer.money -= currentBoardSpace.purchasePrice
-                                printMoneyLossUpdate(currentPlayer, currentBoardSpace.purchasePrice)
-                                return
-                            }
-
-                            "n" -> return
-
-                            else -> print("\nInvalid input, must enter \"y\" or \"n\": ")
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Asks the player that was passed in as an argument about which properties they would like to pawn.
-     */
-    // TODO displayMoneyGain and displayMoneyLoss
-    fun askAboutPawningProperty(player: PlayerManager.Player) {
-        val validPropertiesMap = board.getPawnablePropertyMap(player)
-        for (property in validPropertiesMap.values) {
-            println(property.pawnInfo)
-        }
-        while (true) {
-            println("Enter the position of the property you would like to pawn or enter \"b\" to go back")
-            val input = readLine()!!.toLowerCase()
-            if (input == "b") {
-                return
-            }
-            val property = validPropertiesMap[input]
-            if (property == null) {
-                println("Invalid input")
-            } else {
-                player.money += property.pawnPrice
-                printMoneyGainUpdate(player = player, moneyGain = property.pawnPrice)
-                property.pawn()
-                return
-            }
-        }
-    }
-
-    /**
-     * Only the current player is able to choose to unpawn their property so this function asks the current player
-     * about which properties they would like to unpawn.
-     */
-    fun askAboutUnpawningProperty() {
-        val validPropertiesMap = board.getUnpawnablePropertyMap(currentPlayer)
-        for (property in validPropertiesMap.values) {
-            println(property.unpawnInfo)
-        }
-        while (true) {
-            println(
-                    """
-                ${currentPlayer.name}, you have $${currentPlayer.money}.
-                Enter the position of the property you would like to unpawn or enter "b" to go back.
-            """.trimIndent()
-            )
-            val input = readLine()!!.toLowerCase()
-            if (input == "b") {
-                return
-            }
-            val property = validPropertiesMap[input]
-            if (property == null) {
-                println("Invalid input")
-            } else {
-                if (currentPlayer.money < property.unpawnPrice) {
-                    askAboutGettingMoney(
-                            player = currentPlayer,
-                            moneyNeeded = property.unpawnPrice,
-                            playerHasChoice = true
-                    )
-                    // Following condition will be true if the player couldn't get enough money or changed their mind.
-                    if (currentPlayer.money < property.unpawnPrice) {
-                        return
-                    }
-                }
-                currentPlayer.money -= property.unpawnPrice
-                printMoneyLossUpdate(player = currentPlayer, moneyLoss = property.unpawnPrice)
-                property.unpawn()
-                return
-            }
-        }
-    }
-
-    /**
-     * Only the current player is able to choose to add a restaurant to a street they own so this function asks the
-     * current player about which street they would like to add a restaurant to.
-     */
-    fun askAboutAddingRestaurant() {
-        val validStreetsMap = board.getStreetsWhereRestaurantCanBeAdded(currentPlayer)
-        for (street in validStreetsMap.values) {
-            println(street.restaurantAddInfo)
-        }
-        while (true) {
-            println(
-                    """
-                ${currentPlayer.name}, you have $${currentPlayer.money}.
-                Enter the position of the street you would like to add a restaurant to or enter "b" go back.
-            """.trimIndent()
-            )
-            val input = readLine()!!.toLowerCase()
-            if (input == "b") {
-                return
-            }
-            val street = validStreetsMap[input]
-            if (street == null) {
-                println("Invalid input")
-            } else {
-                val restaurantAddingFee = street.restaurantAddPrice
-                if (currentPlayer.money < restaurantAddingFee) {
-                    askAboutGettingMoney(
-                            player = currentPlayer,
-                            moneyNeeded = restaurantAddingFee,
-                            playerHasChoice = true
-                    )
-
-                    // Following condition will be true if the player couldn't get enough money or changed their mind.
-                    if (currentPlayer.money < restaurantAddingFee) {
-                        return
-                    }
-                    println(
-                            "${currentPlayer.name} has gathered the $$restaurantAddingFee that they need to add a " +
-                                    "restaurant to ${street.name}"
-                    )
-                }
-                currentPlayer.money -= restaurantAddingFee
-                printMoneyLossUpdate(player = currentPlayer, moneyLoss = restaurantAddingFee)
-                street.addRestaurant()
-                return
-            }
-        }
-    }
-
-    /**
-     * Asks the player that was passed in as an argument about which streets they would like to remove a
-     * restaurant from.
-     */
-    fun askAboutRemovingRestaurant(player: PlayerManager.Player) {
-        val validStreetsMap = board.getStreetsWhereRestaurantCanBeRemoved(player)
-        for (street in validStreetsMap.values) {
-            println(street.restaurantRemoveInfo)
-        }
-        while (true) {
-            println(
-                    "Enter the position of the street you would like to remove a restaurant from or enter " +
-                            "\"b\" to go back"
-            )
-            val input = readLine()!!.toLowerCase()
-            if (input == "b") {
-                return
-            }
-            val street = validStreetsMap[input]
-            if (street == null) {
-                println("Invalid input")
-            } else {
-                player.money += street.restaurantRemoveGain
-                printMoneyGainUpdate(player = player, moneyGain = street.restaurantRemoveGain)
-                street.removeRestaurant()
-                return
-            }
-        }
-    }
-
-    /**
-     * Asks a player what they want to do if they need money for the situation they're in and don't have it.
-     *
-     * @param player The player that needs money.
-     * @param moneyNeeded The total amount of money that the player needs.
-     * @param playerHasChoice Should be true if a player chooses to do something and they don't have enough money to
-     * do that thing. For example, adding a restaurant to one of their streets. For this situation, this function can
-     * be exited either by having the player either choosing to exit or by gathering all the money that is needed.
-     * Should be false if the player is in a situation where they need money and they didn't choose to be in that
-     * situation. For example, if the player lands on an owned property and doesn't currently have all the money they
-     * need to pay the fee. For this situation, this function can be exited by having the player either gather the
-     * money needed or drop out of the game.
-     */
-    fun askAboutGettingMoney(player: PlayerManager.Player, moneyNeeded: Int, playerHasChoice: Boolean) {
-        var moneyGainOptions = board.getMoneyGainOptions(player)
-        moneyGettingLoop@ while (true) {
-            val playerCanPawn = moneyGainOptions.getValue("pawn")
-            val playerCanRemoveRestaurant = moneyGainOptions.getValue("remove restaurant")
-            println(
-                    "${player.name}, you need $$moneyNeeded and you currently have $${player.money}. " +
-                            "Select one of the following options to get more money."
-            )
-            if (playerHasChoice) {
-                println("You don't need this money so you have the option of going back.")
-            }
-            println(
-                    if (playerHasChoice) {
-                        "1: Go back"
-                    } else {
-                        "1: Drop out of the game"
-                    }
-                            + "\n2: Make a trade with a player"
-            )
-            if (playerCanPawn) {
-                println("3: Pawn one of your properties")
-            }
-            if (playerCanRemoveRestaurant) {
-                println("4: Remove a restaurant from one of your properties")
-            }
-            when (readLine()) {
-                "1" -> {
-                    if (!playerHasChoice) {
-                        player.removeFromGame()
-                        if (playerManager.onePlayerIsInGame) {
-                            gameOver = true
-                        }
-                    }
-                    return
-                }
-
-                "2" -> askAboutTrading(
-                        initiatingPlayer = player,
-                        initiatingPlayerNeedsMoney = true
-                )
-
-                "3" -> {
-                    if (playerCanPawn) {
-                        askAboutPawningProperty(player)
-                    } else {
-                        println("Invalid input")
-                        continue@moneyGettingLoop
-                    }
-                }
-
-                "4" -> {
-                    if (playerCanRemoveRestaurant) {
-                        askAboutRemovingRestaurant(player)
-                    } else {
-                        println("Invalid input")
-                        continue@moneyGettingLoop
-                    }
-                }
-
-                else -> {
-                    println("Invalid input")
-                    continue@moneyGettingLoop
-                }
-            }
-
-            // If this part is reached, then the player must have done something to get more money. Check if they
-            // have enough.
-            if (player.money >= moneyNeeded) {
-                return
-            }
-
-            // Before another iteration, refresh the money gain options since they could've changed in
-            // one of the functions.
-            moneyGainOptions = board.getMoneyGainOptions(player)
         }
     }
 
@@ -1158,13 +405,13 @@ class CommandLineGame {
                 }
                 when (val input = readLine()!!.toLowerCase()) {
                     "pr" -> askAboutDisplayingPropertyInfo(playerWhoWantsToKnow = initiatingPlayer)
-                    "pl" -> println(playerManager)
+                    "pl" -> println(playerManager.playerInfo)
                     "c" -> return
                     else -> {
                         // Check if a valid number was entered. If so, set otherPlayer to the correct player.
                         val inputNumber = input.toIntOrNull()
                         if (inputNumber == null || inputNumber !in 1..otherPlayersList.size) {
-                            println("Invalid input")
+                            printInvalidInput()
                         } else {
                             otherPlayer = otherPlayersList[inputNumber - 1]
                             break@tradeBeginningLoop
@@ -1198,18 +445,20 @@ class CommandLineGame {
                         if (input == "n") {
                             break@moneyAskLoop1
                         } else if (input != "y") {
-                            println("Invalid input")
+                            printInvalidInput()
                             continue@moneyAskLoop1
                         }
                     }
 
                     moneyAskLoop2@ while (true) {
                         print("This person has $${otherPlayer.money}. Enter an amount")
-                        if (initiatingPlayerNeedsMoney) {
-                            println(". You need money so entering an amount is mandatory")
-                        } else {
-                            println(" or enter \"b\" to go back")
-                        }
+                        println(
+                                if (initiatingPlayerNeedsMoney) {
+                                    ". You need money so entering an amount is mandatory"
+                                } else {
+                                    " or enter \"b\" to go back"
+                                }
+                        )
                         val input = readLine()!!.toLowerCase()
                         if (input == "b" && !initiatingPlayerNeedsMoney) {
                             continue@moneyAskLoop1
@@ -1218,7 +467,7 @@ class CommandLineGame {
                         if (moneyAmount == null || moneyAmount !in 0..otherPlayer.money ||
                                 (initiatingPlayerNeedsMoney && moneyAmount == 0)
                         ) {
-                            println("Invalid input")
+                            printInvalidInput()
                         } else {
                             whatPlayerWants.money = moneyAmount
                             break@moneyAskLoop1
@@ -1250,8 +499,7 @@ class CommandLineGame {
                                     for (position in positionsEntered) {
                                         val property = otherPlayerPropertyMap[position]
                                         if (property == null) {
-                                            // This will be true if there was no such key in otherPlayerPropertyMap
-                                            println("Invalid input")
+                                            printInvalidInput()
                                             // Clear the properties list since properties may have been added to it
                                             // from previous iterations of this for loop.
                                             whatPlayerWants.properties.clear()
@@ -1265,7 +513,7 @@ class CommandLineGame {
 
                             "n" -> break@propertyAskLoop1
 
-                            else -> println("Invalid input")
+                            else -> printInvalidInput()
                         }
                     }
                 }
@@ -1291,7 +539,7 @@ class CommandLineGame {
                                     }
                                     val amount = input.toIntOrNull()
                                     if (amount == null || amount !in 0..otherPlayer.numberOfGetOffVacationCardsOwned) {
-                                        println("Invalid input")
+                                        printInvalidInput()
                                     } else {
                                         whatPlayerWants.getOffVacationFreeCards = amount
                                         break@getOffVacationFreeCardsAskLoop1
@@ -1301,7 +549,7 @@ class CommandLineGame {
 
                             "n" -> break@getOffVacationFreeCardsAskLoop1
 
-                            else -> println("Invalid input")
+                            else -> printInvalidInput()
                         }
                     }
                 }
@@ -1321,7 +569,7 @@ class CommandLineGame {
                         when (readLine()!!.toLowerCase()) {
                             "ta" -> continue@selectWhatIsWanted
                             "c" -> return
-                            else -> println("Invalid input")
+                            else -> printInvalidInput()
                         }
                     }
                 } else {
@@ -1352,7 +600,7 @@ class CommandLineGame {
                                     }
                                     val moneyAmount = input.toIntOrNull()
                                     if (moneyAmount == null || moneyAmount !in 0..initiatingPlayer.money) {
-                                        println("Invalid input")
+                                        printInvalidInput()
                                     } else {
                                         whatPlayerOffers.money = moneyAmount
                                         break@moneyAskLoop1
@@ -1362,7 +610,7 @@ class CommandLineGame {
 
                             "n" -> break@moneyAskLoop1
 
-                            else -> println("Invalid input")
+                            else -> printInvalidInput()
                         }
                     }
                 }
@@ -1384,7 +632,7 @@ class CommandLineGame {
                                 propertyAskLoop2@ while (true) {
                                     println(
                                             "Enter the positions of the properties you would like to offer with each " +
-                                                    "position separated by a single space or enter \"b\" to go back: "
+                                                    "position separated by a single space or enter \"b\" to go back"
                                     )
                                     input = readLine()!!.toLowerCase().trim()
                                     if (input == "b") {
@@ -1394,8 +642,7 @@ class CommandLineGame {
                                     for (position in positionsEntered) {
                                         val property = initiatingPlayerPropertyMap[position]
                                         if (property == null) {
-                                            // This will be true if there was no such key in initiatingPlayerPropertyMap
-                                            println("Invalid input")
+                                            printInvalidInput()
                                             // Clear the properties list since properties could have been added to it
                                             // from previous iterations of this for loop.
                                             whatPlayerOffers.properties.clear()
@@ -1409,7 +656,7 @@ class CommandLineGame {
 
                             "n" -> break@propertyAskLoop1
 
-                            else -> println("Invalid input")
+                            else -> printInvalidInput()
                         }
                     }
                 }
@@ -1440,7 +687,7 @@ class CommandLineGame {
                                     if (amount == null || amount !in
                                             0..initiatingPlayer.numberOfGetOffVacationCardsOwned
                                     ) {
-                                        println("Invalid input")
+                                        printInvalidInput()
                                     } else {
                                         whatPlayerOffers.getOffVacationFreeCards = amount
                                         break@getOffVacationFreeCardsAskLoop1
@@ -1450,7 +697,7 @@ class CommandLineGame {
 
                             "n" -> break@getOffVacationFreeCardsAskLoop1
 
-                            else -> println("Invalid input")
+                            else -> printInvalidInput()
                         }
                     }
                 }
@@ -1470,7 +717,7 @@ class CommandLineGame {
                         when (readLine()!!.toLowerCase()) {
                             "ta" -> continue@selectWhatToOffer
                             "c" -> return
-                            else -> println("Invalid input")
+                            else -> printInvalidInput()
                         }
                     }
                 } else {
@@ -1562,13 +809,13 @@ class CommandLineGame {
                             when (readLine()) {
                                 "1" -> continue@mainTradingLoop
                                 "2" -> return
-                                else -> println("Invalid input")
+                                else -> printInvalidInput()
                             }
                         }
                     }
                     "pr" -> askAboutDisplayingPropertyInfo(playerWhoWantsToKnow = initiatingPlayer)
-                    "pl" -> println(playerManager)
-                    else -> println("Invalid input")
+                    "pl" -> println(playerManager.playerInfo)
+                    else -> printInvalidInput()
                 }
             }
 
@@ -1589,7 +836,7 @@ class CommandLineGame {
 
                     "pr" -> askAboutDisplayingPropertyInfo(playerWhoWantsToKnow = otherPlayer)
 
-                    "pl" -> println(playerManager)
+                    "pl" -> println(playerManager.playerInfo)
 
                     "y" -> {
                         // Give the other player what was agreed upon
@@ -1613,6 +860,7 @@ class CommandLineGame {
                                     val moneyEarned =
                                             numberOfNeighborhoodRestaurants * property.restaurantRemoveGain
                                     initiatingPlayer.money += moneyEarned
+                                    printMoneyGainUpdate(player = initiatingPlayer, moneyGain = moneyEarned)
                                 }
                             }
                             property.owner = otherPlayer
@@ -1641,6 +889,7 @@ class CommandLineGame {
                                     property.removeRestaurantsFromNeighborhood()
                                     val moneyEarned = numberOfNeighborhoodRestaurants * property.restaurantRemoveGain
                                     otherPlayer.money += moneyEarned
+                                    printMoneyGainUpdate(player = otherPlayer, moneyGain = moneyEarned)
                                 }
                             }
                             property.owner = initiatingPlayer
@@ -1651,9 +900,771 @@ class CommandLineGame {
                         return
                     }
 
-                    else -> println("Invalid input")
+                    else -> printInvalidInput()
                 }
             }
         }
+    }
+
+    /**
+     * Asks the player that was passed in as an argument about which properties they would like to pawn.
+     */
+    fun askAboutPawningProperty(player: PlayerManager.Player) {
+        val validPropertiesMap = board.getPawnablePropertyMap(player)
+        for (property in validPropertiesMap.values) {
+            println(property.pawnInfo)
+        }
+        while (true) {
+            println("Enter the position of the property you would like to pawn or enter \"b\" to go back")
+            val input = readLine()!!.toLowerCase()
+            if (input == "b") {
+                return
+            }
+            val property = validPropertiesMap[input]
+            if (property == null) {
+                printInvalidInput()
+            } else {
+                player.money += property.pawnPrice
+                printMoneyGainUpdate(player = player, moneyGain = property.pawnPrice)
+                property.pawn()
+                return
+            }
+        }
+    }
+
+    /**
+     * Only the current player is able to choose to unpawn their property so this function asks the current player
+     * about which properties they would like to unpawn.
+     */
+    fun askAboutUnpawningProperty() {
+        val validPropertiesMap = board.getUnpawnablePropertyMap(currentPlayer)
+        for (property in validPropertiesMap.values) {
+            println(property.unpawnInfo)
+        }
+        while (true) {
+            println(
+                    """
+                ${currentPlayer.name}, you have $${currentPlayer.money}.
+                Enter the position of the property you would like to unpawn or enter "b" to go back.
+            """.trimIndent()
+            )
+            val input = readLine()!!.toLowerCase()
+            if (input == "b") {
+                return
+            }
+            val property = validPropertiesMap[input]
+            if (property == null) {
+                printInvalidInput()
+            } else {
+                if (currentPlayer.money < property.unpawnPrice) {
+                    askAboutGettingMoney(
+                            player = currentPlayer,
+                            moneyNeeded = property.unpawnPrice,
+                            playerHasChoice = true
+                    )
+                    // Following condition will be true if the player couldn't get enough money or changed their mind.
+                    if (currentPlayer.money < property.unpawnPrice) {
+                        return
+                    }
+                }
+                currentPlayer.money -= property.unpawnPrice
+                printMoneyLossUpdate(player = currentPlayer, moneyLoss = property.unpawnPrice)
+                property.unpawn()
+                return
+            }
+        }
+    }
+
+    /**
+     * Only the current player is able to choose to add a restaurant to a street they own so this function asks the
+     * current player about which street they would like to add a restaurant to.
+     */
+    fun askAboutAddingRestaurant() {
+        val validStreetsMap = board.getStreetsWhereRestaurantCanBeAdded(currentPlayer)
+        for (street in validStreetsMap.values) {
+            println(street.restaurantAddInfo)
+        }
+        while (true) {
+            println(
+                    """
+                ${currentPlayer.name}, you have $${currentPlayer.money}.
+                Enter the position of the street you would like to add a restaurant to or enter "b" go back.
+            """.trimIndent()
+            )
+            val input = readLine()!!.toLowerCase()
+            if (input == "b") {
+                return
+            }
+            val street = validStreetsMap[input]
+            if (street == null) {
+                printInvalidInput()
+            } else {
+                val restaurantAddingFee = street.restaurantAddPrice
+                if (currentPlayer.money < restaurantAddingFee) {
+                    askAboutGettingMoney(
+                            player = currentPlayer,
+                            moneyNeeded = restaurantAddingFee,
+                            playerHasChoice = true
+                    )
+
+                    // Following condition will be true if the player couldn't get enough money or changed their mind.
+                    if (currentPlayer.money < restaurantAddingFee) {
+                        return
+                    }
+                    println(
+                            "${currentPlayer.name} has gathered the $$restaurantAddingFee that they need to add a " +
+                                    "restaurant to ${street.name}"
+                    )
+                }
+                currentPlayer.money -= restaurantAddingFee
+                printMoneyLossUpdate(player = currentPlayer, moneyLoss = restaurantAddingFee)
+                street.addRestaurant()
+                return
+            }
+        }
+    }
+
+    /**
+     * Asks the player that was passed in as an argument about which streets they would like to remove a
+     * restaurant from.
+     */
+    fun askAboutRemovingRestaurant(player: PlayerManager.Player) {
+        val validStreetsMap = board.getStreetsWhereRestaurantCanBeRemoved(player)
+        for (street in validStreetsMap.values) {
+            println(street.restaurantRemoveInfo)
+        }
+        while (true) {
+            println(
+                    "Enter the position of the street you would like to remove a restaurant from or enter " +
+                            "\"b\" to go back"
+            )
+            val input = readLine()!!.toLowerCase()
+            if (input == "b") {
+                return
+            }
+            val street = validStreetsMap[input]
+            if (street == null) {
+                printInvalidInput()
+            } else {
+                player.money += street.restaurantRemoveGain
+                printMoneyGainUpdate(player = player, moneyGain = street.restaurantRemoveGain)
+                street.removeRestaurant()
+                return
+            }
+        }
+    }
+
+    /**
+     * Asks a player what they want to do if they need money for the situation they're in and don't have it.
+     *
+     * @param player The player that needs money.
+     * @param moneyNeeded The total amount of money that the player needs.
+     * @param playerHasChoice Should be true if a player chooses to do something and they don't have enough money to
+     * do that thing. For example, adding a restaurant to one of their streets. For this situation, this function can
+     * be exited either by having the player either choosing to exit or by gathering all the money that is needed.
+     * Should be false if the player is in a situation where they need money and they didn't choose to be in that
+     * situation. For example, if the player lands on an owned property and doesn't currently have all the money they
+     * need to pay the fee. For this situation, this function can be exited by having the player either gather the
+     * money needed or drop out of the game.
+     */
+    fun askAboutGettingMoney(player: PlayerManager.Player, moneyNeeded: Int, playerHasChoice: Boolean) {
+        var moneyGainActions = board.getMoneyGainActions(player)
+        moneyGettingLoop@ while (true) {
+            val playerCanPawn = Board.PropertyAction.PAWN in moneyGainActions
+            val playerCanRemoveRestaurant = Board.PropertyAction.REMOVE_RESTAURANT in moneyGainActions
+            println(
+                    "${player.name}, you need $$moneyNeeded and you currently have $${player.money}. " +
+                            "Select one of the following options to get more money."
+            )
+            if (playerHasChoice) {
+                println("You don't need this money so you have the option of going back.")
+            }
+            println(
+                    if (playerHasChoice) {
+                        "1: Go back"
+                    } else {
+                        "1: Drop out of the game"
+                    }
+                            + "\n2: Make a trade with a player"
+            )
+            if (playerCanPawn) {
+                println("3: Pawn one of your properties")
+            }
+            if (playerCanRemoveRestaurant) {
+                println("4: Remove a restaurant from one of your properties")
+            }
+            when (readLine()) {
+                "1" -> {
+                    if (!playerHasChoice) {
+                        player.removeFromGame()
+                        if (playerManager.onePlayerIsInGame) {
+                            gameOver = true
+                        }
+                    }
+                    return
+                }
+
+                "2" -> askAboutTrading(
+                        initiatingPlayer = player,
+                        initiatingPlayerNeedsMoney = true
+                )
+
+                "3" -> {
+                    if (playerCanPawn) {
+                        askAboutPawningProperty(player)
+                    } else {
+                        printInvalidInput()
+                        continue@moneyGettingLoop
+                    }
+                }
+
+                "4" -> {
+                    if (playerCanRemoveRestaurant) {
+                        askAboutRemovingRestaurant(player)
+                    } else {
+                        printInvalidInput()
+                        continue@moneyGettingLoop
+                    }
+                }
+
+                else -> {
+                    printInvalidInput()
+                    continue@moneyGettingLoop
+                }
+            }
+
+            // If this part is reached, then the player may have done something to get more money. Check if they
+            // have enough.
+            if (player.money >= moneyNeeded) {
+                return
+            }
+
+            // Before another iteration, refresh the money gain options since they could've changed in
+            // one of the functions.
+            moneyGainActions = board.getMoneyGainActions(player)
+        }
+    }
+
+    /**
+     * Asks the current player what they would like to do for their turn when they are on vacation.
+     * @throws IllegalStateException if the current player is not on vacation.
+     */
+    fun doVacationAction() {
+        if (!currentPlayer.isOnVacation) {
+            throw IllegalStateException("Current player is not on vacation")
+        }
+        println(
+                "${currentPlayer.name}, you're on vacation and this is your " +
+                        when (currentPlayer.numberOfTurnsOnVacation) {
+                            0 -> "first"
+                            1 -> "second"
+                            2 -> "third (last)"
+                            else -> throw IllegalStateException(
+                                    "Shouldn't be on vacation at this point. " +
+                                            "Number of turns on vacation: ${currentPlayer.numberOfTurnsOnVacation}"
+                            )
+                        }
+                        + " turn on vacation"
+        )
+
+        val feeToGetOffVacation = 128
+        vacationActionAskLoop@ while (true) {
+            println(
+                    """
+                Would you like to:
+                1: Pay $$feeToGetOffVacation to get off vacation
+                2: Try to roll doubles
+            """.trimIndent()
+            )
+            if (currentPlayer.hasAGetOffVacationCard) {
+                println("3: Use a get off vacation card")
+            }
+
+            when (readLine()) {
+                "1" -> {
+                    if (currentPlayer.money < feeToGetOffVacation) {
+                        askAboutGettingMoney(
+                                player = currentPlayer,
+                                moneyNeeded = feeToGetOffVacation,
+                                playerHasChoice = true
+                        )
+
+                        // The following condition will be true if the player couldn't gather the money or
+                        // changed their mind.
+                        if (currentPlayer.money < feeToGetOffVacation) {
+                            continue@vacationActionAskLoop
+                        }
+                    }
+                    println("${currentPlayer.name} has chosen to pay so they will get to take their turn")
+                    currentPlayer.money -= feeToGetOffVacation
+                    printMoneyLossUpdate(player = currentPlayer, moneyLoss = feeToGetOffVacation)
+                    currentPlayer.removeFromVacation()
+                    return
+                }
+
+                "2" -> {
+                    val diceRoll1 = getDiceRoll()
+                    val diceRoll2 = getDiceRoll()
+                    println("${currentPlayer.name} rolled a $diceRoll1 and a $diceRoll2")
+                    if (diceRoll1 == diceRoll2) {
+                        println("These are doubles so they are off vacation")
+                        currentPlayer.removeFromVacation()
+                        currentPlayer.position += (diceRoll1 + diceRoll2)
+                        evaluatePosition()
+                    } else {
+                        currentPlayer.numberOfTurnsOnVacation++
+                        if (currentPlayer.numberOfTurnsOnVacation == 3) {
+                            println("${currentPlayer.name} has spent 3 turns on vacation so it is now over")
+                            currentPlayer.removeFromVacation()
+                        }
+                    }
+                    turnOver = true
+                    return
+                }
+
+                "3" -> {
+                    if (currentPlayer.hasAGetOffVacationCard) {
+                        println(
+                                "${currentPlayer.name} has chosen to use a get off vacation card so they " +
+                                        "get to take their turn"
+                        )
+                        currentPlayer.removeFromVacation()
+                        currentPlayer.removeGetOffVacationCard()
+                        actionDeck.insertGetOffVacationCardAtBottom()
+                        return
+                    } else {
+                        printInvalidInput()
+                    }
+                }
+
+                else -> printInvalidInput()
+            }
+        }
+    }
+
+    fun rollDiceAndMove() {
+        val diceRoll1 = getDiceRoll()
+        val diceRoll2 = getDiceRoll()
+        val totalDiceRoll = diceRoll1 + diceRoll2
+        println("${currentPlayer.name} rolled a $diceRoll1 and a $diceRoll2, for a total of $totalDiceRoll")
+        if (diceRoll1 == diceRoll2) {
+            numberOfDoubleRolls++
+            if (numberOfDoubleRolls == 3) {
+                println("${currentPlayer.name} rolled doubles 3 times in a row so they go to vacation")
+                numberOfDoubleRolls = 0
+                currentPlayer.sendToVacation()
+                turnOver = true
+                return
+            }
+            println("${currentPlayer.name} rolled doubles so they get to go again")
+            goAgain = true
+        } else if (numberOfDoubleRolls > 0) {
+            numberOfDoubleRolls = 0
+        }
+
+        if (currentPlayer.position + totalDiceRoll > board.numberOfSpaces) {
+            currentPlayer.position = (currentPlayer.position + totalDiceRoll) % board.numberOfSpaces
+            currentPlayerMadeRevolution()
+        } else {
+            currentPlayer.position += totalDiceRoll
+        }
+    }
+
+    /**
+     * Evaluates the position that the current player has landed on and takes appropriate action.
+     */
+    fun evaluatePosition() {
+        print("${currentPlayer.name} has landed on position ${currentPlayer.position} which is ")
+        when (val currentBoardSpace = board.getBoardSpace(currentPlayer.position)) {
+            is Board.NonPropertySpace -> {
+                println("\"$currentBoardSpace\".")
+                when (currentBoardSpace) {
+                    Board.NonPropertySpace.START,
+                    Board.NonPropertySpace.VACATION,
+                    Board.NonPropertySpace.BREAK_TIME -> println("This space has no effect")
+
+                    Board.NonPropertySpace.GO_ON_VACATION -> {
+                        currentPlayer.sendToVacation()
+                        // Following condition will be true if the player rolled doubles. The player will not get to
+                        // go again for this case.
+                        if (goAgain) {
+                            goAgain = false
+                        }
+                    }
+
+                    Board.NonPropertySpace.DRAW_ACTION_CARD -> {
+                        println(
+                                "${currentPlayer.name} draws a card from the action deck and it says " +
+                                        "\"${actionDeck.topCard.message}\""
+                        )
+
+                        when (actionDeck.topCard.effect) {
+                            ActionDeck.ActionCard.Effect.MONEY_GAIN -> {
+                                val moneyGain = actionDeck.topCard.value
+                                actionDeck.moveTopCardToBottom()
+                                currentPlayer.money += moneyGain
+                                printMoneyGainUpdate(player = currentPlayer, moneyGain = moneyGain)
+                            }
+
+                            ActionDeck.ActionCard.Effect.MONEY_LOSS -> {
+                                val moneyLoss = actionDeck.topCard.value
+                                actionDeck.moveTopCardToBottom()
+                                if (currentPlayer.money < moneyLoss) {
+                                    askAboutGettingMoney(
+                                            player = currentPlayer,
+                                            moneyNeeded = moneyLoss,
+                                            playerHasChoice = false
+                                    )
+
+                                    // Following condition is true if the player decided to drop out of the game
+                                    // in the askAboutGettingMoney function.
+                                    if (!currentPlayer.isInGame) {
+                                        if (!gameOver) {
+                                            println(
+                                                    "${currentPlayer.name} has dropped out so their properties are " +
+                                                            "now unowned"
+                                            )
+                                            board.makePropertiesUnowned(currentPlayer)
+                                        }
+                                        return
+                                    }
+                                }
+                                currentPlayer.money -= moneyLoss
+                                printMoneyLossUpdate(player = currentPlayer, moneyLoss = moneyLoss)
+                            }
+
+                            ActionDeck.ActionCard.Effect.RECEIVE_MONEY_FROM_OTHER_PLAYERS -> {
+                                val moneyReceivedFromEachPlayer = actionDeck.topCard.value
+                                actionDeck.moveTopCardToBottom()
+                                for (otherPlayer in playerManager.getListOfOtherPlayersInGame(
+                                        excludingPlayer = currentPlayer
+                                )) {
+                                    if (otherPlayer.money < moneyReceivedFromEachPlayer) {
+                                        askAboutGettingMoney(
+                                                player = otherPlayer,
+                                                moneyNeeded = moneyReceivedFromEachPlayer,
+                                                playerHasChoice = false
+                                        )
+                                        // Following condition is true if the other player decided to drop out in the
+                                        // askAboutGettingMoney function
+                                        if (!otherPlayer.isInGame) {
+                                            if (gameOver) {
+                                                return
+                                            }
+                                            println(
+                                                    "${otherPlayer.name} has dropped out so their money and properties " +
+                                                            "will go to ${currentPlayer.name}"
+                                            )
+                                            currentPlayer.money += otherPlayer.money
+                                            printMoneyGainUpdate(player = currentPlayer, moneyGain = otherPlayer.money)
+                                            board.transferOwnership(
+                                                    currentOwner = otherPlayer,
+                                                    newOwner = currentPlayer
+                                            )
+                                            continue
+                                        }
+                                    }
+                                    otherPlayer.money -= moneyReceivedFromEachPlayer
+                                    printMoneyLossUpdate(player = otherPlayer, moneyLoss = moneyReceivedFromEachPlayer)
+                                    currentPlayer.money += moneyReceivedFromEachPlayer
+                                    printMoneyGainUpdate(player = currentPlayer, moneyGain = moneyReceivedFromEachPlayer)
+                                }
+                            }
+
+                            ActionDeck.ActionCard.Effect.GIVE_MONEY_TO_OTHER_PLAYERS -> {
+                                val moneyOwedToEachPlayer = actionDeck.topCard.value
+                                actionDeck.moveTopCardToBottom()
+                                val totalMoneyOwed =
+                                        moneyOwedToEachPlayer * (playerManager.numberOfPlayersInGame - 1)
+                                if (currentPlayer.money < totalMoneyOwed) {
+                                    askAboutGettingMoney(
+                                            player = currentPlayer,
+                                            moneyNeeded = totalMoneyOwed,
+                                            playerHasChoice = false
+                                    )
+                                    // Following condition is true if the current player decided to drop out in the
+                                    // askAboutGettingMoney function
+                                    if (!currentPlayer.isInGame) {
+                                        if (!gameOver) {
+                                            println(
+                                                    "${currentPlayer.name} has dropped out so their properties are " +
+                                                            "now unowned"
+                                            )
+                                            board.makePropertiesUnowned(currentPlayer)
+                                        }
+                                        return
+                                    }
+                                }
+
+                                for (otherPlayer in playerManager.getListOfOtherPlayersInGame(
+                                        excludingPlayer = currentPlayer
+                                )) {
+                                    currentPlayer.money -= moneyOwedToEachPlayer
+                                    printMoneyLossUpdate(player = currentPlayer, moneyLoss = moneyOwedToEachPlayer)
+                                    otherPlayer.money += moneyOwedToEachPlayer
+                                    printMoneyGainUpdate(player = otherPlayer, moneyGain = moneyOwedToEachPlayer)
+                                }
+                            }
+
+                            ActionDeck.ActionCard.Effect.ABSOLUTE_POSITION_CHANGE -> {
+                                val newPosition = actionDeck.topCard.value
+                                actionDeck.moveTopCardToBottom()
+                                if (newPosition < currentPlayer.position) {
+                                    currentPlayerMadeRevolution()
+                                }
+                                currentPlayer.position = newPosition
+                                evaluatePosition()
+                            }
+
+                            ActionDeck.ActionCard.Effect.RELATIVE_POSITION_CHANGE -> {
+                                val positionChange = actionDeck.topCard.value
+                                actionDeck.moveTopCardToBottom()
+                                if (positionChange > 0) {
+                                    if (currentPlayer.position + positionChange > board.numberOfSpaces) {
+                                        currentPlayer.position =
+                                                (currentPlayer.position + positionChange) % board.numberOfSpaces
+                                        currentPlayerMadeRevolution()
+                                    } else {
+                                        currentPlayer.position += positionChange
+                                    }
+                                } else {
+                                    if (currentPlayer.position + positionChange < 1) {
+                                        currentPlayer.position =
+                                                board.numberOfSpaces + (currentPlayer.position + positionChange)
+                                    } else {
+                                        // Move the player back since positionChange is negative.
+                                        currentPlayer.position += positionChange
+                                    }
+                                }
+                                evaluatePosition()
+                            }
+
+                            ActionDeck.ActionCard.Effect.GET_OFF_VACATION_FREE -> {
+                                actionDeck.removeGetOffVacationCardAtTop()
+                                currentPlayer.addGetOffVacationCard()
+                            }
+
+                            ActionDeck.ActionCard.Effect.GO_ON_VACATION -> {
+                                actionDeck.moveTopCardToBottom()
+                                currentPlayer.sendToVacation()
+                                // Following condition will be true if doubles were rolled. The player will not get
+                                // to go again for this case.
+                                if (goAgain) {
+                                    goAgain = false
+                                }
+                            }
+
+                            ActionDeck.ActionCard.Effect.PROPERTY_MAINTENANCE -> {
+                                val feePerRestaurant = actionDeck.topCard.value
+                                val restaurantCount = board.getRestaurantCount(currentPlayer)
+                                actionDeck.moveTopCardToBottom()
+                                if (restaurantCount == 0) {
+                                    println(
+                                            "${currentPlayer.name} doesn't have any restaurants so they don't have to " +
+                                                    "pay anything"
+                                    )
+                                } else {
+                                    val maintenanceFee = feePerRestaurant * restaurantCount
+                                    println(
+                                            "${currentPlayer.name} has $restaurantCount " +
+                                                    (if (restaurantCount == 1) "restaurant" else "restaurants") +
+                                                    "and must pay $$feePerRestaurant per restaurant so they owe $$maintenanceFee."
+                                    )
+                                    if (currentPlayer.money < maintenanceFee) {
+                                        askAboutGettingMoney(
+                                                player = currentPlayer,
+                                                moneyNeeded = maintenanceFee,
+                                                playerHasChoice = false
+                                        )
+                                        // The following condition is true if the player decided to drop out of
+                                        // the game in the askAboutGettingMoney function.
+                                        if (!currentPlayer.isInGame) {
+                                            // Following condition is true if there are at least 2 players remaining
+                                            if (!gameOver) {
+                                                println(
+                                                        "${currentPlayer.name} has dropped out so their properties are " +
+                                                                "now unowned"
+                                                )
+                                                board.makePropertiesUnowned(currentPlayer)
+                                            }
+                                            return
+                                        }
+                                    }
+                                    currentPlayer.money -= maintenanceFee
+                                    printMoneyLossUpdate(player = currentPlayer, moneyLoss = maintenanceFee)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            is Board.Property -> {
+                print("${currentBoardSpace.name}, which is a ${currentBoardSpace.type.toLowerCase()}")
+                if (currentBoardSpace is Board.Street) {
+                    print(" in the ${currentBoardSpace.neighborhoodName} neighborhood")
+                }
+                if (currentBoardSpace.isOwned) {
+                    val owner = currentBoardSpace.owner!!
+                    print(" that is owned ")
+                    if (owner == currentPlayer) {
+                        println("by themself.")
+                        return
+                    }
+                    println("by ${owner.name}.")
+                    if (currentBoardSpace.isPawned) {
+                        println("This property is pawned so ${currentPlayer.name} doesn't have to pay a fee.")
+                        return
+                    }
+                    val fee: Int
+                    when (currentBoardSpace) {
+                        is Board.Street -> {
+                            fee = currentBoardSpace.currentFee
+                            println(
+                                    "There " +
+                                            when (currentBoardSpace.numberOfRestaurants) {
+                                                0 -> "are no restaurants"
+                                                1 -> "is a restaurant"
+                                                in 2..5 -> "are ${currentBoardSpace.numberOfRestaurants} restaurants"
+                                                else -> throw IllegalArgumentException(
+                                                        "Invalid number of restaurants: ${currentBoardSpace.numberOfRestaurants}"
+                                                )
+                                            }
+                                            + " on this street and the fee is $$fee."
+                            )
+                        }
+
+                        is Board.GolfCourse -> {
+                            val feeData = currentBoardSpace.FeeData()
+                            fee = feeData.fee
+                            println(
+                                    "${owner.name} owns ${feeData.numberOfGolfCoursesOwnedByOwner} " +
+                                            (if (feeData.numberOfGolfCoursesOwnedByOwner == 1) "golf course" else "golf courses") +
+                                            " and the fee is $$fee"
+                            )
+                        }
+
+                        is Board.SuperStore -> {
+                            val diceRoll1 = getDiceRoll()
+                            val diceRoll2 = getDiceRoll()
+                            val totalDiceRoll = diceRoll1 + diceRoll2
+                            val feeData = currentBoardSpace.FeeData()
+                            fee = totalDiceRoll * feeData.multiplier
+
+                            println(
+                                    if (feeData.bothSuperStoresOwnedBySamePlayer) {
+                                        "${owner.name} owns both super stores so you have to roll the dice " +
+                                                "and pay ${feeData.multiplier} times that amount."
+                                    } else {
+                                        "This is the only super store that ${owner.name} owns so you have " +
+                                                "to roll the dice and pay ${feeData.multiplier} times that amount"
+                                    }
+                                            + "\nYou rolled a $diceRoll1 and a $diceRoll2 for a total of " +
+                                            "$totalDiceRoll so you have to pay $$fee"
+                            )
+                        }
+
+                        else -> throw IllegalArgumentException(
+                                "Board space is not a street, golf course, nor super store."
+                        )
+                    }
+
+                    if (currentPlayer.money < fee) {
+                        askAboutGettingMoney(
+                                player = currentPlayer,
+                                moneyNeeded = fee,
+                                playerHasChoice = false
+                        )
+                        // Following condition is true if the current player decided to drop out in the
+                        // askAboutGettingMoney function.
+                        if (!currentPlayer.isInGame) {
+                            // Following condition is true if there are at least 2 players remaining after the current
+                            // player decided to drop out.
+                            if (!gameOver) {
+                                // Give all money and properties to the owner of the property.
+                                println(
+                                        "${currentPlayer.name} has dropped out of the game so their money and " +
+                                                "properties will go to ${owner.name}"
+                                )
+                                owner.money += currentPlayer.money
+                                printMoneyGainUpdate(player = owner, moneyGain = currentPlayer.money)
+                                board.transferOwnership(
+                                        currentOwner = currentPlayer,
+                                        newOwner = owner
+                                )
+                            }
+                            return
+                        }
+                        println(
+                                "${currentPlayer.name} has gathered the $$fee that they need to pay the " +
+                                        "fee to ${owner.name}"
+                        )
+                    }
+                    currentPlayer.money -= fee
+                    printMoneyLossUpdate(player = currentPlayer, moneyLoss = fee)
+                    owner.money += fee
+                    printMoneyGainUpdate(player = owner, moneyGain = fee)
+
+                } else {
+                    // This block of code is for when a player lands on an unowned property
+                    println(
+                            " that is unowned.\n${currentPlayer.name}, you have $${currentPlayer.money}. Would you " +
+                                    "like to buy it for $${currentBoardSpace.purchasePrice}? (y/n)"
+                    )
+                    while (true) {
+                        when (readLine()!!.toLowerCase()) {
+                            "y" -> {
+                                if (currentPlayer.money < currentBoardSpace.purchasePrice) {
+                                    askAboutGettingMoney(
+                                            player = currentPlayer,
+                                            moneyNeeded = currentBoardSpace.purchasePrice,
+                                            playerHasChoice = true
+                                    )
+
+                                    // The following condition will be true if the player originally decided
+                                    // that they would buy the property but either couldn't gather the money
+                                    // for it or changed their mind.
+                                    if (currentPlayer.money < currentBoardSpace.purchasePrice) {
+                                        println("${currentPlayer.name} is not buying this property")
+                                        return
+                                    }
+
+                                    println(
+                                            "${currentPlayer.name} has gathered the $${currentBoardSpace.purchasePrice} " +
+                                                    "that they need to buy ${currentBoardSpace.name}"
+                                    )
+                                }
+
+                                currentBoardSpace.owner = currentPlayer
+                                currentPlayer.money -= currentBoardSpace.purchasePrice
+                                printMoneyLossUpdate(player = currentPlayer, moneyLoss = currentBoardSpace.purchasePrice)
+                                return
+                            }
+
+                            "n" -> return
+
+                            else -> printInvalidInput()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fun endTurn() {
+        if (turnOver) {
+            turnOver = false
+        }
+        if (goAgain) {
+            goAgain = false
+        } else {
+            playerManager.switchToNextPlayer()
+            currentPlayer = playerManager.currentPlayer
+        }
+        println("End of turn. Type \"c\" and press enter to continue.")
+        while (readLine()!!.toLowerCase() != "c") {
+            // Do nothing
+        }
+        println()
     }
 }
