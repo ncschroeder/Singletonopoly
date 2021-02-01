@@ -7,16 +7,6 @@ class PlayerManager {
      * Player class consists of data that is unique to each player and functions that can be performed on that data.
      */
     inner class Player(val name: String) {
-        val info
-            get() = "Name: $name, " +
-                    if (isInGame) {
-                        "Position: $position, Money: $$money, Are they on vacation?: " +
-                                "${if (isOnVacation) "Yes" else "No"}, Get Off Vacation Free cards: " +
-                                numberOfGetOffVacationCardsOwned
-                    } else {
-                        "Out of the game"
-                    }
-
         /**
          * @throws IllegalArgumentException if a player's money amount is attempted to be set to a value less
          * than 0.
@@ -29,16 +19,7 @@ class PlayerManager {
                 field = value
             }
 
-        /**
-         * @throws IllegalArgumentException if position is set to a value less than 1.
-         */
         var position = 1
-            set(value) {
-                if (value < 1) {
-                    throw IllegalArgumentException("invalid nonpositive position: $value")
-                }
-                field = value
-            }
 
         var isInGame = true
             private set
@@ -79,9 +60,9 @@ class PlayerManager {
         }
 
         /**
-         * @throws IllegalArgumentException if numberOfGetOffVacationCardsOwned is set to a negative value.
+         * @throws IllegalArgumentException if numberOfGetOffVacationFreeCardsOwned is set to a negative value.
          */
-        var numberOfGetOffVacationCardsOwned = 0
+        var numberOfGetOffVacationFreeCardsOwned = 0
             set(value) {
                 if (value < 0) {
                     throw IllegalArgumentException("Cannot have negative amount of get off vacation free cards")
@@ -89,21 +70,32 @@ class PlayerManager {
                 field = value
             }
 
-        fun addGetOffVacationCard() {
-            numberOfGetOffVacationCardsOwned++
+        fun addGetOffVacationFreeCard() {
+            numberOfGetOffVacationFreeCardsOwned++
         }
 
         /**
          * @throws IllegalArgumentException if numberOfGetOffVacation cards is 0.
          */
-        fun removeGetOffVacationCard() {
-            numberOfGetOffVacationCardsOwned--
+        fun removeGetOffVacationFreeCard() {
+            numberOfGetOffVacationFreeCardsOwned--
         }
 
         /**
          * Is true when the player has at least 1 Get Off Vacation Free card.
          */
-        val hasAGetOffVacationCard get() = numberOfGetOffVacationCardsOwned > 0
+        val hasAGetOffVacationCard get() = numberOfGetOffVacationFreeCardsOwned > 0
+
+        val info
+            get() = "Name: $name, ${
+                if (isInGame) {
+                    "Position: $position, Money: $$money, Are they on vacation?: " +
+                            "${if (isOnVacation) "Yes" else "No"}, Get Off Vacation Free cards: " +
+                            numberOfGetOffVacationFreeCardsOwned
+                } else {
+                    "Out of the game"
+                }
+            }"
     }
 
     private val players = mutableListOf<Player>()

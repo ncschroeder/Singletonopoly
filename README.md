@@ -1,6 +1,6 @@
 # Singletonopoly
-This was made using Kotlin and IntelliJ IDEA. All of the Kotlin files in this repo are copies of the source files for an 
-IntelliJ IDEA project on my computer.
+This is a game with a command line interface made using Kotlin and IntelliJ IDEA. All of the Kotlin files in this repo are copies of the 
+source files for an IntelliJ IDEA project on my computer.
 
 ## Rules and How to Play
 

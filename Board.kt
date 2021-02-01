@@ -4,6 +4,7 @@ import kotlin.math.roundToInt
  * Board class consists of data and functions about properties and other spaces on the board.
  */
 class Board {
+
     /**
      * The 3 types of properties are streets, golf courses, and super stores. The Property class consists of data and
      * functions common to all of these.
@@ -22,19 +23,6 @@ class Board {
         // Purchase price for golf courses and super stores is 512 so this value will be in this class and for
         // streets, the purchase price is overridden.
         open val purchasePrice = 512
-
-        /**
-         * Mentions position, type, and name.
-         */
-        // For super stores and golf courses, this info will do. For streets, the neighborhood will also
-        // be mentioned. This is done by overriding.
-        open val lowDetailInfo get() = "Position: $position, Type: $type, Name: $name"
-
-        /**
-         * Mentions everything in lowDetailInfo. If this property is owned, the owner name, fee info, and
-         * pawn status are also mentioned.
-         */
-        abstract val moderateDetailInfo: String
 
         /**
          * The player that owns this property or null if this property is unowned. This should be set to a player
@@ -76,6 +64,24 @@ class Board {
             isPawned = false
         }
 
+        open fun makeUnowned() {
+            owner = null
+            isPawned = false
+        }
+
+        /**
+         * Mentions position, type, and name.
+         */
+        // For super stores and golf courses, this info will do. For streets, the neighborhood will also
+        // be mentioned. This is done by overriding.
+        open val lowDetailInfo get() = "Position: $position, Type: $type, Name: $name"
+
+        /**
+         * Mentions everything in lowDetailInfo. If this property is owned, the owner name, fee info, and
+         * pawn status are also mentioned.
+         */
+        abstract val moderateDetailInfo: String
+
         /**
          * Consists of lowDetailInfo plus the pawn price.
          */
@@ -85,71 +91,14 @@ class Board {
          * Consists of lowDetailInfo plus the unpawn price.
          */
         val unpawnInfo get() = "$lowDetailInfo, Unpawn Price: $$unpawnPrice"
-
-        open fun makeUnowned() {
-            owner = null
-            isPawned = false
-        }
     }
+
 
     inner class Street(name: String, val neighborhoodNumber: Int, val neighborhoodName: String) : Property(name) {
         override val type = "Street"
 
         override val purchasePrice = neighborhoodNumber * 128
         val startingFee = purchasePrice / 8
-
-        val currentFee
-            get() = when {
-                !isOwned || isPawned -> 0
-                !neighborhoodIsOwnedBySinglePlayer -> startingFee
-                else -> getFeeWhenNeighborhoodIsOwned(numberOfRestaurants = this.numberOfRestaurants)
-            }
-
-        /**
-         * Consists of the position, type, name, and neighborhood.
-         */
-        override val lowDetailInfo get() = "${super.lowDetailInfo}, Neighborhood: $neighborhoodName"
-
-        /**
-         * Mentions everything in lowDetailInfo. If this street is owned, the owner name, number of restaurants,
-         * pawn status, and current fee are mentioned as well.
-         */
-        override val moderateDetailInfo
-            get() = "$lowDetailInfo, " +
-                    if (isOwned) {
-                        "Owner Name: ${owner!!.name},  Number of Restaurants: " +
-                                "$numberOfRestaurants,\n\tPawned: ${if (isPawned) "Yes" else "No"}, " +
-                                "Current fee: $$currentFee"
-                    } else {
-                        "Unowned"
-                    }
-
-        /**
-         * Mentions just about everything that can be mentioned about this street.
-         */
-        val highDetailInfo: String
-            get() {
-                val sb = StringBuilder("$lowDetailInfo, ${if (isOwned) "Owner Name: ${owner!!.name}" else "Unowned"}, ")
-                        .append("Purchase Price: $$purchasePrice, Pawned: ${if (isPawned) "Yes" else "No"}, ")
-                        .append("Pawn Price: $$pawnPrice, Unpawn Price: $$unpawnPrice,\n\tNumber of restaurants: ")
-                        .append("$numberOfRestaurants, restaurant adding price: $$restaurantAddPrice, restaurant ")
-                        .append("remove gain: $$restaurantRemoveGain, is neighborhood owned by single player? ")
-                        .append(if (neighborhoodIsOwnedBySinglePlayer) "yes" else "no")
-                        .append(", Current fee: $$currentFee,\n\tFee when neighborhood is not owned ")
-                        .append("by single player: $$startingFee, Fees when neighborhood is owned by single player: ")
-
-                for (numberOfRestaurants in 0..5) {
-                    sb.append("$numberOfRestaurants ${if (numberOfRestaurants == 1) "restaurant" else "restaurants"}: $")
-                            .append(getFeeWhenNeighborhoodIsOwned(numberOfRestaurants = numberOfRestaurants))
-                    if (numberOfRestaurants != 5) {
-                        sb.append(", ")
-                    }
-                    if (numberOfRestaurants == 1) {
-                        sb.append("\n\t")
-                    }
-                }
-                return sb.toString()
-            }
 
         override val canBePawned get() = !isPawned && numberOfRestaurants == 0
 
@@ -188,22 +137,6 @@ class Board {
 
         val restaurantCanBeAdded get() = neighborhoodIsOwnedBySinglePlayer && !isPawned && numberOfRestaurants < 5
         val restaurantCanBeRemoved get() = numberOfRestaurants > 0
-
-        /**
-         * Mentions everything in lowDetailInfo, the number of restaurants, current fee, and the fee for adding a
-         * restaurant to this street.
-         */
-        val restaurantAddInfo
-            get() = "$lowDetailInfo, Number of restaurants: $numberOfRestaurants, " +
-                    "Current Fee: $$currentFee, Restaurant Adding Price: $$restaurantAddPrice"
-
-        /**
-         * Mentions everything in lowDetailInfo, the number of restaurants, current fee, and the money a player gains
-         * when they remove a restaurant from this street.
-         */
-        val restaurantRemoveInfo
-            get() = "$lowDetailInfo, Number of restaurants: $numberOfRestaurants, " +
-                    "Current Fee: $$currentFee, Restaurant Removal Gain: $$restaurantRemoveGain"
 
         /**
          * A list of streets that are in the same neighborhood as this street, which means that this street
@@ -261,19 +194,79 @@ class Board {
             super.makeUnowned()
             removeAllRestaurants()
         }
+
+        val currentFee
+            get() = when {
+                !isOwned || isPawned -> 0
+                !neighborhoodIsOwnedBySinglePlayer -> startingFee
+                else -> getFeeWhenNeighborhoodIsOwned(numberOfRestaurants = this.numberOfRestaurants)
+            }
+
+        /**
+         * Consists of the position, type, name, and neighborhood.
+         */
+        override val lowDetailInfo get() = "${super.lowDetailInfo}, Neighborhood: $neighborhoodName"
+
+        /**
+         * Mentions everything in lowDetailInfo. If this street is owned, the owner name, number of restaurants,
+         * pawn status, and current fee are mentioned as well.
+         */
+        override val moderateDetailInfo
+            get() = "$lowDetailInfo, ${
+                if (isOwned) {
+                    "Owner Name: ${owner!!.name},  Number of Restaurants: $numberOfRestaurants," +
+                            "\n\tPawned: ${if (isPawned) "Yes" else "No"}, Current fee: $$currentFee"
+                } else {
+                    "Unowned"
+                }
+            }"
+
+        /**
+         * Mentions just about everything that can be mentioned about this street.
+         */
+        val highDetailInfo: String
+            get() {
+                val sb = StringBuilder("$lowDetailInfo, ${if (isOwned) "Owner Name: ${owner!!.name}" else "Unowned"}, ")
+                        .append("Purchase Price: $$purchasePrice, Pawned: ${if (isPawned) "Yes" else "No"}, ")
+                        .append("Pawn Price: $$pawnPrice, Unpawn Price: $$unpawnPrice,\n\tNumber of restaurants: ")
+                        .append("$numberOfRestaurants, restaurant adding price: $$restaurantAddPrice, restaurant ")
+                        .append("remove gain: $$restaurantRemoveGain, is neighborhood owned by single player? ")
+                        .append(if (neighborhoodIsOwnedBySinglePlayer) "Yes" else "No")
+                        .append(", Current fee: $$currentFee,\n\tFee when neighborhood is not owned ")
+                        .append("by single player: $$startingFee, Fees when neighborhood is owned by single player: ")
+
+                for (numberOfRestaurants in 0..5) {
+                    sb.append("$numberOfRestaurants restaurant${if (numberOfRestaurants == 1) "" else "s"}: $")
+                            .append(getFeeWhenNeighborhoodIsOwned(numberOfRestaurants = numberOfRestaurants))
+                    if (numberOfRestaurants != 5) {
+                        sb.append(", ")
+                    }
+                    if (numberOfRestaurants == 1) {
+                        sb.append("\n\t")
+                    }
+                }
+                return sb.toString()
+            }
+
+        /**
+         * Mentions everything in lowDetailInfo, the number of restaurants, current fee, and the fee for adding a
+         * restaurant to this street.
+         */
+        val restaurantAddInfo
+            get() = "$lowDetailInfo, Number of restaurants: $numberOfRestaurants, " +
+                    "Current Fee: $$currentFee, Restaurant Adding Price: $$restaurantAddPrice"
+
+        /**
+         * Mentions everything in lowDetailInfo, the number of restaurants, current fee, and the money a player gains
+         * when they remove a restaurant from this street.
+         */
+        val restaurantRemoveInfo
+            get() = "$lowDetailInfo, Number of restaurants: $numberOfRestaurants, " +
+                    "Current Fee: $$currentFee, Restaurant Removal Gain: $$restaurantRemoveGain"
     }
 
     inner class SuperStore(name: String) : Property(name) {
         override val type = "Super Store"
-
-        override val moderateDetailInfo
-            get() = "$lowDetailInfo, " +
-                    if (isOwned) {
-                        "Owner Name: ${owner!!.name}, Pawned: ${if (isPawned) "Yes" else "No"}, " +
-                                "Current Fee: A dice roll multiplied by ${FeeData().multiplier}"
-                    } else {
-                        "Unowned"
-                    }
 
         /**
          * Fees for super stores are determined by a dice roll and this dice roll is multiplied by a constant that
@@ -305,19 +298,20 @@ class Board {
                 }
             }
         }
+
+        override val moderateDetailInfo
+            get() = "$lowDetailInfo, ${
+                if (isOwned) {
+                    "Owner Name: ${owner!!.name}, Pawned: ${if (isPawned) "Yes" else "No"}, " +
+                            "Current Fee: ${if (isPawned) "$0" else "A dice roll multiplied by ${FeeData().multiplier}"}"
+                } else {
+                    "Unowned"
+                }
+            }"
     }
 
     inner class GolfCourse(name: String) : Property(name) {
         override val type = "Golf Course"
-
-        override val moderateDetailInfo
-            get() = "$lowDetailInfo, " +
-                    if (isOwned) {
-                        "Owner Name: ${owner!!.name}, Pawned: ${if (isPawned) "Yes" else "No"}, " +
-                                "Current Fee: $${FeeData().fee}"
-                    } else {
-                        "Unowned"
-                    }
 
         /**
          * Fees for golf courses are determined by how many golf courses are owned by the player that owns a golf course
@@ -349,6 +343,15 @@ class Board {
                 }
             }
         }
+
+        override val moderateDetailInfo
+            get() = "$lowDetailInfo, ${
+                if (isOwned) {
+                    "Owner Name: ${owner!!.name}, Pawned: ${if (isPawned) "Yes" else "No"}, Current Fee: $${FeeData().fee}"
+                } else {
+                    "Unowned"
+                }
+            }"
     }
 
     enum class NonPropertySpace {
@@ -367,7 +370,7 @@ class Board {
     /**
      * Consists of NonPropertySpaces and Properties that are ordered according to their position on the board.
      */
-    private val boardSpaces = arrayOf(
+    private val boardSpaces = listOf(
             // Numbers in comments are the positions of each space on the board
             NonPropertySpace.START, // 1
             Street(name = "Page Street", neighborhoodNumber = 1, neighborhoodName = "Lambeth"), // 2

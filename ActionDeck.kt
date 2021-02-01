@@ -55,21 +55,6 @@ class ActionDeck {
         }
     }
 
-    /**
-     * Shows the content of the deck. Should only be used for testing and debugging purposes.
-     */
-    override fun toString(): String {
-        val sb = StringBuilder("Top of deck\n")
-        for (i in topIndex until cards.size) {
-            sb.append(cards[i]).append("\n")
-        }
-        for (i in 0 until topIndex) {
-            sb.append(cards[i]).append("\n")
-        }
-        sb.append("Bottom of deck")
-        return sb.toString()
-    }
-
     private val cards = mutableListOf(
             ActionCard(
                     effect = ActionCard.Effect.ABSOLUTE_POSITION_CHANGE,
@@ -154,40 +139,55 @@ class ActionDeck {
      * 2nd from the top is now the top card.
      */
     fun moveTopCardToBottom() {
-        // Increment topIndex and make it go back to 0 once it's equal to the amount of cards in the cards list.
+        // Increment topIndex and make it go back to 0 once it's equal to the amount of cards in the cards list
         topIndex = (topIndex + 1) % cards.size
     }
 
     /**
      * @throws IllegalStateException if the top card does not have the effect GET_OFF_VACATION_FREE.
      */
-    fun removeGetOffVacationCardAtTop() {
+    fun removeGetOffVacationFreeCardAtTop() {
         if (topCard.effect != ActionCard.Effect.GET_OFF_VACATION_FREE) {
             throw IllegalStateException("The top card is not a \"get off vacation free\" card")
         }
         cards.removeAt(topIndex)
 
         // If the "Get off vacation free" card was at the end of the list, topIndex will be equal to the amount of
-        // cards in the cards List and this will result in an out of bounds error the next time the top card is
+        // cards in the cards list and this will result in an out of bounds error the next time the top card is
         // accessed. topIndex needs to be set to 0 in this case to prevent this.
         if (topIndex == cards.size) {
             topIndex = 0
         }
     }
 
-    fun insertGetOffVacationCardAtBottom() {
+    fun insertGetOffVacationFreeCardAtBottom() {
         val newCard = ActionCard(
                 effect = ActionCard.Effect.GET_OFF_VACATION_FREE,
                 message = "Get Off Vacation Free. Keep this card and use it when needed, or trade it.",
                 value = 0
         )
         if (topIndex == 0) {
-            // Add to the end of the cards list.
+            // Add to the end of the cards list
             cards.add(newCard)
         } else {
             cards.add(index = topIndex, element = newCard)
-            // Increment topIndex since cards will be shifted after inserting a new one in the middle of the cards list.
+            // Increment topIndex since cards will be shifted after inserting a new one in the middle of the cards list
             topIndex++
         }
+    }
+
+    /**
+     * Shows the content of the deck. Should only be used for testing and debugging purposes.
+     */
+    override fun toString(): String {
+        val sb = StringBuilder("Top of deck\n")
+        for (i in topIndex until cards.size) {
+            sb.append(cards[i]).append("\n")
+        }
+        for (i in 0 until topIndex) {
+            sb.append(cards[i]).append("\n")
+        }
+        sb.append("Bottom of deck")
+        return sb.toString()
     }
 }

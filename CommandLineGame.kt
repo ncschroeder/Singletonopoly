@@ -62,7 +62,6 @@ class CommandLineGame {
     }
 
     fun setup() {
-        // Get number of players
         var numberOfPlayers: Int?
         while (true) {
             println("How many players? This number must be greater than or equal to 2 and less than or equal to 8")
@@ -233,7 +232,9 @@ class CommandLineGame {
                                 }
                                 return
                             }
+
                             "n" -> break@dropOutAskLoop
+
                             else -> printInvalidInput()
                         }
                     }
@@ -247,7 +248,9 @@ class CommandLineGame {
                                 gameOver = true
                                 return
                             }
+
                             "n" -> break@endGameAskLoop
+                            
                             else -> printInvalidInput()
                         }
                     }
@@ -324,19 +327,19 @@ class CommandLineGame {
                 return
             }
 
-            println()
             println(
-                    when (input) {
-                        "mp" -> board.moderateDetailPropertyInfo
-                        "yp" -> board.getModerateDetailPropertyInfoOfPlayer(playerWhoWantsToKnow)
-                        "ms" -> board.moderateDetailStreetInfo
-                        "hs" -> board.highDetailStreetInfo
-                        "gc" -> board.golfCourseInfo
-                        "ss" -> board.superStoreInfo
-                        else -> "Invalid input"
-                    }
+                    "\n${
+                        when (input) {
+                            "mp" -> board.moderateDetailPropertyInfo
+                            "yp" -> board.getModerateDetailPropertyInfoOfPlayer(playerWhoWantsToKnow)
+                            "ms" -> board.moderateDetailStreetInfo
+                            "hs" -> board.highDetailStreetInfo
+                            "gc" -> board.golfCourseInfo
+                            "ss" -> board.superStoreInfo
+                            else -> "Invalid input"
+                        }
+                    }\n"
             )
-            println()
         }
     }
 
@@ -529,7 +532,7 @@ class CommandLineGame {
                             "y" -> {
                                 getOffVacationFreeCardsAskLoop2@ while (true) {
                                     println(
-                                            "${otherPlayer.name} has ${otherPlayer.numberOfGetOffVacationCardsOwned} get " +
+                                            "${otherPlayer.name} has ${otherPlayer.numberOfGetOffVacationFreeCardsOwned} get " +
                                                     "off vacation cards. How many would you like? Enter an amount or " +
                                                     "enter \"b\" to go back:"
                                     )
@@ -538,7 +541,7 @@ class CommandLineGame {
                                         continue@getOffVacationFreeCardsAskLoop1
                                     }
                                     val amount = input.toIntOrNull()
-                                    if (amount == null || amount !in 0..otherPlayer.numberOfGetOffVacationCardsOwned) {
+                                    if (amount == null || amount !in 0..otherPlayer.numberOfGetOffVacationFreeCardsOwned) {
                                         printInvalidInput()
                                     } else {
                                         whatPlayerWants.getOffVacationFreeCards = amount
@@ -675,7 +678,7 @@ class CommandLineGame {
                                 getOffVacationFreeCardsAskLoop2@ while (true) {
                                     println(
                                             "${initiatingPlayer.name}, you have " +
-                                                    initiatingPlayer.numberOfGetOffVacationCardsOwned +
+                                                    initiatingPlayer.numberOfGetOffVacationFreeCardsOwned +
                                                     " Get Off Vacation Free cards. How many would you like to offer? " +
                                                     "Enter an amount or \"b\" to go back"
                                     )
@@ -685,7 +688,7 @@ class CommandLineGame {
                                     }
                                     val amount = input.toIntOrNull()
                                     if (amount == null || amount !in
-                                            0..initiatingPlayer.numberOfGetOffVacationCardsOwned
+                                            0..initiatingPlayer.numberOfGetOffVacationFreeCardsOwned
                                     ) {
                                         printInvalidInput()
                                     } else {
@@ -738,9 +741,9 @@ class CommandLineGame {
                         if (property is Board.Street && property.neighborhoodIsOwnedBySinglePlayer) {
                             println(
                                     "Note: the above property is a street that is in a neighborhood that is currently " +
-                                            "owned by ${initiatingPlayer.name}.\nIf they agree to the trade, that " +
-                                            "neighborhood will no longer be owned by only them so all restaurants will " +
-                                            "be sold and the fees will go back to the starting fees."
+                                            "owned by ${initiatingPlayer.name}.\nIf ${initiatingPlayer.name} agrees to " +
+                                            "the trade, that neighborhood will no longer be owned by\nonly them so all " +
+                                            "restaurants will be sold and the fees will go back to the starting fees."
                             )
                         }
                     }
@@ -769,9 +772,9 @@ class CommandLineGame {
                         if (property is Board.Street && property.neighborhoodIsOwnedBySinglePlayer) {
                             println(
                                     "Note: the above property is a street that is in a neighborhood that is currently " +
-                                            "owned by ${otherPlayer.name}.\nIf they agree to the trade, that neighborhood " +
-                                            "will no longer be owned by only them so all houses will be sold and the fees " +
-                                            "will go back to the starting fees."
+                                            "owned by ${otherPlayer.name}.\nIf ${otherPlayer.name} agrees to the trade, " +
+                                            "that neighborhood will no longer be owned by\nonly them so all houses will " +
+                                            "be sold and the fees will go back to the starting fees."
                             )
                         }
                     }
@@ -797,6 +800,7 @@ class CommandLineGame {
                 )
                 when (readLine()!!.toLowerCase()) {
                     "y" -> break@confirmTrade
+
                     "n" -> {
                         while (true) {
                             println(
@@ -813,8 +817,11 @@ class CommandLineGame {
                             }
                         }
                     }
+
                     "pr" -> askAboutDisplayingPropertyInfo(playerWhoWantsToKnow = initiatingPlayer)
+
                     "pl" -> println(playerManager.playerInfo)
+
                     else -> printInvalidInput()
                 }
             }
@@ -849,16 +856,20 @@ class CommandLineGame {
 
                         for (property in whatPlayerOffers.properties) {
                             if (property is Board.Street && property.neighborhoodIsOwnedBySinglePlayer) {
-                                val numberOfNeighborhoodRestaurants = property.neighborhoodRestaurantCount
-                                if (numberOfNeighborhoodRestaurants > 0) {
+                                val neighborhoodRestaurantCount = property.neighborhoodRestaurantCount
+                                if (neighborhoodRestaurantCount > 0) {
                                     println(
-                                            "There are $numberOfNeighborhoodRestaurants in the " +
-                                                    "${property.neighborhoodName} neighborhood so these will be sold"
+                                            if (neighborhoodRestaurantCount == 1) {
+                                                "There is 1 restaurant in the ${property.neighborhoodName} neighborhood " +
+                                                        "so this will be sold"
+                                            } else {
+                                                "There are $neighborhoodRestaurantCount restaurants in the " +
+                                                        "${property.neighborhoodName} neighborhood so these will be sold"
+                                            }
                                     )
                                     // Sell all restaurants in the neighborhood
                                     property.removeRestaurantsFromNeighborhood()
-                                    val moneyEarned =
-                                            numberOfNeighborhoodRestaurants * property.restaurantRemoveGain
+                                    val moneyEarned = neighborhoodRestaurantCount * property.restaurantRemoveGain
                                     initiatingPlayer.money += moneyEarned
                                     printMoneyGainUpdate(player = initiatingPlayer, moneyGain = moneyEarned)
                                 }
@@ -866,8 +877,8 @@ class CommandLineGame {
                             property.owner = otherPlayer
                         }
 
-                        initiatingPlayer.numberOfGetOffVacationCardsOwned -= whatPlayerOffers.getOffVacationFreeCards
-                        otherPlayer.numberOfGetOffVacationCardsOwned += whatPlayerOffers.getOffVacationFreeCards
+                        initiatingPlayer.numberOfGetOffVacationFreeCardsOwned -= whatPlayerOffers.getOffVacationFreeCards
+                        otherPlayer.numberOfGetOffVacationFreeCardsOwned += whatPlayerOffers.getOffVacationFreeCards
 
                         // Now give the initiating player what was agreed upon.
                         if (whatPlayerWants.money > 0) {
@@ -879,15 +890,20 @@ class CommandLineGame {
 
                         for (property in whatPlayerWants.properties) {
                             if (property is Board.Street && property.neighborhoodIsOwnedBySinglePlayer) {
-                                val numberOfNeighborhoodRestaurants = property.neighborhoodRestaurantCount
-                                if (numberOfNeighborhoodRestaurants > 0) {
+                                val neighborhoodRestaurantCount = property.neighborhoodRestaurantCount
+                                if (neighborhoodRestaurantCount > 0) {
                                     println(
-                                            "There are $numberOfNeighborhoodRestaurants restaurants in the " +
-                                                    "${property.neighborhoodName} neighborhood so these will be sold"
+                                            if (neighborhoodRestaurantCount == 1) {
+                                                "There is 1 restaurant in the ${property.neighborhoodName} neighborhood " +
+                                                        "so this will be sold"
+                                            } else {
+                                                "There are $neighborhoodRestaurantCount restaurants in the " +
+                                                        "${property.neighborhoodName} neighborhood so these will be sold"
+                                            }
                                     )
                                     // Sell all restaurants in the neighborhood
                                     property.removeRestaurantsFromNeighborhood()
-                                    val moneyEarned = numberOfNeighborhoodRestaurants * property.restaurantRemoveGain
+                                    val moneyEarned = neighborhoodRestaurantCount * property.restaurantRemoveGain
                                     otherPlayer.money += moneyEarned
                                     printMoneyGainUpdate(player = otherPlayer, moneyGain = moneyEarned)
                                 }
@@ -895,8 +911,8 @@ class CommandLineGame {
                             property.owner = initiatingPlayer
                         }
 
-                        otherPlayer.numberOfGetOffVacationCardsOwned -= whatPlayerWants.getOffVacationFreeCards
-                        initiatingPlayer.numberOfGetOffVacationCardsOwned += whatPlayerWants.getOffVacationFreeCards
+                        otherPlayer.numberOfGetOffVacationFreeCardsOwned -= whatPlayerWants.getOffVacationFreeCards
+                        initiatingPlayer.numberOfGetOffVacationFreeCardsOwned += whatPlayerWants.getOffVacationFreeCards
                         return
                     }
 
@@ -1154,17 +1170,17 @@ class CommandLineGame {
             throw IllegalStateException("Current player is not on vacation")
         }
         println(
-                "${currentPlayer.name}, you're on vacation and this is your " +
-                        when (currentPlayer.numberOfTurnsOnVacation) {
-                            0 -> "first"
-                            1 -> "second"
-                            2 -> "third (last)"
-                            else -> throw IllegalStateException(
-                                    "Shouldn't be on vacation at this point. " +
-                                            "Number of turns on vacation: ${currentPlayer.numberOfTurnsOnVacation}"
-                            )
-                        }
-                        + " turn on vacation"
+                "${currentPlayer.name}, you're on vacation and this is your ${
+                    when (currentPlayer.numberOfTurnsOnVacation) {
+                        0 -> "first"
+                        1 -> "second"
+                        2 -> "third (last)"
+                        else -> throw IllegalStateException(
+                                "Shouldn't be on vacation at this point. " +
+                                        "Number of turns on vacation: ${currentPlayer.numberOfTurnsOnVacation}"
+                        )
+                    }
+                } turn on vacation"
         )
 
         val feeToGetOffVacation = 128
@@ -1229,8 +1245,8 @@ class CommandLineGame {
                                         "get to take their turn"
                         )
                         currentPlayer.removeFromVacation()
-                        currentPlayer.removeGetOffVacationCard()
-                        actionDeck.insertGetOffVacationCardAtBottom()
+                        currentPlayer.removeGetOffVacationFreeCard()
+                        actionDeck.insertGetOffVacationFreeCardAtBottom()
                         return
                     } else {
                         printInvalidInput()
@@ -1262,11 +1278,10 @@ class CommandLineGame {
             numberOfDoubleRolls = 0
         }
 
-        if (currentPlayer.position + totalDiceRoll > board.numberOfSpaces) {
-            currentPlayer.position = (currentPlayer.position + totalDiceRoll) % board.numberOfSpaces
+        currentPlayer.position += totalDiceRoll
+        if (currentPlayer.position > board.numberOfSpaces) {
+            currentPlayer.position = currentPlayer.position % board.numberOfSpaces
             currentPlayerMadeRevolution()
-        } else {
-            currentPlayer.position += totalDiceRoll
         }
     }
 
@@ -1289,6 +1304,9 @@ class CommandLineGame {
                         // go again for this case.
                         if (goAgain) {
                             goAgain = false
+                        }
+                        if (numberOfDoubleRolls > 0) {
+                            numberOfDoubleRolls = 0
                         }
                     }
 
@@ -1417,31 +1435,21 @@ class CommandLineGame {
                             }
 
                             ActionDeck.ActionCard.Effect.RELATIVE_POSITION_CHANGE -> {
-                                val positionChange = actionDeck.topCard.value
+                                val positionIncrement = actionDeck.topCard.value
                                 actionDeck.moveTopCardToBottom()
-                                if (positionChange > 0) {
-                                    if (currentPlayer.position + positionChange > board.numberOfSpaces) {
-                                        currentPlayer.position =
-                                                (currentPlayer.position + positionChange) % board.numberOfSpaces
-                                        currentPlayerMadeRevolution()
-                                    } else {
-                                        currentPlayer.position += positionChange
-                                    }
-                                } else {
-                                    if (currentPlayer.position + positionChange < 1) {
-                                        currentPlayer.position =
-                                                board.numberOfSpaces + (currentPlayer.position + positionChange)
-                                    } else {
-                                        // Move the player back since positionChange is negative.
-                                        currentPlayer.position += positionChange
-                                    }
+                                currentPlayer.position += positionIncrement
+                                if (currentPlayer.position > board.numberOfSpaces) {
+                                    currentPlayer.position = currentPlayer.position % board.numberOfSpaces
+                                    currentPlayerMadeRevolution()
+                                } else if (currentPlayer.position < 1) {
+                                    currentPlayer.position = board.numberOfSpaces + currentPlayer.position
                                 }
                                 evaluatePosition()
                             }
 
                             ActionDeck.ActionCard.Effect.GET_OFF_VACATION_FREE -> {
-                                actionDeck.removeGetOffVacationCardAtTop()
-                                currentPlayer.addGetOffVacationCard()
+                                actionDeck.removeGetOffVacationFreeCardAtTop()
+                                currentPlayer.addGetOffVacationFreeCard()
                             }
 
                             ActionDeck.ActionCard.Effect.GO_ON_VACATION -> {
@@ -1451,6 +1459,9 @@ class CommandLineGame {
                                 // to go again for this case.
                                 if (goAgain) {
                                     goAgain = false
+                                }
+                                if (numberOfDoubleRolls > 0) {
+                                    numberOfDoubleRolls = 0
                                 }
                             }
 
@@ -1466,9 +1477,9 @@ class CommandLineGame {
                                 } else {
                                     val maintenanceFee = feePerRestaurant * restaurantCount
                                     println(
-                                            "${currentPlayer.name} has $restaurantCount " +
-                                                    (if (restaurantCount == 1) "restaurant" else "restaurants") +
-                                                    "and must pay $$feePerRestaurant per restaurant so they owe $$maintenanceFee."
+                                            "${currentPlayer.name} has $restaurantCount ${
+                                                if (restaurantCount == 1) "restaurant" else "restaurants"
+                                            } and must pay $$feePerRestaurant per restaurant so they owe $$maintenanceFee."
                                     )
                                     if (currentPlayer.money < maintenanceFee) {
                                         askAboutGettingMoney(
@@ -1521,16 +1532,13 @@ class CommandLineGame {
                         is Board.Street -> {
                             fee = currentBoardSpace.currentFee
                             println(
-                                    "There " +
-                                            when (currentBoardSpace.numberOfRestaurants) {
-                                                0 -> "are no restaurants"
-                                                1 -> "is a restaurant"
-                                                in 2..5 -> "are ${currentBoardSpace.numberOfRestaurants} restaurants"
-                                                else -> throw IllegalArgumentException(
-                                                        "Invalid number of restaurants: ${currentBoardSpace.numberOfRestaurants}"
-                                                )
-                                            }
-                                            + " on this street and the fee is $$fee."
+                                    "There ${
+                                        if (currentBoardSpace.numberOfRestaurants == 1) {
+                                            "is 1 restaurant"
+                                        } else {
+                                            "are ${currentBoardSpace.numberOfRestaurants} restaurants"
+                                        }
+                                    } on this street and the fee is $$fee."
                             )
                         }
 
@@ -1538,8 +1546,8 @@ class CommandLineGame {
                             val feeData = currentBoardSpace.FeeData()
                             fee = feeData.fee
                             println(
-                                    "${owner.name} owns ${feeData.numberOfGolfCoursesOwnedByOwner} " +
-                                            (if (feeData.numberOfGolfCoursesOwnedByOwner == 1) "golf course" else "golf courses") +
+                                    "${owner.name} owns ${feeData.numberOfGolfCoursesOwnedByOwner} golf course" +
+                                            (if (feeData.numberOfGolfCoursesOwnedByOwner == 1) "" else "s") +
                                             " and the fee is $$fee"
                             )
                         }
