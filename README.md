@@ -2,7 +2,36 @@
 This is a game with a command line interface made using Kotlin and IntelliJ IDEA. All of the Kotlin files in this repo are copies of the 
 source files for an IntelliJ IDEA project on my computer.
 
-## Rules and How to Play
+### History and future of this project
+During the spring of 2020, I was thinking that it would be interesting to make coding implementations of some board games. I was also planning
+on doing an independent study course over the summer. I came up with the idea of making coding implementations of some board games for the 
+independent study course. I proposed my idea to one of my professors who would be a sponsor for the course and they accepted. I decided that
+Monopoly would be one of the games I would implement. I decided to make a parody, which in time would be called Singletonopoly. I thought this 
+game would be challenging but not overwhelming to implement. I decided to use Kotlin because I had a little experience by using it for an 
+Android development course, the professor of which was the professor I proposed my idea to. I was originally planning on first making a command line version of Singletonopoly and then
+a graphical user interface version and then do a different board game. However, even after working on a command line version of Singletonopoly for a good portion
+of June and all of July, I still was not done with this version. The time period for the independent study course had ended so I turned in all
+the source code I had to my professor and then got an A for the course and then got my Bachelor's degree in computer science. I would then 
+spend all of August and some of September finishing up this project up and then making minor changes in the following months. I decided that I 
+would not build a graphical user interface of this game yet because there were other things I wanted to work on that I thought were more important,
+such as becoming more familiar with Web development and databases. I might make a graphical user interface version of this project in the future. One idea I can think of to do this is to make the game text-based like
+the command line version but have buttons to allow the user to play the game instead of using the keyboard. For this idea, using any GUI
+framework should work. One GUI framework candidate would be Swing since it's built in to Java and Kotlin and I have used it for a Java application before. Another GUI
+idea is to come up with a board design and show this board and have tokens for players that represent where that player is on the board and have 
+buttons that allow the user to play the game. For this idea, it might be a good idea to use the Unity game engine or some other 2D game engine.
+
+### Thoughts on this project
+I'm glad I used Kotlin because it has some useful features, some of which I was not familiar with at the start. Some features I like include
+smart casting, custom getters, string interpolation, and if statements that are also expressions. I enjoyed this project and 1 reason is because 
+this project was a big problem solving exercise and required a bit of thinking to implement all features. Another reason I enjoyed it is because 
+all the features were fun to implement because this project is a parody of a board game that I sometimes enjoy playing. The hardest part was 
+the trading feature. This part also takes up between 500 and 600 lines of code of the approximately total 2500 lines of code. A problem I 
+had with this feature is that I originally made it so that if a player wanted to trade a property with another player, they would only be 
+able to trade 1 property per trade. I realized that it would be ideal to let players be able to trade however many properties they want in 
+a single trade because what if a player wanted to trade 2 of their properties for 1 of another player's. I had to do some modification to 
+allow for this.
+
+## Rules and how to play
 
 ### Objective
 Make all the money you can by moving around a board and buying properties. Get money from other players when they land
