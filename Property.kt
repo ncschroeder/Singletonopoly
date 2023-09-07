@@ -1,5 +1,8 @@
 import kotlin.math.roundToInt
 
+/**
+ * Superclass for SuperStore, GolfClub, and Street classes.
+ */
 sealed class Property(val name: String) {
     /**
      * Position on the board. This is set by the Board.

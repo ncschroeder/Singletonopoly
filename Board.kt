@@ -4,7 +4,7 @@ object Board {
      * of those spaces.
      */
     private val positionsAndSpaces: Map<Int, Any> =
-        listOf(
+        arrayOf(
             //        Space                     Position
             NonPropertySpace.START,             // 1
             Neighborhood.VAUXHALL.street1,      // 2
@@ -48,7 +48,8 @@ object Board {
             Neighborhood.HAMPTON.street2,       // 40
             Neighborhood.HAMPTON.street3        // 41
         )
-        .associateByPosition()
+        .withIndex()
+        .associate { (index: Int, space: Any) -> index + 1 to space }
     
     /**
      * Returns the space object at the position specified or null if that position is < 1 or > the number of spaces.
@@ -78,7 +79,7 @@ object Board {
                         else -> throw Exception("Board had a space that wasn't a Property nor a NonPropertySpace: $space")
                     }
                 
-                // Put 1 space indent for lines that start with a single digit
+                // Put 1-space indent for lines that start with a single digit.
                 "${if (position < 10) " " else ""}$position -> $ending"
             }
         

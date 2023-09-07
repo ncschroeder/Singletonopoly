@@ -53,7 +53,7 @@ class ActionDeck {
      * Shows the content of the deck. Should only be used for testing and debugging purposes.
      */
     override fun toString(): String {
-        // newPosition isn't shown in the message for absolute position change cards, so show it here
+        // newPosition isn't shown in the message for absolute position change cards, so show it here.
         fun cardTransform(c: ActionCard): String =
             c.message.plus(
                 if (c is AbsolutePositionChangeCard) {

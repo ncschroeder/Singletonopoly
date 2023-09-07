@@ -99,7 +99,7 @@ enum class Neighborhood(street1Name: String, street2Name: String, street3Name: S
         fun getStreetsInfo(includeAll: Boolean): StringBuilder =
             values().joinTo(
                 StringBuilder(),
-                prefix = "Streets\n",
+                prefix = "Streets\n\n",
                 transform = { it.getInfo(includeAll) },
                 separator = "\n\n"
             )
