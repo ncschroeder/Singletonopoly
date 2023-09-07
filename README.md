@@ -1,34 +1,96 @@
 # Singletonopoly
-This is a game with a command line interface made using Kotlin and IntelliJ IDEA. All of the Kotlin files in this repo are copies of the 
-source files for an IntelliJ IDEA project on my computer.
 
-### History and future of this project
-During the spring of 2020, I was thinking that it would be interesting to make coding implementations of some board games. I was also planning
-on doing an independent study course over the summer. I came up with the idea of making coding implementations of some board games for the 
-independent study course. I proposed my idea to one of my professors who would be a sponsor for the course and they accepted. I decided that
-Monopoly would be one of the games I would implement. I decided to make a parody, which in time would be called Singletonopoly. I thought this 
-game would be challenging but not overwhelming to implement. I decided to use Kotlin because I had a little experience by using it for an 
-Android development course, the professor of which was the professor I proposed my idea to. I was originally planning on first making a command line version of Singletonopoly and then
-a graphical user interface version and then do a different board game. However, even after working on a command line version of Singletonopoly for a good portion
-of June and all of July, I still was not done with this version. The time period for the independent study course had ended so I turned in all
-the source code I had to my professor and then got an A for the course and then got my Bachelor's degree in computer science. I would then 
-spend all of August and some of September finishing up this project up and then making minor changes in the following months. 
-I might make a graphical user interface version of this project in the future.
+This is a game with a command line interface made using Kotlin. All of the Kotlin files in this repo are copies of the files in an IntelliJ IDEA project of mine. The Game.kt file has the `main` function and the `Game` class, which has most of the code for playing a game. The other Kotlin files have classes, [object declarations (singletons)](https://kotlinlang.org/docs/object-declarations.html#object-declarations-overview), and Misc.kt has functions. Some files have documentation. Some, such as the `PlayerManager` class, seem simple enough that they don't need documentation. Some, such as the `ActionDeck` class, have some code that's explained by some info in the manual.
 
-### Thoughts on this project
-I'm glad I used Kotlin because it has some useful features, some of which I was not familiar with at the start. Some features I like include
-smart casting, custom getters, string interpolation, and if statements that are also expressions. I enjoyed this project and 1 reason is because 
-this project was a big problem solving exercise and required a bit of thinking to implement all features. Another reason I enjoyed it is because 
-all the features were fun to implement because this project is a parody of a board game that I sometimes enjoy playing. The hardest part was 
-the trading feature. This part also takes up between 500 and 600 lines of code of the approximately total 2500 lines of code. One problem I 
-had with this feature is that I originally made it so that if a player wanted to trade a property with another player, they would only be 
-able to trade 1 property per trade. I realized that it would be ideal to let players be able to trade however many properties they want in 
-a single trade because what if a player wanted to trade 2 of their properties for 1 of another player's. I had to do some modification to 
-allow for this.
+
+## Game Objective
+
+Roll some dice, move around a board, and buy some properties. Get money from other players when they land on your properties. :heavy_dollar_sign: :moneybag: :money_with_wings: :money_mouth_face: Remove other players from the game by making them lose all their money and properties. Be the last person remaining in the game. In other words, make the set of players in the game a singleton set that consists of only you.
+
+
+## Language Used
+
+I did this project with the language Kotlin. It runs on the JVM and is similar to C#. As mentioned in the "Project History" section, I decided to use it because I had a little experience from using it for a school course. I'm glad I learned it and decided to use it. It's statically typed and has some neat features, such as null safety, smart casting, destructuring for some objects, the ability to name args, and an abundance of built-in functions (many of which are higher-order) to name a few. Here's a [*Kotlin Docs* article that gives a brief overview of syntax and some features of the language and has links to more detailed articles](https://kotlinlang.org/docs/basic-syntax.html). Here's the [documentation for the Kotlin Standard Library](https://kotlinlang.org/api/latest/jvm/stdlib/). You can use the menu on the left edge of either of these pages to access other documentation articles.
+
+Lambdas are used often in this project and Kotlin has a pretty unique syntax for them. There's a *Kotlin Docs* article that goes over higher-order functions and lambdas. It starts off by going over a bit of general info about higher-order functions. Info about lambda syntax and features is in this article in the "Lambda expression syntax" section and the sections below that. Here's [the link to that article](https://kotlinlang.org/docs/lambdas.html). Other notable features used that aren't easily findable in the documentation include [object declarations (singletons)](https://kotlinlang.org/docs/object-declarations.html#object-declarations-overview), [destructuring](https://kotlinlang.org/docs/destructuring-declarations.html), and [scope functions](https://kotlinlang.org/docs/scope-functions.html).
+
+
+## Project History
+
+<details>
+
+During the spring of 2020, I thought it would be interesting to make computerized versions of some board games. I was also planning on doing an independent study course over the summer. I came up with the idea of making computerized versions of some board games for the independent study course. I proposed my idea to one of my professors who would be a sponsor for the course and they accepted. I decided that Monopoly would be one of the games I would implement. I decided to make a parody, which in time would be called Singletonopoly. I thought this game would be challenging but not overwhelming to implement. I decided to use Kotlin because I had a little experience by using it for an Android development course, the professor of which was the professor I proposed my idea to.
+
+I started the work in June 2020. The independent study course came to an end at the end of July. By that time, I wasn't done but submitted my work to the professor and then got an A for the course and got my Bachelor's degree in Computer Science. :man_student: I spent more time to finish the project and got a finished version uploaded to GitHub in October. Refactoring was done and other changes were made throughout 2021, 2022, and 2023.
+
+One part of the project that got changed significantly was the manual. This started off having 10 sections, ~1,200 words, and no lists, tables, flowcharts, pie charts, nor emojis. :slightly_smiling_face: I was able to come up with a lot more stuff that could be added to the manual and now, as mentioned in the "Manual" section, it has 15 sections, ~4,200 words, 7 lists, 5 tables, 3 flowcharts, 1 pie chart, and ~40 emojis.
+
+### Refactoring Examples
+
+#### Higher-Order Functions
+
+In early versions of this project, something that I didn't use very much are higher-order functions. Some examples are in the `PlayerManager` class. Here's some old code for finding the count of players that are in the game:
+
+https://github.com/ncschroeder/Singletonopoly/blob/19bbbdd34e26252db5399f8cca1456611c915755/PlayerManager.kt#L138-L147
+
+In the current version, that count is found using `players.count { it.isInGame }`.
+
+Here's some old code for building a string that contains info about players:
+
+https://github.com/ncschroeder/Singletonopoly/blob/e5c09b1f3ce4883acd655f0636b6247a3b49c253/PlayerManager.kt#L142-L148
+
+Here's the current implementation:
+
+https://github.com/ncschroeder/Singletonopoly/blob/5698b1b60623068af849a7a02126efa571dba267/PlayerManager.kt#L22-L23
+
+#### Enums
+
+Another problem with early versions of this project was an inappropriate use of string literals. Namely, the non-property spaces that are now implemented as the `NonPropertySpace` enum used to be implemented with string literals. String literals were used by the `boardSpaces` array in the `Board` class like this: 
+
+```kotlin
+private val boardSpaces = arrayOf(
+    "Start",
+    ...
+    "Draw Action Card",
+    ...
+    "Break Time",
+    ...
+)
+```
+
+As a result of that, the `getBoardSpace` function would possibly return those strings and then the `evaluatePosition` function in the `Game` class would have to use string literals to check a result, as seen in this code snippet:
+
+https://github.com/ncschroeder/Singletonopoly/blob/19bbbdd34e26252db5399f8cca1456611c915755/Game.kt#L370-L385
+
+This is bad because of the possibility of typos. Since an enum is used now, typos aren't a problem since there'll be a compilation error if you misspell the name of an enum or one of its constants. Though, you don't even have to type out the enum or constant name. You can just start typing the enum name and then your IDE should display an autocomplete option with that name. You can select this and type a `.` and then your IDE should display autocomplete options with the enum constant names and you can select one.
+
+The `Board` object now has a `spacesMap` and the values of that map come from the elements of an array and some of these elements are instances of the `NonPropertySpace` enum like this:
+
+```kotlin
+private val spacesMap: Map<Int, Any> =
+    arrayOf(
+        NonPropertySpace.START,
+        ...
+        NonPropertySpace.DRAW_ACTION_CARD,
+        ...
+        NonPropertySpace.BREAK_TIME,
+        ...
+    )
+    ...
+```
+
+As a result of this, the `getSpace` function will possibly return a `NonPropertySpace` and then the `evaluatePosition` function can easily check if an instance of that got returned and which instance got returned, as seen in this code snippet:
+
+https://github.com/ncschroeder/Singletonopoly/blob/5698b1b60623068af849a7a02126efa571dba267/Game.kt#L372-L388
+
+</details>
+
 
 ## Manual
 
-There's a pie chart :pie: :chart_with_upwards_trend: and some flowcharts in this manual that are generated by the diagramming and charting tool Mermaid :mermaid: and were conveniently able to be added by adding some code to the Markdown. Here's a [*GitHub Docs* article on creating diagrams](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-diagrams) and here's the [Mermaid website](https://mermaid.js.org/).
+This manual has a lot of info about the game but virtually no info about the implementation of it. There's 15 sections, ~4,200 words, 7 lists, 5 tables, 3 flowcharts, 1 pie chart :pie: :chart_with_upwards_trend:, and ~40 emojis. :slightly_smiling_face:
+
+The flowcharts and pie chart are generated by the diagramming and charting tool Mermaid :mermaid: and were conveniently able to be added by adding some code to the Markdown. Here's a [*GitHub Docs* article on creating diagrams](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-diagrams) and here's the [Mermaid website](https://mermaid.js.org/).
 
 There are also some mathematical expressions in this manual that can be written with GitHub Markdown, such as $p + d \leq 41$. Here's a [*GitHub Docs* article on writing mathematical expressions](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/writing-mathematical-expressions).
 
@@ -45,7 +107,7 @@ All players start with :heavy_dollar_sign:4,096 (2<sup>12</sup>) and on position
 
 ### Playing the Game
 
-Throughout the game, the user is prompted to enter input. The valid input options will be shown. These are either a single integer, a group of 1 or more space-separated integers, or short sequences of characters. Like entering the names at the beginning, leading and trailing whitespace is ignored. However, the character sequence inputs are case-insensitive. For example, the input for a player to take their turn is “tt”. Valid inputs for this include but are not limited to “tt”, “ &nbsp; &nbsp; Tt &nbsp; &nbsp; ”, and “TT”.
+Throughout the game, the user is prompted to enter input. The valid input options will be shown. These are either a single integer, a group of 1 or more space-separated integers, or short sequences of characters. Like entering the names at the beginning, leading and trailing whitespace is ignored. However, the character sequence inputs are case-***in***sensitive. For example, the input for a player to take their turn is “tt”. Valid inputs for this include but are not limited to “tt”, “ &nbsp; &nbsp; Tt &nbsp; &nbsp; ”, and “TT”. If invalid input is entered, the text "Invalid input" will be displayed and new input will need to be entered.
 
 Before a player takes their turn, they have options to do other things.
 
@@ -79,6 +141,8 @@ There are 41 spaces:
 - Go On Vacation
 - Vacation
 
+Here's a pie chart that displays the percentages of each type of space:
+
 ```mermaid
 pie
     "Streets" : 24
@@ -93,9 +157,7 @@ pie
 
 The Start, Break Time, and Vacation spaces have no effect when landing on them. The effects of the other spaces are described in their section in this manual.
 
-#### All Spaces
-
-The spaces with streets have the street name displayed followed by their neighborhood.
+Here are all the spaces on the board. The spaces with streets have the street name displayed followed by their neighborhood.
     
 | Position | Space                        |
 | :------: | ---------------------------- |
@@ -144,15 +206,21 @@ The spaces with streets have the street name displayed followed by their neighbo
 
 ### Properties
 
-The 3 types of properties are super stores, golf clubs, and streets. These are all unowned at the beginning. If a player lands on an unowned property then they will have the option to buy it. If they want to buy it but don’t have enough money, they will be sent to the Money Getting Section and if they can gather the money, the property will be given to them. When a player lands on a property that is owned by someone else and unpawned, they will have to pay a fee to the owner. More info about fees are in the property type sections below. If a player can’t pay a fee, they will be sent to the Money Getting Section. If they decide to drop out, their money and properties will go to the player that owned the property.
+The 3 types of properties are super stores, golf clubs, and streets. There are subsections below that give more info about these. All properties are unowned at the beginning. If a player lands on an unowned property then they will have the option to buy it. If they want to buy it but don’t have enough money, they will be sent to the Money Getting Section and if they can gather the money, the property will be given to them. When a player lands on a property that is owned by someone else and unpawned, they will have to pay a fee to the owner. If a player can’t pay a fee, they will be sent to the Money Getting Section. If they decide to drop out, their money and properties will go to the player that owned the property.
 
-The names follow themes and these are revealed in the "Name Origins and Pronunciations" section below. Any time info about properties is displayed, the properties will first follow the order of super stores, golf clubs, and streets. The properties in each group will then be ordered by position on the board.
+The property names follow themes and these are revealed in the "Name Origins" collapsible sections in the property type subsections below. Any time info about properties is displayed, the properties will first follow the order of super stores, golf clubs, and streets. The properties in each group will then be ordered by position on the board.
 
 
 #### Super Stores &nbsp; :department_store:
 
 There are 2 super stores, Newton Super Store and Leibniz Super Store. Each one has a purchase price of :heavy_dollar_sign:512 (2<sup>9</sup>), a pawn price of :heavy_dollar_sign:256 (2<sup>8</sup>), and an unpawn price of :heavy_dollar_sign:282. The fee for a super store is a dice roll multiplied by either 8 or 16, 16 for if the owner of that super store owns the other super store as well and 8 for if they don’t.
 
+<details>
+<summary>Name Origins</summary>
+
+Isaac Newton and Gottfried Leibniz (pronounced *got-freed libe-nitz*) are mathematicians who invented and developed calculus.
+
+</details>
 
 #### Golf Clubs &nbsp; :golf: &nbsp; :golfing:
 
@@ -164,6 +232,13 @@ There are 4 golf clubs. The start of the names are "Granby", "Monett", "Neosho",
 |           2           |  128  |
 |           3           |  256  |
 |           4           |  512  |
+
+<details>
+<summary>Name Origins</summary>
+
+Granby, Monett, Neosho, and Aurora are towns along US Route 60 southwest of Springfield, MO. That is a stretch of highway I traveled down a few times during my time living in Springfield and attending Missouri State University.
+
+</details>
 
 
 #### Neighborhoods and Streets :motorway:
@@ -180,6 +255,38 @@ There are 24 streets around the board that are grouped into 8 neighborhoods. If 
 | Gauss        | Euler Avenue      | Ramanujan Street  | Euclid Avenue       |
 | Turing       | Dijkstra Street   | Knuth Street      | Ritchie Avenue      |
 | Hampton      | Chesapeake Avenue | Suffolk Avenue    | Norfolk Street      |
+
+<details>
+<summary>Name Origins</summary>
+
+Many of these names have pronunciations that aren’t obvious so I’ll do my best to spell out the pronunciation in parentheses.
+
+- The Vauxhall neighborhood is England themed. Vauxhall is a district in London. Victoria is a former British queen. Nottingham and Manchester are cities in England, though Manchester is also a St. Louis suburb and Manchester Road is also a road in the St. Louis area. The British English way of pronouncing Nottingham is *noddingum*.
+
+- Monrovia, Luanda, Kinshasa, and Lagos are cities in Africa. :earth_africa:
+
+- The Ozark neighborhood is Lake of the Ozarks themed. :speedboat: :bikini: :sunrise: :swimming_man: Camden County is where most of the lake and surrounding area is. Lake Shore Drive is a road in Chicago but goes with the theme. Osage Beach is one of the cities at the Lake of the Ozarks and there’s a real road there called Osage Beach Parkway.
+    
+- Augusta, Sullivan, Labadie, and Potosi are towns in east central Missouri, not far from Union, where I spent much of my life.
+
+- The Little Italy neighborhood is, of course, Italian themed. Ezio Auditore (*et-zee-o ow-de-toray*) is the protagonist in 3 *Assassin’s Creed* games. He’s from Florence in modern-day Italy. I say *modern-day* Italy because the games take place during the 1400s to 1500s and Italy as we know it today didn’t become a country until the 1800s, I think. Speaking of Florence, the Italian name for it is Firenze (*fee-rent-zay*) and the Italian name for Venice is Venezia (*venetzia*).
+
+- Carl Friedrich Gauss (Gauss rhymes with mouse), Leonhard Euler (*lay-o-nard oy-ler*), Srinivasa (similar to *slee-nee-vasa*) Ramanujan, and Euclid (not *oy-clid* but *you-clid*) are mathematicians. Euler is Swiss and Euclid is an ancient Greek which explains the different pronunciations of *eu*. Euclid Avenue is also a street in St. Louis. :fleur_de_lis:
+
+- Alan Turing, Edsger Dijkstra (*dike-struh*), Donald Knuth (*ka-newth*), and Dennis Ritchie are computer scientists.
+
+- Hampton, Chesapeake, Suffolk (*suff-ick*), and Norfolk (*nor-foke*) are cities in the Hampton Roads region of Eastern Virginia.
+
+</details>
+
+<details>
+<summary>Implementation Note</summary>
+
+This table looks similar to the `Neighborhood` enum constant declarations, as seen in this code snippet:
+
+https://github.com/ncschroeder/Singletonopoly/blob/5698b1b60623068af849a7a02126efa571dba267/Neighborhood.kt#L15-L23
+
+</details>
 
 Each neighborhood has a number associated with it and these are shown in one of the tables below. The purchase price of a street is its $\text{neighborhood number} \times 128 (2^7)$. The starting fee is the $\text{purchase price} \div 8$. This is what the fee is if the owner owns 1 or 2 of the streets in the corresponding neighborhood. If a player owns all 3 of the streets in a neighborhood, the fees for those streets increase and restaurants can be added to them. There can be a max of 5 restaurants on a street. The price to add a restaurant to a street is half of the purchase price. The money that a player gains when selling a restaurant back is half of the price that was paid to put that restaurant there. For neighborhoods where 1 player owns all streets, the streets have fees that are equal to the $\text{street starting fee} \times (2n + 2)$, where $n$ is the number of restaurants on that street. This gives us the following values:
 
@@ -204,31 +311,6 @@ All of this info, along with some info from the "Pawning" section, gives us the 
 | Gauss        |   6    |      768       |              384              |     423      |           192            |     96       |  192  |  384  |  576  |  768  |  960  | 1,152 |
 | Turing       |   7    |      896       |              448              |     494      |           224            |     112      |  224  |  448  |  672  |  896  | 1,120 | 1,344 |
 | Hampton      |   8    |     1,024      |              512              |     564      |           256            |     128      |  256  |  512  |  768  | 1,024 | 1,280 | 1,536 |
-
-
-#### Name Origins and Pronunciations
-
-Many of these have pronunciations that aren’t obvious so I’ll do my best to spell out the pronunciation in parentheses.
-
-- Isaac Newton and Gottfried Leibniz (*got-freed libe-nitz*) are mathematicians who invented and developed calculus.
-
-- Granby, Monett, Neosho, and Aurora are towns along US Route 60 southwest of Springfield, MO. That is a stretch of highway I traveled down a few times during my time living in Springfield and attending Missouri State University.
-
-- The Vauxhall neighborhood is England themed. Vauxhall is a district in London. Victoria is a former British queen. Nottingham and Manchester are cities in England, though Manchester is also a St. Louis suburb and Manchester Road is also a road in the St. Louis area. The British English way of pronouncing Nottingham is *noddingum*.
-
-- Monrovia, Luanda, Kinshasa, and Lagos are cities in Africa. :earth_africa:
-
-- The Ozark neighborhood is Lake of the Ozarks themed. :speedboat: :bikini: :sunrise: :swimming_man: Camden County is where most of the lake and surrounding area is. Lake Shore Drive is a road in Chicago but goes with the theme. Osage Beach is one of the cities at the Lake of the Ozarks and there’s a real road there called Osage Beach Parkway.
-    
-- Augusta, Sullivan, Labadie, and Potosi are towns in east central Missouri, not far from Union, where I spent much of my life.
-
-- The Little Italy neighborhood is, of course, Italian themed. Ezio Auditore (*et-zee-o ow-de-toray*) is the protagonist in 3 *Assassin’s Creed* games. He’s from Florence in modern-day Italy. I say *modern-day* Italy because the games take place during the 1400s to 1500s and Italy as we know it today didn’t become a country until the 1800s, I think. Speaking of Florence, the Italian name for it is Firenze (*fee-rent-zay*) and the Italian name for Venice is Venezia (*venetzia*).
-
-- Carl Friedrich Gauss (Gauss rhymes with mouse), Leonhard Euler (*lay-o-nard oy-ler*), Srinivasa (similar to *slee-nee-vasa*) Ramanujan, and Euclid (not *oy-clid* but *you-clid*) are mathematicians. Euler is Swiss and Euclid is an ancient Greek which explains the different pronunciations of *eu*. Euclid Avenue is also a street in St. Louis. :fleur_de_lis:
-
-- Alan Turing, Edsger Dijkstra (*dike-struh*), Donald Knuth (*ka-newth*), and Dennis Ritchie are computer scientists.
-
-- Hampton, Chesapeake, Suffolk (*suff-ick*), and Norfolk (*nor-foke*) are cities in the Hampton Roads region of Eastern Virginia.
 
 
 #### Pawning
