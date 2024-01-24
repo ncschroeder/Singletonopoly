@@ -10,10 +10,256 @@ Roll some dice, move around a board, and buy some properties. Get money from oth
 
 ## Language Used
 
-I did this project with the language Kotlin. It runs on the JVM and is similar to C#. As mentioned in the "Project History" section, I decided to use it because I had a little experience from using it for a school course. I'm glad I learned it and decided to use it. It's statically typed and has some neat features, such as null safety, smart casting, destructuring for some objects, the ability to name args, and an abundance of built-in functions (many of which are higher-order) to name a few. Here's a [*Kotlin Docs* article that gives a brief overview of syntax and some features of the language and has links to more detailed articles](https://kotlinlang.org/docs/basic-syntax.html). Here's the [documentation for the Kotlin Standard Library](https://kotlinlang.org/api/latest/jvm/stdlib/). You can use the menu on the left edge of either of these pages to access other documentation articles.
+I did this project with my now-favorite language Kotlin. At the time I started this project, I think my favorite language was Java :coffee:. I decided to use Kotlin because I had a little experience from using it for an Android development course in college. I'm glad I learned it and decided to use it.
 
-Lambdas are used often in this project and Kotlin has a pretty unique syntax for them. There's a *Kotlin Docs* article that goes over higher-order functions and lambdas. It starts off by going over a bit of general info about higher-order functions. Info about lambda syntax and features is in this article in the "Lambda expression syntax" section and the sections below that. Here's [the link to that article](https://kotlinlang.org/docs/lambdas.html). Other notable features used that aren't easily findable in the documentation include [object declarations (singletons)](https://kotlinlang.org/docs/object-declarations.html#object-declarations-overview), [destructuring](https://kotlinlang.org/docs/destructuring-declarations.html), and [scope functions](https://kotlinlang.org/docs/scope-functions.html).
+Kotlin is statically typed and similar to C# and Java in terms of features, though much of the syntax is different. I think Kotlin is more similar to C#; however, a notable similarity Kotlin has with Java is that Kotlin code can be compiled to Java bytecode! Kotlin code can also be compiled to native binaries or transpiled to front-end JavaScript.
 
+Here's a [Kotlin Docs article that gives a brief overview of syntax and some features of the language and has links to more detailed documentation articles](https://kotlinlang.org/docs/basic-syntax.html). You can also use the menu on the left edge of that page to access other articles. Here's the [Kotlin Standard Library documentation](https://kotlinlang.org/api/latest/jvm/stdlib/). If you go to the page for a class or function in the Standard Library, not only does that page describe the class or function but it also provides a link to the source code. Throughout the rest of the "Language Used" section, including the collapsible section below, I'll give some links to pages in the Kotlin Docs and Standard Library documentation.
+
+I like the features of Kotlin. Some of my favorite ones include [null safety](https://kotlinlang.org/docs/null-safety.html), [lambda features](https://kotlinlang.org/docs/lambdas.html#lambda-expressions-and-anonymous-functions) such as how `it` is the implicit param and the last expression is the return value, [extension functions](https://kotlinlang.org/docs/extensions.html#extension-functions), [destructuring](https://kotlinlang.org/docs/destructuring-declarations.html), and the ability to [name args when calling functions](https://kotlinlang.org/docs/functions.html#named-arguments). I also like the abundance of functions that the Standard Library provides. For example, if you go to [the `Iterable` page](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-iterable/), your scrollbar will get really short because of the amount of functions there are.
+
+More info about Kotlin features used in this project is in the collapsible section below.
+
+<details>
+<summary>More Info</summary>
+
+#### Destructuring
+
+This is done several times in this project. Any object can be configured to be able to be destructured and several built-in objects are configured this way. The objects that are destructured in this project are [`Map.Entry`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/-entry/)s and [`IndexedValue`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-indexed-value/)s. More info about destructuring can be found [here](https://kotlinlang.org/docs/destructuring-declarations.html).
+
+#### Object Declarations (Singletons)
+
+There are several object declarations used, including some companion objects. More info about these can be found [here](https://kotlinlang.org/docs/object-declarations.html#object-declarations-overview).
+
+#### Sealed Classes
+
+The `Property` class is sealed :zipper_mouth_face:. More info about sealed classes can be found [here](https://kotlinlang.org/docs/sealed-classes.html). The 3 subclasses of `Property` are `Street`, `GolfClub`, and `SuperStore`. The benefit to using a sealed class is in the `handleLandingOnProperty` function in the `Game` class. Part of that function is in the collapsible section below.
+
+<details>
+<summary>Part of `handleLandingOnProperty`</summary>
+
+```kotlin
+fun handleLandingOnProperty(property: Property) {
+    ...
+    val fee: Int
+    when (property) {
+        is Street -> {
+            fee = ...
+            ...
+        }
+        
+        is GolfClub -> {
+            ...
+            fee = ...
+            ...
+        }
+        
+        is SuperStore -> {
+            ...
+            fee = ...
+            ...
+        }
+    }
+    
+    // Do some stuff with fee.
+}
+```
+
+</details>
+
+Using a sealed class allows us to guarantee the compiler that `fee` will be set. If we didn't use a sealed class, we would have to do something such as initialize `fee` with `var fee = 0` instead of `val fee: Int` or have an `else` branch in the `when` statement and throw an exception or set `fee` to something in there.
+
+#### Extension Properties and Functions
+
+In the `Game` class, there are 2 extension properties for `Pair<Int, Int>`s, `bothAreSame` and `sum`. There's also 1 extension function for `Property` `List`s, `filterByPositions`. More info about extension properties and functions can be found [here](https://kotlinlang.org/docs/extensions.html).
+
+#### Lambdas
+
+These are often used in these problems. Info about lambda syntax and features can be found [here](https://kotlinlang.org/docs/lambdas.html#lambda-expressions-and-anonymous-functions).
+
+#### Scope Functions
+
+The functions [`let`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/let.html), [`run`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/run.html), [`also`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/also.html), [`apply`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/apply.html), and [`with`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/with.html) are known as *scope functions* and these are a special type of higher-order function. `let`, `run`, and `apply` are occasionally used in this project, with `let` being the most frequently used. I used `let` to reduce variable usage; `run` to easily access multiple properties of an object; and `apply` to easily create an object, immediately modify it, and store it to a variable. Examples are shown in the collapsible section below. More info about scope functions can be found [here](https://kotlinlang.org/docs/scope-functions.html).
+
+<details>
+<summary>Examples</summary>
+
+##### `let` and `apply`
+
+Both of these functions are used in the initialization of `cardsDeque` at the beginning of the `ActionDeck` class:
+
+```kotlin
+private val cardsDeque: ArrayDeque<ActionCard> =
+    listOf(
+        MoneyGainCard(gainAmount = 128),
+        MoneyGainCard(gainAmount = 256),
+        MoneyLossCard(lossAmount = 128),
+        MoneyLossCard(lossAmount = 256),
+        // 14 more ActionCards
+    )
+    .let { ArrayDeque(elements = it) }
+    .apply { shuffle() }
+```
+
+First, ***let's*** focus on `let` and ignore `apply`. The use of `let` in the code above is an alternative to using the code in the following 2 code blocks:
+
+```kotlin
+private val cardsDeque: ArrayDeque<ActionCard> =
+    ArrayDeque(elements =
+        listOf(
+            MoneyGainCard(gainAmount = 128),
+            MoneyGainCard(gainAmount = 256),
+            MoneyLossCard(lossAmount = 128),
+            MoneyLossCard(lossAmount = 256),
+            // 14 more ActionCards
+        )
+    )
+```
+
+```kotlin
+private val cardsDeque: ArrayDeque<ActionCard>
+
+init {
+    val cards: List<ActionCard> =
+        listOf(
+            MoneyGainCard(gainAmount = 128),
+            MoneyGainCard(gainAmount = 256),
+            MoneyLossCard(lossAmount = 128),
+            MoneyLossCard(lossAmount = 256),
+            // 14 more ActionCards
+        )
+
+    cardsDeque = ArrayDeque(elements = cards)
+}
+```
+
+Now, let's focus on `apply`. The use of that function in the first code block is an alternative to:
+
+```kotlin
+private val cardsDeque: ArrayDeque<ActionCard> =
+    listOf(
+        MoneyGainCard(gainAmount = 128),
+        MoneyGainCard(gainAmount = 256),
+        MoneyLossCard(lossAmount = 128),
+        MoneyLossCard(lossAmount = 256),
+        // 14 more ActionCards
+    )
+    .let { ArrayDeque(elements = it) }
+
+init {
+    cardsDeque.shuffle()
+}
+```
+
+Another use of `let` is to run some code if a value isn't null after using the [safe call operator (`?.`)](https://kotlinlang.org/docs/null-safety.html#safe-calls). For example, the code below is in the `init` function in the `Game` class. `playerManager.winnerName` returns a nullable string, or `String?`.
+
+https://github.com/ncschroeder/Singletonopoly/blob/f7f36ed663e525ec426db4073581b018c850436e/Game.kt#L95-L96
+
+This is an alternative to:
+
+```kotlin
+val winnerName: String? = playerManager.winnerName
+if (winnerName != null) {
+    println("The winner is $winnerName!")
+}
+```
+
+##### `run`
+
+The beginning of the `rollDiceAndMove` function in the `Game` class is:
+
+https://github.com/ncschroeder/Singletonopoly/blob/f7f36ed663e525ec426db4073581b018c850436e/Game.kt#L333-L335
+
+This is an alternative to:
+
+```kotlin
+val diceRoll: Pair<Int, Int> = getDiceRoll()
+println("${currentPlayer.name} rolled a ${diceRoll.first} and a ${diceRoll.second}, for a total of ${diceRoll.sum}." )
+```
+
+</details>
+
+#### Functions with Receivers
+
+The `run`, `apply`, and `with` scope functions have a param named `block` and the type of it is `T.() -> Unit`, where `T` is a type param. The [`buildList`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/build-list.html) function has a param named `builderAction` and the type of it is `MutableList<E>.() -> Unit`, where `E` is a type param. These types are functions with a receiver and the receiver type is the type before the `.()`. This type of function can be created with a lambda and inside that lambda, you can access members of the receiver type without needing an instance of that type. For example, a usage of `buildList` in the `GolfClub` class can be seen in the collapsible section below.
+
+<details>
+<summary>`buildList` Usage</summary>
+
+https://github.com/ncschroeder/Singletonopoly/blob/f7f36ed663e525ec426db4073581b018c850436e/GolfClub.kt#L56-L67
+
+`add` is a [`MutableList`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-mutable-list/) function that would otherwise be called like `someMutableList.add(...)`.
+
+</details>
+
+`buildList` is also used in the `Neighborhood` and `PropertyManager` classes.
+
+More info about functions with receivers can be found [here](https://kotlinlang.org/docs/lambdas.html#function-types) and [here](https://kotlinlang.org/docs/lambdas.html#function-literals-with-receiver).
+
+#### Eager and Lazy Collection Operations
+
+Some collection operations, such as mapping and filtering, can be either eagerly or lazily evaluated. If one of those operations is performed on an [`Iterable`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-iterable/), [`Array`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/), [`String`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/), [`CharSequence`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-char-sequence/), or [`Map`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/); it'll be eagerly evaluated and if performed on a [`Sequence`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.sequences/-sequence/), it'll be lazily evaluated. `Iterable` and `Sequence` are interfaces that have a type param `T` and require an implementation of `operator fun iterator(): Iterator<T>`. The same operations can be performed on iterables and sequences and many of those operations can also be performed on arrays, strings, char sequences, and maps. `Iterable` is the interface that types such as [`List`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/), [`Set`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-set/), and [`IntRange`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.ranges/-int-range/) implement. As implied a few sentences ago; arrays, strings, char sequences, and maps aren't iterables. An iterable, array, string, char sequence, or map can be converted to a sequence by using the [`asSequence`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/as-sequence.html) function, though there are a few other ways to create a sequence.
+
+Here's [an article that mostly goes over sequences and lazy evaluation but also goes over iterables and eager evaluation](https://kotlinlang.org/docs/sequences.html).
+
+A good question is: when should eager evaluation be used and when should lazy evaluation be used? There's not a clear answer to that. The 4<sup>th</sup> paragraph of the article linked above gives some info about that. Here's that paragraph:
+
+> So, the sequences let you avoid building results of intermediate steps, therefore improving the performance of the whole collection processing chain. However, the lazy nature of sequences adds some overhead which may be significant when processing smaller collections or doing simpler computations. Hence, you should consider both `Sequence` and `Iterable` and decide which one is better for your case.
+
+In this project, there are several times when collection multi-step processing is done but the amount of elements involved in the intermediate steps is small. For this reason, I decided to do that processing with iterables, arrays, strings, and maps; which results in eager evaluation and intermediate collections. Some examples are shown in the collapsible section below.
+
+<details>
+<summary>Collection Multi-Step Processing Examples</summary>
+
+##### Example 1
+
+Here's the `getPropertiesOwnedBy` function in the `PropertyManager` object:
+
+https://github.com/ncschroeder/Singletonopoly/blob/f7f36ed663e525ec426db4073581b018c850436e/PropertyManager.kt#L24-L25
+
+The list returned by this will contain at most 30 elements and is used as an intermediate collection half the time. Here's some code in the `Game` class for finding the number of restaurants a player owns:
+
+```kotlin
+fun handleLandingOnDrawActionCard() {
+    val topCard: ActionCard = actionDeck.topCard
+    ...     
+    when (topCard) {
+        ...
+        is PropertyMaintenanceCard -> {
+            val numRestaurantsOwned: Int =
+                PropertyManager.getPropertiesOwnedBy(currentPlayer)
+                .filterIsInstance<Street>()
+                .sumOf { it.numRestaurants }
+            ...
+        }
+        ...
+    }
+}
+```
+
+`filterIsInstance<Street>()` returns another list, which will contain at most 24 elements and is another intermediate collection. If I decided to use sequences, I would have `getPropertiesOwnedBy` return a sequence with `allProperties.asSequence().filter { it.owner == player }`. Then, when finding the number of restaurants a player owns, `filterIsInstance<Street>()` would return a sequence.
+
+##### Example 2
+
+Here's the `filterByPositions` extension function in the `Game` class:
+
+https://github.com/ncschroeder/Singletonopoly/blob/f7f36ed663e525ec426db4073581b018c850436e/Game.kt#L883-L897
+
+In the code above, `split` and `mapNotNull` return lists. If I decided to use sequences, I would use:
+
+```kotlin
+val inputInts: Set<Int> =
+    positionsInput
+    .splitToSequence(Regex(" +"))
+    .mapNotNull { it.toIntOrNull() }
+    .toSet()
+```
+
+In the code above, `splitToSequence` and `mapNotNull` return sequences.
+
+</details>
+
+</details>
 
 ## Project History
 
