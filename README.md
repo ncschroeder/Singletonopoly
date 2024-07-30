@@ -464,7 +464,7 @@ There are 2 super stores, Newton Super Store and Leibniz Super Store. Each one h
 <details>
 <summary>Name Origins</summary>
 
-Isaac Newton and Gottfried Leibniz (pronounced *got-freed libe-nitz*) are mathematicians who invented and developed calculus.
+[Isaac Newton](https://en.wikipedia.org/wiki/Isaac_Newton) and [Gottfried Leibniz](https://en.wikipedia.org/wiki/Gottfried_Wilhelm_Leibniz) were mathematicians who invented and developed calculus.
 
 </details>
 
@@ -482,7 +482,9 @@ There are 4 golf clubs. The start of the names are "Granby", "Monett", "Neosho",
 <details>
 <summary>Name Origins</summary>
 
-Granby, Monett, Neosho, and Aurora are towns along US Route 60 southwest of Springfield, MO. That is a stretch of highway I traveled down a few times during my time living in Springfield and attending Missouri State University.
+[Granby](https://en.wikipedia.org/wiki/Granby,_Missouri), [Monett](https://en.wikipedia.org/wiki/Monett,_Missouri), [Neosho](https://en.wikipedia.org/wiki/Neosho,_Missouri), and [Aurora](https://en.wikipedia.org/wiki/Aurora,_Missouri) are Missouri towns along [US Route 60](https://en.wikipedia.org/wiki/U.S._Route_60_in_Missouri) southwest of [Springfield](https://en.wikipedia.org/wiki/Springfield,_Missouri). That's a route I traveled on a few times during my time living in Springfield and attending Missouri State University.
+
+![Southwestern Missouri Map](/Images/SW_Missouri_Map.JPG)
 
 </details>
 
@@ -505,23 +507,39 @@ There are 24 streets around the board that are grouped into 8 neighborhoods. If 
 <details>
 <summary>Name Origins</summary>
 
-Many of these names have pronunciations that aren’t obvious so I’ll do my best to spell out the pronunciation in parentheses.
+- The Vauxhall neighborhood is England themed. Vauxhall is a [district in London](https://en.wikipedia.org/wiki/Vauxhall) and an [English car company](https://en.wikipedia.org/wiki/Vauxhall_Motors). [Victoria](https://en.wikipedia.org/wiki/Queen_Victoria) was a British queen. [Nottingham](https://en.wikipedia.org/wiki/Nottingham) and [Manchester](https://en.wikipedia.org/wiki/Manchester) are cities in England, though Manchester is also a St. Louis suburb and Manchester Road is also a road in the St. Louis area.
 
-- The Vauxhall neighborhood is England themed. Vauxhall is a district in London. Victoria is a former British queen. Nottingham and Manchester are cities in England, though Manchester is also a St. Louis suburb and Manchester Road is also a road in the St. Louis area. The British English way of pronouncing Nottingham is *noddingum*.
+In the map below, the red dots form the outline of Vauxhall.
 
-- Monrovia, Luanda, Kinshasa, and Lagos are cities in Africa. :earth_africa:
+![Vauxhall Map](/Images/Vauxhall_Map.JPG)
 
-- The Ozark neighborhood is Lake of the Ozarks themed. :speedboat: :bikini: :sunrise: :swimming_man: Camden County is where most of the lake and surrounding area is. Lake Shore Drive is a road in Chicago but goes with the theme. Osage Beach is one of the cities at the Lake of the Ozarks and there’s a real road there called Osage Beach Parkway.
+![England Map](/Images/England_Map.JPG)
+
+- [Monrovia, Liberia](https://en.wikipedia.org/wiki/Monrovia), [Luanda, Angola](https://en.wikipedia.org/wiki/Luanda), [Kinshasa, Democratic Republic of the Congo](https://en.wikipedia.org/wiki/Kinshasa), and [Lagos, Nigeria](https://en.wikipedia.org/wiki/Lagos) are cities in Africa. :earth_africa: Fun fact: Monrovia was named after 6<sup>th</sup> U.S. president James Monroe.
+
+![Africa Map](/Images/Africa_Map.JPG)
+
+- The Ozark neighborhood is [Lake of the Ozarks](https://en.wikipedia.org/wiki/Lake_of_the_Ozarks) themed. :speedboat: :bikini: :sunrise: :swimming_man: [Camden County](https://en.wikipedia.org/wiki/Camden_County,_Missouri) is where most of the lake and surrounding area is. [Lake Shore Drive](https://en.wikipedia.org/wiki/Lake_Shore_Drive) is a road in Chicago but goes with the theme. [Osage Beach](https://en.wikipedia.org/wiki/Osage_Beach,_Missouri) is a city by the lake and there’s a road there called Osage Beach Parkway.
+
+In the map below, the red dots form the outline of Camden County.
+
+![Lake of the Ozarks Map](/Images/Lake_of_the_Ozarks_Map.JPG)
     
-- Augusta, Sullivan, Labadie, and Potosi are towns in east central Missouri, not far from Union, where I spent much of my life.
+- [Augusta](https://en.wikipedia.org/wiki/Augusta,_Missouri), [Sullivan](https://en.wikipedia.org/wiki/Sullivan,_Missouri), [Labadie](https://en.wikipedia.org/wiki/Labadie,_Missouri), and [Potosi](https://en.wikipedia.org/wiki/Potosi,_Missouri) are towns in east central Missouri, not far from [Union](https://en.wikipedia.org/wiki/Union,_Missouri), where I spent much of my life.
 
-- The Little Italy neighborhood is, of course, Italian themed. Ezio Auditore (*et-zee-o ow-de-toray*) is the protagonist in 3 *Assassin’s Creed* games. He’s from Florence in modern-day Italy. I say *modern-day* Italy because the games take place during the 1400s to 1500s and Italy as we know it today didn’t become a country until the 1800s, I think. Speaking of Florence, the Italian name for it is Firenze (*fee-rent-zay*) and the Italian name for Venice is Venezia (*venetzia*).
+![Eastern Missouri Map](/Images/Eastern_Missouri_Map.JPG)
 
-- Carl Friedrich Gauss (Gauss rhymes with mouse), Leonhard Euler (*lay-o-nard oy-ler*), Srinivasa (similar to *slee-nee-vasa*) Ramanujan, and Euclid (not *oy-clid* but *you-clid*) are mathematicians. Euler is Swiss and Euclid is an ancient Greek which explains the different pronunciations of *eu*. Euclid Avenue is also a street in St. Louis. :fleur_de_lis:
+- The Little Italy neighborhood is, of course, Italian themed. [Ezio Auditore da Firenze](https://en.wikipedia.org/wiki/Ezio_Auditore_da_Firenze) is the protagonist in 3 [*Assassin’s Creed*](https://en.wikipedia.org/wiki/Assassin%27s_Creed) games and is from Florence. [Florence](https://en.wikipedia.org/wiki/Florence) and [Venice](https://en.wikipedia.org/wiki/Venice) are cities in modern-day Italy and the Italian names for them are Firenze and Venezia, respectively.
 
-- Alan Turing, Edsger Dijkstra (*dike-struh*), Donald Knuth (*ka-newth*), and Dennis Ritchie are computer scientists.
+![Italy Map](/Images/Italy_Map.JPG)
 
-- Hampton, Chesapeake, Suffolk (*suff-ick*), and Norfolk (*nor-foke*) are cities in the Hampton Roads region of Eastern Virginia.
+- [Carl Friedrich Gauss](https://en.wikipedia.org/wiki/Carl_Friedrich_Gauss), [Leonhard Euler](https://en.wikipedia.org/wiki/Leonhard_Euler), [Srinivasa Ramanujan](https://en.wikipedia.org/wiki/Srinivasa_Ramanujan), and [Euclid](https://en.wikipedia.org/wiki/Euclid) are mathematicians. Euclid Avenue is also a street in St. Louis. :fleur_de_lis:
+
+- [Alan Turing](https://en.wikipedia.org/wiki/Alan_Turing), [Edsger Dijkstra](https://en.wikipedia.org/wiki/Edsger_W._Dijkstra), [Donald Knuth](https://en.wikipedia.org/wiki/Donald_Knuth), and [Dennis Ritchie](https://en.wikipedia.org/wiki/Dennis_Ritchie) are computer scientists.
+
+- [Hampton](https://en.wikipedia.org/wiki/Hampton,_Virginia), [Chesapeake](https://en.wikipedia.org/wiki/Chesapeake,_Virginia), [Suffolk](https://en.wikipedia.org/wiki/Suffolk,_Virginia), and [Norfolk](https://en.wikipedia.org/wiki/Norfolk,_Virginia) are cities in the [Hampton Roads region of eastern Virginia](https://en.wikipedia.org/wiki/Hampton_Roads).
+
+![Hampton Roads Map](/Images/Hampton_Roads_Map.JPG)
 
 </details>
 
