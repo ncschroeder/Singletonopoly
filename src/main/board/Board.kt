@@ -1,3 +1,7 @@
+package singletonopoly.board
+
+import singletonopoly.board.properties.*
+
 object Board {
     /**
      * Has values that are NonPropertySpaces and Properties that represent spaces. The keys are the positions

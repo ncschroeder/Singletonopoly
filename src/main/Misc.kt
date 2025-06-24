@@ -1,3 +1,8 @@
+package singletonopoly
+
+import java.text.DecimalFormat
+import kotlin.math.absoluteValue
+
 // This file has a couple functions that are used in multiple classes.
 
 /**

@@ -1,3 +1,8 @@
+package singletonopoly.board.properties
+
+import singletonopoly.board.Board
+import singletonopoly.players.Player
+
 /**
  * Used for querying and updating properties, though this object isn't the only thing that does those actions.
  */

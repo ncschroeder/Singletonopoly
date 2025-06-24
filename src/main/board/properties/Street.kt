@@ -1,3 +1,5 @@
+package singletonopoly.board.properties
+
 class Street(name: String, val neighborhood: Neighborhood) : Property(name) {
     override val purchasePrice: Int
         get() = neighborhood.streetPurchasePrice

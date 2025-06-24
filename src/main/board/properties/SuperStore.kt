@@ -1,3 +1,5 @@
+package singletonopoly.board.properties
+
 class SuperStore private constructor(name: String) : Property(name) {
     override val currentFeeString
         get() =

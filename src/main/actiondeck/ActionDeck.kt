@@ -1,3 +1,7 @@
+package singletonopoly.actiondeck
+
+import java.util.ArrayDeque
+
 class ActionDeck {
     private val cardsDeque: ArrayDeque<ActionCard> =
         listOf(
@@ -25,7 +29,7 @@ class ActionDeck {
     
     val topCard: ActionCard
         get() = cardsDeque.first()
-
+    
     /**
      * Makes it so that the card that used to be the top card is now the bottom card and the card that used to be
      * 2nd from the top is now the top card.
@@ -33,7 +37,7 @@ class ActionDeck {
     fun moveTopCardToBottom() {
         cardsDeque.addLast(cardsDeque.removeFirst())
     }
-
+    
     fun removeGetOffVacationCardAtTop() {
         if (topCard is GetOffVacationFreeCard) {
             cardsDeque.removeFirst()
@@ -44,7 +48,7 @@ class ActionDeck {
             )
         }
     }
-
+    
     fun insertGetOffVacationCardAtBottom() {
         cardsDeque.addLast(GetOffVacationFreeCard)
     }

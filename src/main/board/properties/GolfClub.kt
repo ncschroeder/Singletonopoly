@@ -1,3 +1,5 @@
+package singletonopoly.board.properties
+
 class GolfClub private constructor(name: String) : Property(name) {
     /**
      * Fees for golf clubs are determined by how many golf clubs are owned by the player that owns a golf
@@ -20,7 +22,7 @@ class GolfClub private constructor(name: String) : Property(name) {
     
     override val currentFeeString
         get() = "$${FeeData().fee}"
-
+    
     companion object Manager {
         val allClubs: List<GolfClub> =
             arrayOf("Granby", "Monett", "Neosho", "Aurora")

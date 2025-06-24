@@ -1,3 +1,7 @@
+package singletonopoly.players
+
+import singletonopoly.board.Board
+
 class Player(val name: String) {
     var position = 1
     

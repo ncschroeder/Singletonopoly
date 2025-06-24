@@ -1,4 +1,7 @@
+package singletonopoly.board.properties
+
 import kotlin.math.roundToInt
+import singletonopoly.players.Player
 
 /**
  * Superclass for SuperStore, GolfClub, and Street classes.

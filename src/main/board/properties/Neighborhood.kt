@@ -1,3 +1,5 @@
+package singletonopoly.board.properties
+
 /**
  * Class with a list of streets in a neighborhood. Some members of this class access the streets in that list.
  * For example, onePlayerOwnsAllStreets and numRestaurants. Some members are for things that are shared among
@@ -31,13 +33,13 @@ enum class Neighborhood(street1Name: String, street2Name: String, street3Name: S
     val street1: Street get() = streets[0]
     val street2: Street get() = streets[1]
     val street3: Street get() = streets[2]
-
+    
     val streetPurchasePrice: Int = (ordinal + 1) * 128
     val streetStartingFee: Int = streetPurchasePrice / 8
     
     val onePlayerOwnsAllStreets: Boolean
         get() = street1.owner.let { it != null && it == street2.owner && it == street3.owner }
-
+    
     fun getStreetFeeWhen1PlayerOwnsAllStreets(numRestaurants: Int): Int =
         streetStartingFee
         .times(
@@ -57,7 +59,7 @@ enum class Neighborhood(street1Name: String, street2Name: String, street3Name: S
     
     val restaurantAddPrice: Int = streetPurchasePrice / 2
     val restaurantRemoveGain: Int = restaurantAddPrice / 2
-
+    
     val numRestaurants: Int
         get() = streets.sumOf { it.numRestaurants }
     
@@ -88,7 +90,7 @@ enum class Neighborhood(street1Name: String, street2Name: String, street3Name: S
             streets.forEach { add(it.basicInfo) }
         }
         .joinTo(StringBuilder(), separator = "\n")
-
+    
     
     companion object Manager {
         fun getAllStreets(): List<Street> = values().flatMap { it.streets }

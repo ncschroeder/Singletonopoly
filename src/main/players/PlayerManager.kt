@@ -1,3 +1,5 @@
+package singletonopoly.players
+
 class PlayerManager(playerNames: List<String>) {
     private val players: List<Player> = playerNames.map(::Player)
     private var currentPlayerIndex = 0

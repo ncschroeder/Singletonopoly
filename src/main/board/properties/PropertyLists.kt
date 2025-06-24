@@ -1,3 +1,7 @@
+package singletonopoly.board.properties
+
+import singletonopoly.players.Player
+
 /**
  * Class with lists of properties owned by a player that can have certain things done to them, as well as booleans
  * for checking if those lists are empty.

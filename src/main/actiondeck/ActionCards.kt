@@ -1,4 +1,7 @@
+package singletonopoly.actiondeck
+
 import kotlin.math.absoluteValue
+import singletonopoly.board.properties.PropertyManager
 
 /*
 This file has the ActionCard abstract class and all its subclasses and objects that inherit from it.
