@@ -107,3 +107,37 @@ enum class Neighborhood(street1Name: String, street2Name: String, street3Name: S
             )
     }
 }
+
+/*
+The code below is used to generate the rows for the 3rd table in the Properties -> Neighborhoods and Streets
+section in the manual in the README.
+ */
+/*
+import singletonopoly.Misc.toMoneyString
+
+fun Neighborhood.getMarkdownTableRow(): String =
+    buildList {
+        add(friendlyName)
+        add(ordinal + 1)
+        
+        arrayOf(
+            streetPurchasePrice,
+            street1.pawnPrice,
+            street1.unpawnPrice,
+            restaurantRemoveGain,
+            streetStartingFee
+        )
+        .forEach { add(it.toMoneyString()) }
+        
+        for (numRestaurants in 0..5) {
+            add(getStreetFeeWhenOnePlayerOwnsAllStreets(numRestaurants).toMoneyString())
+        }
+    }
+    .joinToString(prefix = "| ", separator = " | ", postfix = " |")
+
+fun main() {
+    for (n in Neighborhood.entries) {
+        println(n.getMarkdownTableRow())
+    }
+}
+ */

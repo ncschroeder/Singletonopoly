@@ -565,16 +565,18 @@ Each neighborhood has a number associated with it and these are shown in one of 
 
 All of this info, along with some info from the "Pawning" section, gives us the following values. The last 6 columns are for the fees for a street in a neighborhood where 1 player owns all streets. The column headings are for how many restaurants are on that street.
 
-| Neighborhood | Number | Purchase Price | Pawn and Restaurant Add Price | Unpawn Price | Restaurant Removal Price | Starting Fee |   0   |   1   |   2   |   3   |   4   |   5   |
-| ------------ | :----: | :------------: | :---------------------------: | :----------: | :----------------------: | :----------: | :---: | :---: | :---: | :---: | :---: | :---: |
-| Vauxhall     |   1    |      128       |              64               |     71       |           32             |     16       |  32   |  64   |  96   |  128  |  160  |  192  |
-| Monrovia     |   2    |      256       |              128              |     141      |           64             |     32       |  64   |  128  |  192  |  256  |  320  |  384  |
-| Ozark        |   3    |      384       |              192              |     212      |           96             |     48       |  96   |  192  |  288  |  384  |  480  |  576  |
-| Augusta      |   4    |      512       |              256              |     282      |           128            |     64       |  128  |  256  |  384  |  512  |  640  |  768  |
-| Little Italy |   5    |      640       |              320              |     353      |           160            |     80       |  160  |  320  |  480  |  640  |  800  |  960  |
-| Gauss        |   6    |      768       |              384              |     423      |           192            |     96       |  192  |  384  |  576  |  768  |  960  | 1,152 |
-| Turing       |   7    |      896       |              448              |     494      |           224            |     112      |  224  |  448  |  672  |  896  | 1,120 | 1,344 |
-| Hampton      |   8    |     1,024      |              512              |     564      |           256            |     128      |  256  |  512  |  768  | 1,024 | 1,280 | 1,536 |
+| Neighborhood | Number | Purchase Price | Pawn and Restaurant Add Price | Unpawn Price | Restaurant Removal Gain | Starting Fee |   0   |   1   |   2   |   3   |   4   |   5   |
+| ------------ | :----: | :------------: | :---------------------------: | :----------: | :---------------------: | :----------: | :---: | :---: | :---: | :---: | :---: | :---: |
+| Vauxhall | 1 | $128 | $64 | $71 | $32 | $16 | $32 | $64 | $96 | $128 | $160 | $192 |
+| Monrovia | 2 | $256 | $128 | $141 | $64 | $32 | $64 | $128 | $192 | $256 | $320 | $384 |
+| Ozark | 3 | $384 | $192 | $212 | $96 | $48 | $96 | $192 | $288 | $384 | $480 | $576 |
+| Augusta | 4 | $512 | $256 | $282 | $128 | $64 | $128 | $256 | $384 | $512 | $640 | $768 |
+| Little Italy | 5 | $640 | $320 | $353 | $160 | $80 | $160 | $320 | $480 | $640 | $800 | $960 |
+| Gauss | 6 | $768 | $384 | $423 | $192 | $96 | $192 | $384 | $576 | $768 | $960 | $1,152 |
+| Turing | 7 | $896 | $448 | $494 | $224 | $112 | $224 | $448 | $672 | $896 | $1,120 | $1,344 |
+| Hampton | 8 | $1,024 | $512 | $564 | $256 | $128 | $256 | $512 | $768 | $1,024 | $1,280 | $1,536 |
+
+The Markdown for the rows of the table above was generated programmatically by the code at the end of Neighborhood.kt that's now commented out.
 
 
 #### Pawning
