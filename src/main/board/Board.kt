@@ -14,43 +14,42 @@ object Board {
             Neighborhood.VAUXHALL.street1,      // 2
             Neighborhood.VAUXHALL.street2,      // 3
             Neighborhood.VAUXHALL.street3,      // 4
-            GolfClub.club1,                     // 5
-            Neighborhood.MONROVIA.street1,      // 6
-            NonPropertySpace.DRAW_ACTION_CARD,  // 7
-            Neighborhood.MONROVIA.street2,      // 8
-            Neighborhood.MONROVIA.street3,      // 9
-            SuperStore.store1,                  // 10
-            NonPropertySpace.BREAK_TIME,        // 11
-            Neighborhood.OZARK.street1,         // 12
+            GolfClub.neoshoClub,                // 5
+            NonPropertySpace.DRAW_ACTION_CARD,  // 6
+            Neighborhood.MONROVIA.street1,      // 7
+            SuperStore.newtonStore,             // 8
+            Neighborhood.MONROVIA.street2,      // 9
+            Neighborhood.MONROVIA.street3,      // 10
+            Neighborhood.OZARK.street1,         // 11
+            NonPropertySpace.BREAK_TIME,        // 12
             Neighborhood.OZARK.street2,         // 13
-            NonPropertySpace.DRAW_ACTION_CARD,  // 14
-            Neighborhood.OZARK.street3,         // 15
-            Neighborhood.AUGUSTA.street1,       // 16
-            NonPropertySpace.VACATION,          // 17
-            Neighborhood.AUGUSTA.street2,       // 18
-            GolfClub.club2,                     // 19
-            Neighborhood.AUGUSTA.street3,       // 20
-            Neighborhood.LITTLE_ITALY.street1,  // 21
-            NonPropertySpace.DRAW_ACTION_CARD,  // 22
-            Neighborhood.LITTLE_ITALY.street2,  // 23
-            Neighborhood.LITTLE_ITALY.street3,  // 24
-            GolfClub.club3,                     // 25
-            Neighborhood.GAUSS.street1,         // 26
-            Neighborhood.GAUSS.street2,         // 27
-            NonPropertySpace.DRAW_ACTION_CARD,  // 28
+            Neighborhood.OZARK.street3,         // 14
+            Neighborhood.AUGUSTA.street1,       // 15
+            NonPropertySpace.DRAW_ACTION_CARD,  // 16
+            Neighborhood.AUGUSTA.street2,       // 17
+            GolfClub.granbyClub,                // 18
+            Neighborhood.AUGUSTA.street3,       // 19
+            Neighborhood.LITTLE_ITALY.street1,  // 20
+            NonPropertySpace.VACATION,          // 21
+            Neighborhood.LITTLE_ITALY.street2,  // 22
+            Neighborhood.LITTLE_ITALY.street3,  // 23
+            NonPropertySpace.DRAW_ACTION_CARD,  // 24
+            GolfClub.monettClub,                // 25
+            NonPropertySpace.GO_ON_VACATION,    // 26
+            Neighborhood.GAUSS.street1,         // 27
+            Neighborhood.GAUSS.street2,         // 28
             Neighborhood.GAUSS.street3,         // 29
             NonPropertySpace.BREAK_TIME,        // 30
-            NonPropertySpace.GO_ON_VACATION,    // 31
-            Neighborhood.TURING.street1,        // 32
+            Neighborhood.TURING.street1,        // 31
+            NonPropertySpace.DRAW_ACTION_CARD,  // 32
             Neighborhood.TURING.street2,        // 33
-            SuperStore.store2,                  // 34
-            NonPropertySpace.DRAW_ACTION_CARD,  // 35
-            Neighborhood.TURING.street3,        // 36
-            Neighborhood.HAMPTON.street1,       // 37
-            GolfClub.club4,                     // 38
-            NonPropertySpace.DRAW_ACTION_CARD,  // 39
-            Neighborhood.HAMPTON.street2,       // 40
-            Neighborhood.HAMPTON.street3        // 41
+            SuperStore.leibnizStore,            // 34
+            Neighborhood.TURING.street3,        // 35
+            Neighborhood.HAMPTON.street1,       // 36
+            GolfClub.auroraClub,                // 37
+            NonPropertySpace.DRAW_ACTION_CARD,  // 38
+            Neighborhood.HAMPTON.street2,       // 39
+            Neighborhood.HAMPTON.street3        // 40
         )
         .withIndex()
         .associate { (index: Int, space: Any) -> index + 1 to space }

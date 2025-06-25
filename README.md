@@ -371,17 +371,17 @@ Things that can conditionally be done if the player has at least 1 property wher
 - Add restaurants to streets
 - Remove restaurants from streets
 
-When a player decides to take their turn, 2 dice will be rolled for them. :game_die: :game_die: I'm going to use the variables $p$ to represent the player’s current position and $d$ to represent the sum of the values of the dice. As mentioned in the "The Board" section, there are 41 board spaces. If $p + d \leq 41$, then the player will be placed at position $(p + d)$. If $p + d > 41$, then the player has made a revolution around the board and their new position is equal to the difference between $(p + d)$ and $41$. For example, if $p + d = 42$, then the new position is 1, since the difference between 42 and 41 is 1. After a revolution, a player gains :heavy_dollar_sign:512. The player's new position will be evaluated and appropriate action will be taken. If the values of both dice are the same, also called rolling doubles, that player gets to go again. If a player rolls doubles thrice, or 3 times, in a row, that player will be sent to Vacation.
+When a player decides to take their turn, 2 dice will be rolled for them. :game_die: :game_die: I'm going to use the variables $p$ to represent the player’s current position and $d$ to represent the sum of the values of the dice. As mentioned in the "The Board" section, there are 40 board spaces. If $p + d \leq 40$, then the player will be placed at position $(p + d)$. If $p + d > 40$, then the player has made a revolution around the board and their new position is equal to the difference between $(p + d)$ and $40$. For example, if $p + d = 42$, then the new position is 2, since the difference between 42 and 40 is 2. After a revolution, a player gains :heavy_dollar_sign:512. The player's new position will be evaluated and appropriate action will be taken. If the values of both dice are the same, also called rolling doubles, that player gets to go again. If a player rolls doubles thrice, or 3 times, in a row, that player will be sent to Vacation.
 
 
 ### The Board
 
-There are 41 spaces:
+There are 40 spaces:
 - 30 Properties
     - 24 Streets
     - 4 Golf Clubs
     - 2 Super Stores
-- 6 Draw Action Card
+- 5 Draw Action Card
 - 2 Break Time
 - Start
 - Go On Vacation
@@ -394,7 +394,7 @@ pie
     "Streets" : 24
     "Golf Clubs" : 4
     "Super Stores" : 2
-    "Draw Action Card" : 6
+    "Draw Action Card" : 5
     "Break Time" : 2
     "Start" : 1
     "Go On Vacation" : 1
@@ -411,44 +411,42 @@ Here are all the spaces on the board. The spaces with streets have the street na
 |    2     | Victoria Street, Vauxhall    |
 |    3     | Nottingham Avenue, Vauxhall  |
 |    4     | Manchester Road, Vauxhall    |
-|    5     | Granby Golf Club             |
-|    6     | Luanda Street, Monrovia      |
-|    7     | Draw Action Card             |
-|    8     | Kinshasa Street, Monrovia    |
-|    9     | Lagos Avenue, Monrovia       |
-|    10    | Newton Super Store           |
-|    11    | Break Time                   |
-|    12    | Camden Avenue, Ozark         |
+|    5     | Neosho Golf Club             |
+|    6     | Draw Action Card             |
+|    7     | Luanda Expressway, Monrovia  |
+|    8     | Newton Super Store           |
+|    9     | Kinshasa Street, Monrovia    |
+|    10    | Lagos Avenue, Monrovia       |
+|    11    | Camden Court, Ozark          |
+|    12    | Break Time                   |
 |    13    | Lake Shore Drive, Ozark      |
-|    14    | Draw Action Card             |
-|    15    | Osage Beach Parkway, Ozark   |
-|    16    | Sullivan Avenue, Augusta     |
-|    17    | Vacation                     |
-|    18    | Labadie Street, Augusta      |
-|    19    | Monett Golf Club             |
-|    20    | Potosi Street, Augusta       |
-|    21    | Ezio Avenue, Little Italy    |
-|    22    | Draw Action Card             |
-|    23    | Firenze Street, Little Italy |
-|    24    | Venezia Street, Little Italy |
-|    25    | Neosho Golf Club             |
-|    26    | Euler Avenue, Gauss          |
-|    27    | Ramanujan Street, Gauss      |
-|    28    | Draw Action Card             |
+|    14    | Osage Beach Parkway, Ozark   |
+|    15    | Labadie Avenue, Augusta      |
+|    16    | Draw Action Card             |
+|    17    | Moselle Street, Augusta      |
+|    18    | Granby Golf Club             |
+|    19    | Clover Bottom Road, Augusta  |
+|    20    | Ezio Avenue, Little Italy    |
+|    21    | Vacation                     |
+|    22    | Firenze Way, Little Italy    |
+|    23    | Venezia Street, Little Italy |
+|    24    | Draw Action Card             |
+|    25    | Monett Golf Club             |
+|    26    | Go On Vacation               |
+|    27    | Euler Street, Gauss          |
+|    28    | Ramanujan Road, Gauss        |
 |    29    | Euclid Avenue, Gauss         |
 |    30    | Break Time                   |
-|    31    | Go On Vacation               |
-|    32    | Dijkstra Street, Turing      |
+|    31    | Dijkstra Drive, Turing       |
+|    32    | Draw Action Card             |
 |    33    | Knuth Street, Turing         |
 |    34    | Leibniz Super Store          |
-|    35    | Draw Action Card             |
-|    36    | Ritchie Avenue, Turing       |
+|    35    | Ritchie Road, Turing         |
 |    37    | Chesapeake Avenue, Hampton   |
-|    38    | Aurora Golf Club             |
-|    39    | Draw Action Card             |
-|    40    | Suffolk Avenue, Hampton      |
-|    41    | Norfolk Street, Hampton      |
-    
+|    36    | Aurora Golf Club             |
+|    38    | Draw Action Card             |
+|    39    | Suffolk Street, Hampton      |
+|    40    | Norfolk Avenue, Hampton      |
 
 ### Properties
 
@@ -470,7 +468,7 @@ There are 2 super stores, Newton Super Store and Leibniz Super Store. Each one h
 
 #### Golf Clubs &nbsp; :golf: &nbsp; :golfing:
 
-There are 4 golf clubs. The start of the names are "Granby", "Monett", "Neosho", and "Aurora" and the end of each name is "Golf Club". Each one has a purchase price of :heavy_dollar_sign:512 (2<sup>9</sup>), a pawn price of :heavy_dollar_sign:256 (2<sup>8</sup>), and an unpawn price of :heavy_dollar_sign:282. Golf clubs have a fee that depends on how many golf clubs the owner of that golf club owns. The formula is $\frac{512}{2^{4 - n}}$ or $2^{n + 5}$, where $n$ is the number of clubs owned. This gives us the following values:
+There are 4 golf clubs. The start of the names are "Neosho", "Granby", "Monett", and "Aurora" and the end of each name is "Golf Club". Each one has a purchase price of :heavy_dollar_sign:512 (2<sup>9</sup>), a pawn price of :heavy_dollar_sign:256 (2<sup>8</sup>), and an unpawn price of :heavy_dollar_sign:282. Golf clubs have a fee that depends on how many golf clubs the owner of that golf club owns. The formula is $\frac{512}{2^{4 - n}}$ or $2^{n + 5}$, where $n$ is the number of clubs owned. This gives us the following values:
 
 | Number of Clubs Owned |  Fee  |
 | :-------------------: | :---: |
@@ -482,7 +480,7 @@ There are 4 golf clubs. The start of the names are "Granby", "Monett", "Neosho",
 <details>
 <summary>Name Origins</summary>
 
-[Granby](https://en.wikipedia.org/wiki/Granby,_Missouri), [Monett](https://en.wikipedia.org/wiki/Monett,_Missouri), [Neosho](https://en.wikipedia.org/wiki/Neosho,_Missouri), and [Aurora](https://en.wikipedia.org/wiki/Aurora,_Missouri) are Missouri towns along [US Route 60](https://en.wikipedia.org/wiki/U.S._Route_60_in_Missouri) southwest of [Springfield](https://en.wikipedia.org/wiki/Springfield,_Missouri). That's a route I traveled on a few times during my time living in Springfield and attending Missouri State University.
+[Neosho](https://en.wikipedia.org/wiki/Neosho,_Missouri), [Granby](https://en.wikipedia.org/wiki/Granby,_Missouri), [Monett](https://en.wikipedia.org/wiki/Monett,_Missouri), and [Aurora](https://en.wikipedia.org/wiki/Aurora,_Missouri) are Missouri towns along [US Route 60](https://en.wikipedia.org/wiki/U.S._Route_60_in_Missouri) southwest of [Springfield](https://en.wikipedia.org/wiki/Springfield,_Missouri). That's a route I traveled on a few times during my time living in Springfield and attending Missouri State University.
 
 ![Southwestern Missouri Map](/Images/SW_Missouri_Map.JPG)
 
@@ -496,13 +494,13 @@ There are 24 streets around the board that are grouped into 8 neighborhoods. If 
 | Neighborhood | Street 1          | Street 2          | Street 3            |
 | ------------ | ----------------- | ----------------- | ------------------- |
 | Vauxhall     | Victoria Street   | Nottingham Avenue | Manchester Road     |
-| Monrovia     | Luanda Street     | Kinshasa Street   | Lagos Avenue        |
-| Ozark        | Camden Avenue     | Lake Shore Drive  | Osage Beach Parkway |
-| Augusta      | Sullivan Avenue   | Labadie Street    | Potosi Street       |
-| Little Italy | Ezio Avenue       | Firenze Street    | Venezia Street      |
-| Gauss        | Euler Avenue      | Ramanujan Street  | Euclid Avenue       |
-| Turing       | Dijkstra Street   | Knuth Street      | Ritchie Avenue      |
-| Hampton      | Chesapeake Avenue | Suffolk Avenue    | Norfolk Street      |
+| Monrovia     | Luanda Expressway | Kinshasa Street   | Lagos Avenue        |
+| Ozark        | Camden Court      | Lake Shore Drive  | Osage Beach Parkway |
+| Augusta      | Labadie Avenue    | Moselle Street    | Clover Bottom Road  |
+| Little Italy | Ezio Avenue       | Firenze Way       | Venezia Street      |
+| Gauss        | Euler Street      | Ramanujan Road    | Euclid Avenue       |
+| Turing       | Dijkstra Drive    | Knuth Street      | Ritchie Road        |
+| Hampton      | Chesapeake Avenue | Suffolk Street    | Norfolk Avenue      |
 
 <details>
 <summary>Name Origins</summary>
@@ -525,9 +523,9 @@ In the map below, the red dots form the outline of Camden County.
 
 ![Lake of the Ozarks Map](/Images/Lake_of_the_Ozarks_Map.JPG)
     
-- [Augusta](https://en.wikipedia.org/wiki/Augusta,_Missouri), [Sullivan](https://en.wikipedia.org/wiki/Sullivan,_Missouri), [Labadie](https://en.wikipedia.org/wiki/Labadie,_Missouri), and [Potosi](https://en.wikipedia.org/wiki/Potosi,_Missouri) are towns in east central Missouri, not far from [Union](https://en.wikipedia.org/wiki/Union,_Missouri), where I spent much of my life.
+- [Augusta](https://en.wikipedia.org/wiki/Augusta,_Missouri), [Labadie](https://en.wikipedia.org/wiki/Labadie,_Missouri), [Moselle](https://en.wikipedia.org/wiki/Moselle,_Missouri), and [Clover Bottom](https://en.wikipedia.org/wiki/Clover_Bottom,_Missouri) are communities close to [Union, Missouri](https://en.wikipedia.org/wiki/Union,_Missouri), where I spent much of my life.
 
-![Eastern Missouri Map](/Images/Eastern_Missouri_Map.JPG)
+    ![Area Around Union Map](/Images/Area_Around_Union_Map.JPG)
 
 - The Little Italy neighborhood is, of course, Italian themed. [Ezio Auditore da Firenze](https://en.wikipedia.org/wiki/Ezio_Auditore_da_Firenze) is the protagonist in 3 [*Assassin’s Creed*](https://en.wikipedia.org/wiki/Assassin%27s_Creed) games and is from Florence. [Florence](https://en.wikipedia.org/wiki/Florence) and [Venice](https://en.wikipedia.org/wiki/Venice) are cities in modern-day Italy and the Italian names for them are Firenze and Venezia, respectively.
 
@@ -696,7 +694,7 @@ Here are the messages of all cards in the deck. The cards that appear twice have
 
 - If a player draws the Lagos Avenue card or Knuth Street card on a Draw Action Card space that is past the location of that street (has a higher position), then that player gets to make a revolution. However, if a player draws a "Go on Vacation" card, the player will be sent to the Vacation space without making a revolution, regardless of which Draw Action Card space they drew the card from.
 
-- If a player lands on the Draw Action Card space at position 7 of the board and draws the "Move back 8 spaces" card, they will get moved to position 40 and will luckily be able to make a revolution and collect :heavy_dollar_sign:512 once they move at least another 2 spaces forward.
+- If a player lands on the Draw Action Card space at position 6 of the board and draws the "Move back 8 spaces" card, they will get moved to position 38 and will luckily be able to make a revolution and collect :heavy_dollar_sign:512 once they move at least another 3 spaces forward.
 
 
 ### Trading

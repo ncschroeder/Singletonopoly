@@ -16,13 +16,13 @@ package singletonopoly.board.properties
  */
 enum class Neighborhood(street1Name: String, street2Name: String, street3Name: String) {
     VAUXHALL("Victoria Street", "Nottingham Avenue", "Manchester Road"),
-    MONROVIA("Luanda Street", "Kinshasa Street", "Lagos Avenue"),
-    OZARK("Camden Avenue", "Lake Shore Drive", "Osage Beach Parkway"),
-    AUGUSTA("Sullivan Avenue", "Labadie Street", "Potosi Street"),
-    LITTLE_ITALY("Ezio Avenue", "Firenze Street", "Venezia Street"),
-    GAUSS("Euler Avenue", "Ramanujan Street", "Euclid Avenue"),
-    TURING("Dijkstra Street", "Knuth Street", "Ritchie Avenue"),
-    HAMPTON("Chesapeake Avenue", "Suffolk Avenue", "Norfolk Street");
+    MONROVIA("Luanda Expressway", "Kinshasa Street", "Lagos Avenue"),
+    OZARK("Camden Court", "Lake Shore Drive", "Osage Beach Parkway"),
+    AUGUSTA("Labadie Avenue", "Moselle Street", "Clover Bottom Road"),
+    LITTLE_ITALY("Ezio Avenue", "Firenze Way", "Venezia Street"),
+    GAUSS("Euler Street", "Ramanujan Road", "Euclid Avenue"),
+    TURING("Dijkstra Drive", "Knuth Street", "Ritchie Road"),
+    HAMPTON("Chesapeake Avenue", "Suffolk Street", "Norfolk Avenue");
     
     val friendlyName: String = createFriendlyName()
     
