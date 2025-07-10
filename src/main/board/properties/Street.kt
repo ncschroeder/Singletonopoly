@@ -1,30 +1,34 @@
 package singletonopoly.board.properties
 
+import singletonopoly.Misc
+import singletonopoly.Misc.toStringWithCommas
+
 class Street(name: String, val neighborhood: Neighborhood) : Property(name) {
     override val purchasePrice: Int
         get() = neighborhood.streetPurchasePrice
     
-    val currentFee: Int
+    val curFee: Int
         get() = when {
             isUnownedOrPawned -> 0
+            
             neighborhood.onePlayerOwnsAllStreets ->
-                neighborhood.getStreetFeeWhen1PlayerOwnsAllStreets(numRestaurants = this.numRestaurants)
+                neighborhood.getStreetFeeWhenOnePlayerOwnsAllStreets(numRestaurants = this.numRestaurants)
+            
             else -> neighborhood.streetStartingFee
         }
     
-    override val currentFeeString
-        get() = "$$currentFee"
+    override val curFeeString
+        get() = '$' + curFee.toStringWithCommas()
     
     /**
      * Property.basicInfo and if there are any restaurants on this street then the number of restaurants
      * is mentioned as well.
      */
-    override val basicInfo: String
-        get() =
-            super.basicInfo.plus(
-                if (numRestaurants == 0) ""
-                else ", Number of Restaurants: $numRestaurants"
-            )
+    override fun getBasicInfo(): String =
+        super.getBasicInfo().let {
+            if (numRestaurants == 0) it
+            else "$it, Number of Restaurants: $numRestaurants"
+        }
     
     override fun makeUnowned() {
         super.makeUnowned()
@@ -47,7 +51,7 @@ class Street(name: String, val neighborhood: Neighborhood) : Property(name) {
         if (restaurantCanBeAdded) {
             numRestaurants++
         } else {
-            printError("addRestaurant called on $name, which can't have a restaurant added to it")
+            Misc.printError("addRestaurant called on $name, which can't have a restaurant added to it.")
         }
     }
     
@@ -55,7 +59,7 @@ class Street(name: String, val neighborhood: Neighborhood) : Property(name) {
         if (restaurantCanBeRemoved) {
             numRestaurants--
         } else {
-            printError("removeRestaurant called on $name, which can't have a restaurant removed from it")
+            Misc.printError("removeRestaurant called on $name, which can't have a restaurant removed from it.")
         }
     }
     
@@ -63,18 +67,15 @@ class Street(name: String, val neighborhood: Neighborhood) : Property(name) {
         numRestaurants = 0
     }
     
-    val restaurantAddPrice: Int
-        get() = neighborhood.restaurantAddPrice
+    val restaurantAddPrice: Int = neighborhood.restaurantAddPrice
+    val restaurantRemovalGain: Int = neighborhood.restaurantRemovalGain
     
-    val restaurantRemoveGain: Int
-        get() = neighborhood.restaurantRemoveGain
+    private fun getRestaurantInfoStart() =
+        "$infoStart, Number of Restaurants: $numRestaurants, Current Fee: $curFeeString"
     
-    private val restaurantInfoStart
-        get() = "$infoStart, Number of Restaurants: $numRestaurants, Current Fee: $$currentFee"
+    fun getRestaurantAddInfo() =
+        "${getRestaurantInfoStart()}, Restaurant Adding Price: $$restaurantAddPrice"
     
-    val restaurantAddInfo
-        get() = "$restaurantInfoStart, Restaurant Adding Price: $$restaurantAddPrice"
-    
-    val restaurantRemoveInfo
-        get() = "$restaurantInfoStart, Restaurant Removal Gain: $$restaurantRemoveGain"
+    fun getRestaurantRemovalInfo() =
+        "${getRestaurantInfoStart()}, Restaurant Removal Gain: $$restaurantRemovalGain"
 }

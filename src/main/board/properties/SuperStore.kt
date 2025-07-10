@@ -1,7 +1,7 @@
 package singletonopoly.board.properties
 
-class SuperStore private constructor(name: String) : Property(name) {
-    override val currentFeeString
+class SuperStore private constructor(nameStart: String) : Property(name = "$nameStart Super Store") {
+    override val curFeeString
         get() =
             if (isUnownedOrPawned) "$0"
             else "A dice roll multiplied by ${FeeData().multiplier}"
@@ -13,38 +13,37 @@ class SuperStore private constructor(name: String) : Property(name) {
      */
     class FeeData {
         val onePlayerOwnsBothStores: Boolean =
-            store1.owner != null && store1.owner == store2.owner
+            newtonStore.owner != null && newtonStore.owner === leibnizStore.owner
         
         val multiplier: Int =
-            if (onePlayerOwnsBothStores) bothStoresOwnedMultiplier
-            else oneStoreOwnedMultiplier
+            if (onePlayerOwnsBothStores) BOTH_STORES_OWNED_MULTIPLIER
+            else ONE_STORE_OWNED_MULTIPLIER
     }
     
     companion object Manager {
-        const val oneStoreOwnedMultiplier = 8
-        const val bothStoresOwnedMultiplier = 16
+        private const val ONE_STORE_OWNED_MULTIPLIER = 8
+        private const val BOTH_STORES_OWNED_MULTIPLIER = 16
         
-        val store1 = SuperStore("Newton Super Store")
-        val store2 = SuperStore("Leibniz Super Store")
+        val newtonStore = SuperStore(nameStart = "Newton")
+        val leibnizStore = SuperStore(nameStart = "Leibniz")
         
-        val bothStores: List<SuperStore>
-            get() = listOf(store1, store2)
+        val bothStores
+            get() = listOf(newtonStore, leibnizStore)
+        
+        private const val EXTRA_INFO =
+            "Fees are a dice roll multiplied by either $ONE_STORE_OWNED_MULTIPLIER or " +
+            "$BOTH_STORES_OWNED_MULTIPLIER: $ONE_STORE_OWNED_MULTIPLIER for if the owner doesn't " +
+            "own the other super store as well and $BOTH_STORES_OWNED_MULTIPLIER for if they do."
         
         /**
          * Returns a StringBuilder that contains a heading and info about the stores.
          */
-        fun getStoresInfo(includeAll: Boolean): StringBuilder =
+        fun getStoresInfo(includeAllInfo: Boolean): CharSequence =
             StringBuilder().apply {
                 appendLine("Super Stores")
-                if (includeAll) {
-                    appendLine(
-                        "Fees are a dice roll multiplied by either $oneStoreOwnedMultiplier or " +
-                        "$bothStoresOwnedMultiplier: $oneStoreOwnedMultiplier for if the owner doesn't own the " +
-                        "other super store as well and $bothStoresOwnedMultiplier for if they do"
-                    )
-                }
-                appendLine(store1.basicInfo)
-                append(store2.basicInfo)
+                if (includeAllInfo) appendLine(EXTRA_INFO)
+                appendLine(newtonStore.getBasicInfo())
+                append(leibnizStore.getBasicInfo())
             }
     }
 }

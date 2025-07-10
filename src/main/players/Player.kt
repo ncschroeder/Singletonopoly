@@ -1,5 +1,7 @@
 package singletonopoly.players
 
+import singletonopoly.Misc
+import singletonopoly.Misc.toStringWithCommas
 import singletonopoly.board.Board
 
 class Player(val name: String) {
@@ -8,22 +10,24 @@ class Player(val name: String) {
     var money = 4_096
         private set(value) {
             field =
-                if (value < 0) {
-                    printError("money for $name was attempted to be set to $value")
+                if (value >= 0) value
+                else {
+                    Misc.printError("money for $name was attempted to be set to $value.")
                     0
-                } else {
-                    value
                 }
         }
     
+    val moneyString
+        get() = money.toStringWithCommas()
+    
     fun incrementMoneyAndPrintUpdate(amount: Int) {
         money += amount
-        println("$name gained $$amount and now has $$money")
+        println("$name gained $$amount and now has $$moneyString.")
     }
     
     fun decrementMoneyAndPrintUpdate(amount: Int) {
         money -= amount
-        println("$name lost $$amount and now has $$money")
+        println("$name lost $$amount and now has $$moneyString.")
     }
     
     var isInGame = true
@@ -49,38 +53,44 @@ class Player(val name: String) {
     }
     
     var numGetOffVacationCards = 0
-        set(value) {
+        private set(value) {
             field =
-                if (value < 0) {
-                    printError("numGetOffVacationCards for $name was attempted to be set to $value")
+                if (value >= 0) value
+                else {
+                    Misc.printError("numGetOffVacationCards for $name was attempted to be set to $value.")
                     0
-                } else {
-                    value
                 }
         }
     
     val hasAGetOffVacationCard: Boolean
         get() = numGetOffVacationCards > 0
     
-    fun addGetOffVacationCard() {
-        numGetOffVacationCards++
+    fun incrementNumGetOffVacationCardsAndPrintUpdate(amount: Int = 1) {
+        numGetOffVacationCards += amount
+        println(
+            "$name gained ${Misc.getNumGetOffVacationCardsString(amount)} and now has $numGetOffVacationCards."
+        )
     }
     
-    fun removeGetOffVacationCard() {
-        numGetOffVacationCards--
+    fun decrementNumGetOffVacationCardsAndPrintUpdate(amount: Int = 1) {
+        numGetOffVacationCards -= amount
+        println(
+            "$name lost ${Misc.getNumGetOffVacationCardsString(amount)} and now has $numGetOffVacationCards."
+        )
     }
     
     /**
-     * Returns a StringBuilder that contains info about this player.
+     * Returns a CharSequence with info about this player. The chars in this CharSequence will
+     * be added to the string that gets built in the PlayerManager.getPlayersInfo function.
      */
-    fun getInfo(): StringBuilder =
+    fun getInfo(): CharSequence =
         StringBuilder().apply {
             append("$name -> ")
             if (!isInGame) {
                 append("Out of the Game")
                 return@apply
             }
-            append("Position: $position, Money: $$money")
+            append("Position: $position, Money: $$moneyString")
             if (hasAGetOffVacationCard) {
                 append(", Get Off Vacation Free Cards: $numGetOffVacationCards")
             }

@@ -1,6 +1,10 @@
 package singletonopoly.board.properties
 
-class GolfClub private constructor(name: String) : Property(name) {
+import singletonopoly.Misc
+import singletonopoly.Misc.joinToStringBuilder
+import singletonopoly.Misc.toStringWithCommas
+
+class GolfClub private constructor(nameStart: String) : Property(name = "$nameStart Golf Club") {
     /**
      * Fees for golf clubs are determined by how many golf clubs are owned by the player that owns a golf
      * club that gets landed on. This class provides this data.
@@ -19,31 +23,28 @@ class GolfClub private constructor(name: String) : Property(name) {
             }
         }
     }
-    
-    override val currentFeeString
-        get() = "$${FeeData().fee}"
-    
+
+    override val curFeeString
+        get() = '$' + FeeData().fee.toStringWithCommas()
+
     companion object Manager {
-        val allClubs: List<GolfClub> =
-            arrayOf("Granby", "Monett", "Neosho", "Aurora")
-            .map { GolfClub(name = "$it Golf Club") }
+        val neoshoClub = GolfClub(nameStart = "Neosho")
+        val granbyClub = GolfClub(nameStart = "Granby")
+        val monettClub = GolfClub(nameStart = "Monett")
+        val auroraClub = GolfClub(nameStart = "Aurora")
         
-        val club1: GolfClub get() = allClubs[0]
-        val club2: GolfClub get() = allClubs[1]
-        val club3: GolfClub get() = allClubs[2]
-        val club4: GolfClub get() = allClubs[3]
+        val allClubs = listOf(neoshoClub, granbyClub, monettClub, auroraClub)
         
         private fun getFee(numClubsOwnedByOwner: Int): Int =
-            club1.purchasePrice
-            .div(
+            neoshoClub.purchasePrice / (
                 when (numClubsOwnedByOwner) {
                     1 -> 8
                     2 -> 4
                     3 -> 2
                     4 -> 1
                     else -> {
-                        printError("numClubsOwnedByOwner arg for getFee was $numClubsOwnedByOwner")
-                        club1.purchasePrice
+                        Misc.printError("numClubsOwnedByOwner arg for getFee was $numClubsOwnedByOwner")
+                        neoshoClub.purchasePrice
                     }
                 }
             )
@@ -58,14 +59,12 @@ class GolfClub private constructor(name: String) : Property(name) {
         /**
          * Returns a StringBuilder that contains a heading and info about the golf clubs.
          */
-        fun getClubsInfo(includeAll: Boolean): StringBuilder =
+        fun getClubsInfo(includeAllInfo: Boolean): CharSequence =
             buildList(capacity = 6) {
                 add("Golf Clubs")
-                if (includeAll) {
-                    add(extraInfo)
-                }
                 allClubs.forEach { add(it.basicInfo) }
+                if (includeAllInfo) add(extraInfo)
             }
-            .joinTo(StringBuilder(), separator = "\n")
+            .joinToStringBuilder(separator = "\n")
     }
 }

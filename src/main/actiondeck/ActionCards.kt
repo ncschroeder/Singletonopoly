@@ -1,6 +1,5 @@
 package singletonopoly.actiondeck
 
-import kotlin.math.absoluteValue
 import singletonopoly.board.properties.PropertyManager
 
 /*
@@ -22,35 +21,37 @@ class GetMoneyFromOtherPlayersCard(val moneyAmount: Int) :
 
 class GiveMoneyToOtherPlayersCard(val moneyAmount: Int) :
     ActionCard(message = "You must pay every other player $$moneyAmount")
+class RestaurantMaintenanceCard(val feePerRestaurant: Int) :
+    ActionCard(message = "You must pay $$feePerRestaurant per restaurant that you own for maintenance")
 
-class PropertyMaintenanceCard(val feePerRestaurant: Int) :
-    ActionCard(message = "You must pay $$feePerRestaurant per restaurant for maintenance")
 
-class RelativePositionChangeCard(val moveAmount: Int) :
-    ActionCard(message = "Move ${if (moveAmount > 0) "ahead" else "back"} ${moveAmount.absoluteValue} spaces")
+class MoveAheadCard(val numSpaces: Int): ActionCard(message = "Move ahead $numSpaces spaces.")
 
-abstract class AbsolutePositionChangeCard(nameOfPropertyToMoveTo: String, message: String) : ActionCard(message) {
-    val newPosition: Int = PropertyManager.getPropertyPosition(nameOfPropertyToMoveTo)
+class MoveBackCard(val numSpaces: Int): ActionCard(message = "Move back $numSpaces spaces.")
+
+abstract class MoveToPropertyCard(propertyName: String, message: String) : ActionCard(message) {
+    val propertyPosition: Int = PropertyManager.getPropertyPosition(propertyName)
 }
 
 object LagosAvenueCard :
-    AbsolutePositionChangeCard(
-        nameOfPropertyToMoveTo = "Lagos Avenue",
+    MoveToPropertyCard(
+        propertyName = "Lagos Avenue",
         message = "Lagos is the most populated city in Africa. Move to Lagos Avenue."
     )
 
 object KnuthStreetCard :
-    AbsolutePositionChangeCard(
-        nameOfPropertyToMoveTo = "Knuth Street",
+    MoveToPropertyCard(
+        propertyName = "Knuth Street",
         message =
             """
             Computer scientist Donald Knuth once said:
-            'Programs are meant to be read by humans and only incidentally for computers to execute'.
+            "Programs are meant to be read by humans and only incidentally for computers to execute."
             Move to Knuth Street.
             """.trimIndent()
     )
 
-object GetOffVacationFreeCard :
-    ActionCard(message = "Get Off Vacation Free. Keep this card and use it when needed, or trade it.")
-
 object GoOnVacationCard : ActionCard(message = "Go On Vacation")
+
+object GetOffVacationFreeCard :
+    ActionCard(message = "Get off Vacation free. Keep this card and use it when needed, or trade it.")
+

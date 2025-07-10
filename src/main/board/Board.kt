@@ -59,7 +59,7 @@ object Board {
      */
     fun getSpace(position: Int): Any? = positionsAndSpaces[position]
     
-    val numberOfSpaces: Int = positionsAndSpaces.size
+    val numSpaces: Int = positionsAndSpaces.size
     
     var vacationPosition: Int
         private set

@@ -1,48 +1,57 @@
 package singletonopoly.actiondeck
 
 import java.util.ArrayDeque
+import java.util.Queue
+import singletonopoly.Misc
 
 class ActionDeck {
-    private val cardsDeque: ArrayDeque<ActionCard> =
-        listOf(
-            MoneyGainCard(gainAmount = 128),
-            MoneyGainCard(gainAmount = 256),
-            MoneyLossCard(lossAmount = 128),
-            MoneyLossCard(lossAmount = 256),
-            GetMoneyFromOtherPlayersCard(moneyAmount = 32),
-            GiveMoneyToOtherPlayersCard(moneyAmount = 32),
-            PropertyMaintenanceCard(feePerRestaurant = 32),
-            PropertyMaintenanceCard(feePerRestaurant = 64),
-            RelativePositionChangeCard(moveAmount = 4),
-            RelativePositionChangeCard(moveAmount = -4),
-            RelativePositionChangeCard(moveAmount = 8),
-            RelativePositionChangeCard(moveAmount = -8),
-            LagosAvenueCard,
-            KnuthStreetCard,
-            GetOffVacationFreeCard,
-            GetOffVacationFreeCard,
-            GoOnVacationCard,
-            GoOnVacationCard
-        )
-        .let { ArrayDeque(elements = it) }
-        .apply { shuffle() }
+    private val cardsQueue: Queue<ActionCard>
+    init {
+        val shuffledCards: List<ActionCard> =
+            arrayListOf(
+                MoneyGainCard(amount = 128),
+                MoneyGainCard(amount = 256),
+                MoneyLossCard(amount = 128),
+                MoneyLossCard(amount = 256),
+                GetMoneyFromOtherPlayersCard(moneyToGetFromEachPlayer = 32),
+                GetMoneyFromOtherPlayersCard(moneyToGetFromEachPlayer = 64),
+                PayMoneyToOtherPlayersCard(moneyToPayEachPlayer = 32),
+                PayMoneyToOtherPlayersCard(moneyToPayEachPlayer = 64),
+                RestaurantMaintenanceCard(feePerRestaurant = 32),
+                RestaurantMaintenanceCard(feePerRestaurant = 64),
+                MoveAheadCard(numSpaces = 4),
+                MoveAheadCard(numSpaces = 8),
+                MoveBackCard(numSpaces = 4),
+                MoveBackCard(numSpaces = 8),
+                LagosAvenueCard,
+                KnuthStreetCard,
+                GoOnVacationCard,
+                GoOnVacationCard,
+                GetOffVacationFreeCard,
+                GetOffVacationFreeCard,
+                GetOffVacationFreeCard
+            )
+            .apply { shuffle() }
+        
+        cardsQueue = ArrayDeque(shuffledCards)
+    }
     
     val topCard: ActionCard
-        get() = cardsDeque.first()
+        get() = cardsQueue.element()
     
     /**
      * Makes it so that the card that used to be the top card is now the bottom card and the card that used to be
      * 2nd from the top is now the top card.
      */
     fun moveTopCardToBottom() {
-        cardsDeque.addLast(cardsDeque.removeFirst())
+        with(cardsQueue) { add(remove()) }
     }
     
     fun removeGetOffVacationCardAtTop() {
         if (topCard is GetOffVacationFreeCard) {
-            cardsDeque.removeFirst()
+            cardsQueue.remove()
         } else {
-            printError(
+            Misc.printError(
                 "The Action Deck had removeGetOffVacationCardAtTop called when the top card wasn't a " +
                 "GetOffVacationFreeCard"
             )
@@ -50,7 +59,7 @@ class ActionDeck {
     }
     
     fun insertGetOffVacationCardAtBottom() {
-        cardsDeque.addLast(GetOffVacationFreeCard)
+        cardsQueue.add(GetOffVacationFreeCard)
     }
     
     /**
