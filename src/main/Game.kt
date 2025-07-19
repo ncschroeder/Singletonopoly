@@ -923,192 +923,183 @@ class Game {
         println("No valid positions were entered.")
     }
     
-    
-    fun askAboutPawningProperties(player: Player, pawnableProperties: List<Property>) {
-        println("Here are the properties owned by ${player.name} that can be pawned:")
-        pawnableProperties.forEach { println(it.pawnInfo) }
+    fun askAboutPawningOrUnpawning(
+        pawning: Boolean,
+        player: Player,
+        pawnableOrUnpawnableProps: PropertyManager.PropertyGroups
+    ): Boolean {
+        var selectedProps: PropertyManager.PropertyGroups
+        var totalMoneyGainOrPrice: Int
         
-        while (true) {
-            println(
-                "\nEnter the positions of the properties you would like to pawn with each position " +
-                "separated by space or enter \"b\" to go back:"
-            )
-            
-            input = getFormattedInput()
-            if (input == "b") {
-                return
-            }
-            
-            val selectedProperties: List<Property> =
-                pawnableProperties.filterByPositions(positionsInput = input)
-            
-            if (selectedProperties.isEmpty()) {
-                printInvalidPositionsText()
-                continue
-            }
-            
-            val moneyGain: Int = selectedProperties.sumOf { it.pawnPrice }
-            selectedProperties.forEach { it.pawn() }
-            println(
-                "\nThe following properties were pawned: " +
-                selectedProperties.joinToString(transform = { it.name }, separator = ", ")
-            )
-            player.incrementMoneyAndPrintUpdate(moneyGain)
-            return
-        }
-    }
-    
-    
-    fun askAboutUnpawningProperties(unpawnableProperties: List<Property>) {
-        // Only the current player is able to unpawn properties.
-        println("Here are the properties owned by ${currentPlayer.name} that can be unpawned:")
-        unpawnableProperties.forEach { println(it.unpawnInfo) }
+        val propGroupsStringStart =
+            "Here are the properties owned by ${player.name} that can be ${if (pawning) "" else "un"}pawned:"
+        val propGroupsString = pawnableOrUnpawnableProps.toString(propGroupsStringStart)
         
         while (true) {
             println()
+            println(propGroupsString)
             println(
-                """
-                ${currentPlayer.name}, you have $${currentPlayer.money}
-                Enter the positions of the properties you would like to unpawn with each position separated by space or enter "b" to go back:
-                """.trimIndent()
+                "\n${player.name}, enter the positions of the properties you would like to " +
+                "${if (pawning) "" else "un"}pawn with each position separated by whitespace or enter " +
+                "\"b\" to go back:"
             )
             
             input = getFormattedInput()
-            if (input == "b") {
-                return
-            }
+            if (input == "b") return false
             
-            val selectedProperties: List<Property> =
-                unpawnableProperties.filterByPositions(positionsInput = input)
-            
-            if (selectedProperties.isEmpty()) {
-                println()
+            selectedProps = pawnableOrUnpawnableProps.filterByPositions(positionsInput = input)
+            if (selectedProps.none()) {
                 printInvalidPositionsText()
                 continue
             }
             
-            val moneyOwed: Int = selectedProperties.sumOf { it.unpawnPrice }
-            if (currentPlayer.money < moneyOwed) {
-                askAboutGettingMoney(
-                    player = currentPlayer,
-                    moneyNeeded = moneyOwed,
-                    playerHasChoice = true
+            totalMoneyGainOrPrice =
+                selectedProps.sumOf { if (pawning) it.pawnGain else it.unpawnPrice }
+            
+            val confirmationStringEnd =
+                """
+                $${totalMoneyGainOrPrice.toStringWithCommas()} will ${if (pawning) "be gained" else "have to be paid"}.
+                ${player.name}, do you confirm this?
+                """.trimIndent()
+            
+            val selectedPropsConfirmationString =
+                selectedProps
+                .toString(
+                    start = "Here are the selected properties:",
+                    end = confirmationStringEnd
                 )
-                
-                println()
-                
-                // Following condition will be true if the player couldn't get enough money or changed their mind.
-                if (currentPlayer.money < moneyOwed) {
-                    println("${currentPlayer.name} isn't unpawning anything.")
-                    return
+            
+            if (!promptForYOrN(selectedPropsConfirmationString)) continue
+            
+            if (!pawning && player.money < totalMoneyGainOrPrice) {
+                if (
+                    !askAboutGettingMoney(
+                        player = player,
+                        moneyNeeded = totalMoneyGainOrPrice,
+                        playerHasChoice = true
+                    )
+                ) {
+                    println("\n${player.name} will be taken back to the properties selection section.")
+                    continue
                 }
                 
-                println("${currentPlayer.name} gathered the $$moneyOwed that they need to unpawn their properties.")
+                println()
+                printGotMoneyMessage(player = player, messageEnd = "unpawn their properties")
             }
             
-            selectedProperties.forEach { it.unpawn() }
-            println(
-                "\nThe following properties were unpawned: " +
-                selectedProperties.joinToString(transform = { it.name }, separator = ", ")
-            )
-            currentPlayer.decrementMoneyAndPrintUpdate(moneyOwed)
-            return
+            break
         }
+        
+        if (pawning) {
+            selectedProps.forEach { it.pawn() }
+            player.incrementMoneyAndPrintUpdate(totalMoneyGainOrPrice)
+        } else {
+            selectedProps.forEach { it.unpawn() }
+            player.decrementMoneyAndPrintUpdate(totalMoneyGainOrPrice)
+        }
+        
+        return true
     }
     
+    fun askAboutPawning(player: Player, pawnableProps: PropertyManager.PropertyGroups): Boolean =
+        askAboutPawningOrUnpawning(pawning = true, player, pawnableProps)
     
-    fun askAboutAddingRestaurants(restaurantAddableStreets: List<Street>) {
-        // Only the current player is able to add restaurants to streets.
-        println("Here are the streets owned by ${currentPlayer.name} that can have a restaurant added to it:")
-        restaurantAddableStreets.forEach { println(it.restaurantAddInfo) }
+    fun askAboutUnpawning(unpawnableProps: PropertyManager.PropertyGroups): Boolean =
+        askAboutPawningOrUnpawning(pawning = false, curPlayer, unpawnableProps)
+    
+    
+    fun askAboutAddingOrRemovingRestaurants(
+        addingRestaurants: Boolean,
+        player: Player,
+        restaurantAddableOrRemovableStreets: PropertyManager.StreetGroups
+    ): Boolean {
+        var selectedStreets: PropertyManager.StreetGroups
+        var totalMoneyGainOrPrice: Int
+        
+        val streetGroupsStringStart =
+            "Here are the streets owned by ${player.name} that can have a restaurant " +
+            "${if (addingRestaurants) "added" else "removed"}:"
+        
+        val streetGroupsString =
+            restaurantAddableOrRemovableStreets
+            .toCharSequence(streetGroupsStringStart)
+            .toString()
         
         while (true) {
             println()
+            println(streetGroupsString)
             println(
-                """
-                ${currentPlayer.name}, you have $${currentPlayer.money}
-                Enter the positions of the streets you would like to add a restaurant to with each position separated by space or enter "b" go back:
-                """.trimIndent()
+                "\n${player.name}, enter the positions of the properties you would like to " +
+                if (addingRestaurants) "add a restaurant to" else "remove a restaurant from" +
+                " with each position separated by whitespace or enter \"b\" to go back:"
             )
             
             input = getFormattedInput()
-            if (input == "b") {
-                return
-            }
+            if (input == "b") return false
             
-            val selectedStreets: List<Street> =
-                restaurantAddableStreets.filterByPositions(positionsInput = input)
-            
-            if (selectedStreets.isEmpty()) {
-                println()
+            selectedStreets = restaurantAddableOrRemovableStreets.filterByPositions(positionsInput = input)
+            if (selectedStreets.none()) {
                 printInvalidPositionsText()
                 continue
             }
             
-            val moneyOwed: Int = selectedStreets.sumOf { it.restaurantAddPrice }
-            if (currentPlayer.money < moneyOwed) {
-                askAboutGettingMoney(
-                    player = currentPlayer,
-                    moneyNeeded = moneyOwed,
-                    playerHasChoice = true
+            totalMoneyGainOrPrice =
+                selectedStreets.sumOf {
+                    if (addingRestaurants) it.restaurantAddPrice else it.restaurantRemovalGain
+                }
+            
+            val confirmationStringEnd =
+                """
+                $${totalMoneyGainOrPrice.toStringWithCommas()} will ${if (addingRestaurants) "have to be paid" else "be gained"}.
+                ${player.name}, do you confirm this?
+                """.trimIndent()
+            
+            val selectedStreetsConfirmationString =
+                selectedStreets
+                .toCharSequence(
+                    start = "Here are the selected streets:",
+                    end = confirmationStringEnd
                 )
-                
-                println()
-                
-                // Following condition will be true if the player couldn't get enough money or changed their mind.
-                if (currentPlayer.money < moneyOwed) {
-                    println("${currentPlayer.name} isn't adding any restaurants.")
-                    return
+                .toString()
+            
+            if (!promptForYOrN(selectedStreetsConfirmationString)) continue
+            
+            if (addingRestaurants && player.money < totalMoneyGainOrPrice) {
+                if (
+                    !askAboutGettingMoney(
+                        player = player,
+                        moneyNeeded = totalMoneyGainOrPrice,
+                        playerHasChoice = true
+                    )
+                ) {
+                    println("\n${player.name} will be taken back to the streets selection section.")
+                    continue
                 }
                 
-                println("${currentPlayer.name} gathered the $$moneyOwed that they need to add the restaurants.")
+                println()
+                printGotMoneyMessage(player = player, messageEnd = "add restaurants to their streets")
             }
             
+            break
+        }
+        
+        if (addingRestaurants) {
             selectedStreets.forEach { it.addRestaurant() }
-            println(
-                "\nA restaurant was added to each of the following streets: " +
-                selectedStreets.joinToString(transform = { it.name }, separator = ", ")
-            )
-            currentPlayer.decrementMoneyAndPrintUpdate(moneyOwed)
-            return
-        }
-    }
-    
-    
-    fun askAboutRemovingRestaurants(player: Player, restaurantRemovableStreets: List<Street>) {
-        println("Here are the streets owned by ${player.name} that can have a restaurant removed from it:")
-        restaurantRemovableStreets.forEach { println(it.restaurantRemoveInfo) }
-        
-        while (true) {
-            println(
-                "\nEnter the positions of the streets you would like to remove a restaurant from with each " +
-                "position separated by space or enter \"b\" to go back:"
-            )
-            
-            input = getFormattedInput()
-            if (input == "b") {
-                return
-            }
-            
-            val selectedStreets: List<Street> =
-                restaurantRemovableStreets.filterByPositions(positionsInput = input)
-            
-            if (selectedStreets.isEmpty()) {
-                println()
-                printInvalidPositionsText()
-                continue
-            }
-            
-            val moneyGain: Int = selectedStreets.sumOf { it.restaurantRemoveGain }
+            player.decrementMoneyAndPrintUpdate(totalMoneyGainOrPrice)
+        } else {
             selectedStreets.forEach { it.removeRestaurant() }
-            println(
-                "\nA restaurant was removed from each of the following streets: " +
-                selectedStreets.joinToString(transform = { it.name }, separator = ", ")
-            )
-            player.incrementMoneyAndPrintUpdate(moneyGain)
-            return
+            player.incrementMoneyAndPrintUpdate(totalMoneyGainOrPrice)
         }
+        
+        return true
     }
+    
+    fun askAboutAddingRestaurants(restaurantAddableStreets: PropertyManager.StreetGroups): Boolean =
+        askAboutAddingOrRemovingRestaurants(addingRestaurants = true, curPlayer, restaurantAddableStreets)
+    
+    fun askAboutRemovingRestaurants(player: Player, restaurantRemovableStreets: PropertyManager.StreetGroups): Boolean =
+        askAboutAddingOrRemovingRestaurants(addingRestaurants = false, player, restaurantRemovableStreets)
+        
     
     /**
      * This is the function for implementing the Money Getting Section described in the manual. This function
@@ -1124,7 +1115,7 @@ class Game {
      * by having the player either gather the money needed or drop out of the game.
      */
     fun askAboutGettingMoney(player: Player, moneyNeeded: Int, playerHasChoice: Boolean): Boolean {
-        val propertyLists = PropertyManager.PropertyLists(player)
+        val actionPropGroups = PropertyManager.ActionPropertyGroups.forPropsOwnedBy(player)
         
         // Valid input values
         val exitValue = "ex"
@@ -1142,10 +1133,10 @@ class Game {
                 $makeTradeValue: Make a trade with another player
                 """.trimIndent()
             )
-            if (propertyLists.hasPawnable) {
+            if (actionPropGroups.hasPawnable) {
                 println("$pawnValue: Pawn some of your properties")
             }
-            if (propertyLists.hasRestaurantRemovable) {
+            if (actionPropGroups.hasRestaurantRemovable) {
                 println("$removeRestaurantValue: Remove restaurants from some of your streets")
             }
             
@@ -1163,15 +1154,15 @@ class Game {
                 makeTradeValue -> {
                     println()
                     if (askAboutTrading(initiatingPlayer = player, initiatingPlayerNeedsMoney = true)) {
-                        propertyLists.refresh()
+                        actionPropGroups.refresh()
                     }
                 }
                 
                 pawnValue -> {
                     println()
-                    if (propertyLists.hasPawnable) {
-                        if (askAboutPawningProperties(player = player, pawnableProperties = propertyLists.pawnable)) {
-                            propertyLists.refresh()
+                    if (actionPropGroups.hasPawnable) {
+                        if (askAboutPawning(player = player, pawnableProps = actionPropGroups.pawnable)) {
+                            actionPropGroups.refresh()
                         }
                     } else {
                         printInvalidInput()
@@ -1180,14 +1171,14 @@ class Game {
                 
                 removeRestaurantValue -> {
                     println()
-                    if (propertyLists.hasRestaurantRemovable) {
+                    if (actionPropGroups.hasRestaurantRemovable) {
                         if (
                             askAboutRemovingRestaurants(
                                 player = player,
-                                restaurantRemovableStreets = propertyLists.restaurantRemovable
+                                restaurantRemovableStreets = actionPropGroups.restaurantRemovable
                             )
                         ) {
-                            propertyLists.refresh()
+                            actionPropGroups.refresh()
                         }
                     } else {
                         printInvalidInput()
@@ -1206,6 +1197,83 @@ class Game {
     
     
     /**
+     * When a player wants to make a trade, they will have to select what they want to offer and what they
+     * want to receive. These can include money, properties, and get off Vacation free cards. This class
+     * is used as a data structure for those.
+     */
+    class TradeItems(private val owner: Player) {
+        var money = 0
+        
+        var props: PropertyManager.PropertyGroups? = null
+        
+        var numGetOffVacationCards = 0
+        /**
+         * Is true when one of the fields is different than when this object was instantiated.
+         */
+        val somethingHasBeenChanged: Boolean
+            get() = money != 0 || props != null || numGetOffVacationCards != 0
+        
+        override fun toString() =
+            buildList {
+                if (money > 0) add('$' + money.toStringWithCommas())
+                
+                props?.let {
+                    val end =
+                        "If a street in an owned neighborhood gets traded, then that neighborhood will " +
+                        "no longer be owned so all restaurants in it will be sold and the street fees " +
+                        "will go back to the starting fees."
+                    
+                    add(it.toString(start = "The following properties:", end, sayIfNHoodIsOwned = true))
+                }
+                
+                numGetOffVacationCards.let {
+                    if (it > 0) {
+                        add(Misc.getNumGetOffVacationCardsString(it))
+                    }
+                }
+            }
+            .joinToString(separator = "\n\n")
+        
+        fun transferItemsTo(newOwner: Player) {
+            if (money > 0) {
+                owner.decrementMoneyAndPrintUpdate(money)
+                newOwner.incrementMoneyAndPrintUpdate(money)
+            }
+            
+            props?.forEach { p ->
+                p.owner = newOwner
+                if (p !is Street) return@forEach
+                
+                val nHood = p.neighborhood
+                if (nHood.numRestaurants == 0) return@forEach
+                
+                println()
+                println(
+                    if (nHood.numRestaurants == 1) {
+                        "There's 1 restaurant in the ${nHood.friendlyName} " +
+                        "neighborhood so this will be sold."
+                    } else {
+                        "There are ${nHood.numRestaurants} restaurants in the " +
+                        "${nHood.friendlyName} neighborhood so these will be sold."
+                    }
+                )
+                
+                // Sell all restaurants in the neighborhood.
+                nHood.removeRestaurants()
+                val moneyGain: Int = nHood.numRestaurants * nHood.restaurantRemovalGain
+                owner.incrementMoneyAndPrintUpdate(moneyGain)
+            }
+            
+            numGetOffVacationCards.let {
+                if (it > 0) {
+                    owner.decrementNumGetOffVacationCardsAndPrintUpdate(it)
+                    newOwner.incrementNumGetOffVacationCardsAndPrintUpdate(it)
+                }
+            }
+        }
+    }
+    
+    /**
      * Interacts with the initiating player about trading. This includes asking who they want to trade with and
      * what they want to trade. If a trade is agreed upon, the necessary changes are made.
      *
@@ -1213,28 +1281,10 @@ class Game {
      * they want from the player they want to make a trade with and they won't be able to offer money themselves.
      */
     fun askAboutTrading(initiatingPlayer: Player, initiatingPlayerNeedsMoney: Boolean): Boolean {
-        /**
-         * When a player wants to make a trade, they will have to select what they want to offer and what they
-         * want to receive. These can include money, properties, and get off Vacation free cards. This class
-         * is used as a data structure for those.
          */
-        class TradeItems {
-            var money = 0
-            
-            var properties = emptyList<Property>()
-            
-            var numGetOffVacationCards = 0
-            
-            /**
-             * Is true when one of the fields is different than when this object was instantiated.
-             */
-            val somethingHasBeenChanged: Boolean
-                get() = money != 0 || properties.isNotEmpty() || numGetOffVacationCards != 0
-        }
         
-        val initiatingPlayerProperties: List<Property> =
-            PropertyManager.getPropertiesOwnedBy(initiatingPlayer)
-        val initiatingPlayerHasAProperty: Boolean =initiatingPlayerProperties.isNotEmpty()
+        val initiatingPlayerProps = PropertyManager.PropertyGroups.forPropsOwnedBy(initiatingPlayer)
+        val initiatingPlayerHasAProp: Boolean = initiatingPlayerProps.any()
         
         // Let otherPlayersMap be a Map where the keys are stringified ints that start at 1 and the values are Players.
         val otherPlayersMap: Map<String, Player> =
@@ -1299,13 +1349,12 @@ class Game {
                 println()
             }
             
-            val otherPlayerProperties: List<Property> =
-                PropertyManager.getPropertiesOwnedBy(otherPlayer)
-            val otherPlayerHasAProperty: Boolean = otherPlayerProperties.isNotEmpty()
+            val otherPlayerProps = PropertyManager.PropertyGroups.forPropsOwnedBy(otherPlayer)
+            val otherPlayerHasAProp: Boolean = otherPlayerProps.any()
             
             // Prevent the player from continuing if there is nothing that can be traded besides money.
-            if (!initiatingPlayerHasAProperty && !initiatingPlayer.hasAGetOffVacationCard &&
-                !otherPlayerHasAProperty && !otherPlayer.hasAGetOffVacationCard
+            if (!initiatingPlayerHasAProp && !initiatingPlayer.hasAGetOffVacationCard &&
+                !otherPlayerHasAProp && !otherPlayer.hasAGetOffVacationCard
             ) {
                 println(
                     "There's nothing that ${initiatingPlayer.name} and ${otherPlayer.name} can trade " +
@@ -1325,7 +1374,9 @@ class Game {
             
             // Part for having the initiating player select what they want.
             
-            val wantedItems = TradeItems()
+            val wantedItems = TradeItems(owner = otherPlayer)
+            val nextValue = "g"
+            val nextPartSentencePart = "\"$nextValue\" to go to the next part of the trade process"
             
             selectWhatIsWanted@ while (true) {
                 moneyAskLoop1@ while (true) {
@@ -1371,7 +1422,7 @@ class Game {
                     }
                 }
                 
-                if (otherPlayerHasAProperty) {
+                if (otherPlayerHasAProp) {
                     propertyAskLoop1@ while (true) {
                         print("${initiatingPlayer.name}, would you like any properties from ${otherPlayer.name}? (y/n): ")
                         input = getFormattedInput()
@@ -1380,27 +1431,29 @@ class Game {
                             "n" -> break@propertyAskLoop1
                             
                             "y" -> {
-                                val propertiesAndDirectionsString =
-                                    PropertyManager.getInfoForPropertiesOwnedBy(otherPlayer, otherPlayerProperties) +
-                                    "\n\nEnter the positions of all the properties you would like with each " +
-                                    "position separated by whitespace or enter \"b\" to go back:"
+                                val propertiesString = ""
                                 
                                 
-                                propertyAskLoop2@ while (true) {
-                                    println(propertiesAndDirectionsString)
+                                while (true) {
+                                    println()
+                                    println(propertiesString)
+                                    println()
+                                    println(
+                                        "Enter the positions of all the properties you would like with each " +
+                                        "position separated by whitespace or enter $nextPartSentencePart:"
+                                    )
                                     input = getFormattedInput()
-                                    if (input == "b") continue@propertyAskLoop1
-                                    val selectedProperties: List<Property> =
-                                        otherPlayerProperties.filterByPositions(positionsInput = input)
+                                    if (input == nextValue) break@propertyAskLoop1
                                     
-                                    if (selectedProperties.isEmpty()) {
-                                        println()
-                                        printInvalidPositionsText()
-                                        continue@propertyAskLoop2
+                                    val selectedProps: PropertyManager.PropertyGroups =
+                                        otherPlayerProps.filterByPositions(positionsInput = input)
+                                    if (selectedProps.any()) {
+                                        wantedItems.props = selectedProps
+                                        break@propertyAskLoop1
                                     }
                                     
-                                    wantedItems.properties = selectedProperties
-                                    break@propertyAskLoop1
+                                    println()
+                                    printInvalidPositionsText()
                                 }
                             }
                             
@@ -1488,7 +1541,7 @@ class Game {
             
             // Part for having the initiating player select what to offer.
             
-            val offeredItems = TradeItems()
+            val offeredItems = TradeItems(owner = initiatingPlayer)
             
             selectWhatToOffer@ while (true) {
                 // Only give the initiating player the choice of offering money if they are not in need of money
@@ -1530,34 +1583,37 @@ class Game {
                     }
                 }
                 
-                if (initiatingPlayerHasAProperty) {
+                if (initiatingPlayerHasAProp) {
                     propertyAskLoop1@ while (true) {
                         print("${initiatingPlayer.name}, would you like to offer ${otherPlayer.name} any properties? (y/n): ")
                         input = getFormattedInput()
                         
                         when (input) {
                             "y" -> {
-                                val propertiesAndDirectionsString =
-                                    PropertyManager.getInfoForPropertiesOwnedBy(initiatingPlayer, initiatingPlayerProperties) +
-                                    "\n\nEnter the positions of the properties you would like to offer with each " +
-                                    "position separated by whitespace or enter \"b\" to go back:"
+                                val propertiesString = ""
                                 
-                                propertyAskLoop2@ while (true) {
-                                    println(propertiesAndDirectionsString)
+                                while (true) {
+                                    println()
+                                    println(propertiesString)
+                                    println()
+                                    println(
+                                        "Enter the positions of the properties you would like to offer with each " +
+                                        "position separated by whitespace or enter $nextPartSentencePart:"
+                                    )
+                                    
                                     input = getFormattedInput()
-                                    if (input == "b") continue@propertyAskLoop1
+                                    if (input == nextValue) break@propertyAskLoop1
                                     
-                                    val selectedProperties: List<Property> =
-                                        initiatingPlayerProperties.filterByPositions(positionsInput = input)
                                     
-                                    if (selectedProperties.isEmpty()) {
-                                        println()
-                                        printInvalidPositionsText()
-                                        continue@propertyAskLoop2
+                                    val selectedProps: PropertyManager.PropertyGroups =
+                                        initiatingPlayerProps.filterByPositions(positionsInput = input)
+                                    if (selectedProps.any()) {
+                                        offeredItems.props = selectedProps
+                                        break@propertyAskLoop1
                                     }
                                     
-                                    offeredItems.properties = selectedProperties
-                                    break@propertyAskLoop1
+                                    println()
+                                    printInvalidPositionsText()
                                 }
                             }
                             
@@ -1609,7 +1665,6 @@ class Game {
                             else -> {
                                 println()
                                 printInvalidInput()
-                                println()
                             }
                         }
                     }
@@ -1647,61 +1702,18 @@ class Game {
             }
             
             
-            fun getOwnedNeighborhoodMessage(player: Player) =
-                "Note: the above property is a street that is in a neighborhood that is currently owned by " +
-                "${player.name}. If ${player.name} agrees to the trade, that neighborhood will no longer be owned " +
-                "by only them so all restaurants will be sold and the fees will go back to the starting fees."
-            
             
             // Part for the initiating player to confirm what they want and what they offer.
             
-            confirmTrade@ while (true) {
+            val offeredItemsString = offeredItems.toString()
+            val wantedItemsString = wantedItems.toString()
+            
+            while (true) {
                 println("\nFor this trade, ${initiatingPlayer.name} will give ${otherPlayer.name} the following:")
-                offeredItems.money.let { if (it > 0) println("\n$$it") }
-                
-                if (offeredItems.properties.isNotEmpty()) {
-                    println("\nThe following properties:")
-                    for (p: Property in offeredItems.properties) {
-                        println(p.basicInfo)
-                        if (p is Street && p.neighborhood.onePlayerOwnsAllStreets) {
-                            println(getOwnedNeighborhoodMessage(initiatingPlayer))
-                        }
-                    }
-                }
-                
-                offeredItems.numGetOffVacationCards.let {
-                    if (it > 0) {
-                        println()
-                        println(
-                            if (it == 1) "A get off Vacation free card"
-                            else "$it get off Vacation free cards"
-                        )
-                    }
-                }
-                
-                
+                println(offeredItemsString)
                 println("\n${otherPlayer.name} will give ${initiatingPlayer.name} the following:")
-                wantedItems.money.let { if (it > 0) println("\n$$it") }
+                println(wantedItemsString)
                 
-                if (wantedItems.properties.isNotEmpty()) {
-                    println("\nThe following properties:")
-                    for (p: Property in wantedItems.properties) {
-                        println(p.basicInfo)
-                        if (p is Street && p.neighborhood.onePlayerOwnsAllStreets) {
-                            println(getOwnedNeighborhoodMessage(otherPlayer))
-                        }
-                    }
-                }
-                
-                wantedItems.numGetOffVacationCards.let {
-                    if (it > 0) {
-                        println()
-                        println(
-                            if (it == 1) "A get off Vacation free card"
-                            else "$it get off Vacation free cards"
-                        )
-                    }
-                }
                 
                 // Reuse propertyInfoValue and playerInfoValue from beginning of function.
                 println()
@@ -1715,7 +1727,7 @@ class Game {
                 )
                 
                 when (getFormattedInput()) {
-                    "y" -> break@confirmTrade
+                    "y" -> break
                     
                     "n" -> {
                         while (true) {
@@ -1761,7 +1773,7 @@ class Game {
             
             // Part for the other player to accept or deny the trade and make the changes if accepted.
             
-            acceptOrDenyTrade@ while (true) {
+            while (true) {
                 // Reuse propertyInfoValue and playerInfoValue from beginning of function.
                 println()
                 println(
@@ -1792,78 +1804,12 @@ class Game {
                     "y" -> {
                         // Give the other player what was agreed upon.
                         
-                        offeredItems.money.let {
-                            if (it > 0) {
-                                initiatingPlayer.decrementMoneyAndPrintUpdate(it)
-                                otherPlayer.incrementMoneyAndPrintUpdate(it)
-                            }
+                        
                         }
                         
-                        for (property: Property in offeredItems.properties) {
-                            if (property is Street && property.neighborhood.onePlayerOwnsAllStreets) {
-                                val numNeighborhoodRestaurants: Int = property.neighborhood.numRestaurants
-                                if (numNeighborhoodRestaurants > 0) {
-                                    println()
-                                    println(
-                                        if (numNeighborhoodRestaurants == 1) {
-                                            "There is 1 restaurant in the ${property.neighborhood.friendlyName} " +
-                                            "neighborhood so this will be sold."
-                                        } else {
-                                            "There are $numNeighborhoodRestaurants restaurants in the " +
-                                            "${property.neighborhood.friendlyName} neighborhood so these will be sold."
-                                        }
-                                    )
-                                    
-                                    // Sell all restaurants in the neighborhood.
-                                    property.neighborhood.removeRestaurants()
-                                    val moneyEarned: Int = numNeighborhoodRestaurants * property.restaurantRemoveGain
-                                    initiatingPlayer.incrementMoneyAndPrintUpdate(moneyEarned)
-                                }
-                            }
-                            
-                            property.owner = otherPlayer
-                        }
+                        offeredItems.transferItemsTo(otherPlayer)
+                        wantedItems.transferItemsTo(initiatingPlayer)
                         
-                        initiatingPlayer.numGetOffVacationCards -= offeredItems.numGetOffVacationCards
-                        otherPlayer.numGetOffVacationCards += offeredItems.numGetOffVacationCards
-                        
-                        
-                        // Now give the initiating player what was agreed upon.
-                        
-                        wantedItems.money.let {
-                            if (it > 0) {
-                                otherPlayer.decrementMoneyAndPrintUpdate(it)
-                                initiatingPlayer.incrementMoneyAndPrintUpdate(it)
-                            }
-                        }
-                        
-                        for (property: Property in wantedItems.properties) {
-                            if (property is Street && property.neighborhood.onePlayerOwnsAllStreets) {
-                                val numNeighborhoodRestaurants: Int = property.neighborhood.numRestaurants
-                                if (numNeighborhoodRestaurants > 0) {
-                                    println()
-                                    println(
-                                        if (numNeighborhoodRestaurants == 1) {
-                                            "There is 1 restaurant in the ${property.neighborhood.friendlyName} " +
-                                            "neighborhood so this will be sold."
-                                        } else {
-                                            "There are $numNeighborhoodRestaurants restaurants in the " +
-                                            "${property.neighborhood.friendlyName} neighborhood so these will be sold."
-                                        }
-                                    )
-                                    
-                                    // Sell all restaurants in the neighborhood.
-                                    property.neighborhood.removeRestaurants()
-                                    val moneyEarned: Int = numNeighborhoodRestaurants * property.restaurantRemoveGain
-                                    otherPlayer.incrementMoneyAndPrintUpdate(moneyEarned)
-                                }
-                            }
-                            
-                            property.owner = initiatingPlayer
-                        }
-                        
-                        otherPlayer.numGetOffVacationCards -= wantedItems.numGetOffVacationCards
-                        initiatingPlayer.numGetOffVacationCards += wantedItems.numGetOffVacationCards
                         return true
                     }
                     

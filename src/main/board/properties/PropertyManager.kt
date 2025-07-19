@@ -1,5 +1,6 @@
 package singletonopoly.board.properties
 
+import singletonopoly.Misc.joinToStringBuilder
 import singletonopoly.board.Board
 import singletonopoly.players.Player
 
@@ -19,6 +20,170 @@ object PropertyManager {
     
     private val allProperties: List<Property> =
         SuperStore.bothStores + GolfClub.allClubs + Neighborhood.getAllStreets()
+    
+    private fun List<Property>.toCharSequence(start: String, extraInfo: String): CharSequence =
+        buildList {
+            add(start)
+            add(extraInfo)
+            for (prop in this@toCharSequence) {
+                add(prop.getBasicInfo())
+            }
+        }
+        .joinToStringBuilder(separator = "\n")
+    
+    private fun getPositions(positionsInput: String): Set<Int> =
+        positionsInput
+        .split(Regex("\\s+"))
+        .mapNotNullTo(HashSet()) { it.toIntOrNull() }
+    
+    class StreetGroups(private val streets: List<List<Street>>): Iterable<Street> {
+        fun filter(predicate: (Street) -> Boolean): StreetGroups =
+            StreetGroups(
+                streets
+                .map { it.filter(predicate) }
+                .filter { it.isNotEmpty() }
+            )
+        
+        fun filterByPositions(positionsInput: String): StreetGroups {
+            val positionsSet: Set<Int> = getPositions(positionsInput)
+            return filter { it.position in positionsSet }
+        }
+        
+        fun toCharSequence(start: String, end: String? = null, sayIfNHoodIsOwned: Boolean = false): CharSequence =
+            buildList {
+                add(start)
+                
+                for (streetList in streets) {
+                    val nHood = streetList.first().neighborhood
+                    val charSeqStart: String =
+                        nHood.friendlyName.let {
+                            if (sayIfNHoodIsOwned && nHood.onePlayerOwnsAllStreets) "$it (Owned)"
+                            else it
+                        }
+                    add(streetList.toCharSequence(start = charSeqStart, extraInfo = nHood.extraInfo))
+                }
+                
+                if (end != null) add(end)
+            }
+            .joinToStringBuilder(separator = "\n\n")
+        
+        private val flattenedStreets: List<Street> by lazy { streets.flatten() }
+        
+        override fun iterator(): Iterator<Street> = flattenedStreets.iterator()
+    }
+    
+    class PropertyGroups private constructor(
+        val stores: List<SuperStore>,
+        val clubs: List<GolfClub>,
+        val streetGroups: StreetGroups
+    ): Iterable<Property> {
+        fun toString(start: String?, end: String? = null, sayIfNHoodIsOwned: Boolean = false) =
+            buildList(capacity = 3) {
+                if (start != null) add(start)
+                add(extraInfo)
+                
+                if (stores.isNotEmpty()) {
+                    add(
+                        stores.toCharSequence(
+                            start = "Super Stores",
+                            extraInfo = SuperStore.EXTRA_INFO
+                        )
+                    )
+                }
+                
+                if (clubs.isNotEmpty()) {
+                    add(
+                        clubs.toCharSequence(
+                            start = "Golf Clubs",
+                            extraInfo = GolfClub.extraInfo
+                        )
+                        
+                    )
+                }
+                
+                if (streetGroups.any()) {
+                    add(streetGroups.toCharSequence(start = "Streets", sayIfNHoodIsOwned = sayIfNHoodIsOwned))
+                }
+                
+                if (end != null) add(end)
+            }
+            .joinToString(separator = "\n\n")
+        
+        override fun toString() = toString(start = null, end = null)
+        
+        fun filter(predicate: (Property) -> Boolean): PropertyGroups =
+            PropertyGroups(
+                stores = stores.filter(predicate),
+                clubs = clubs.filter(predicate),
+                streetGroups = streetGroups.filter(predicate)
+            )
+            
+        fun filterByPositions(positionsInput: String): PropertyGroups {
+            val positionsSet: Set<Int> = getPositions(positionsInput)
+            return filter { it.position in positionsSet }
+        }
+        
+        private val combinedProperties: List<Property> by lazy {
+            stores + clubs + streetGroups
+        }
+        
+        override fun iterator(): Iterator<Property> = combinedProperties.iterator()
+        
+        companion object {
+            val forAllProps =
+                PropertyGroups(
+                    stores = SuperStore.bothStores,
+                    clubs = GolfClub.allClubs,
+                    streetGroups = StreetGroups(Neighborhood.entries.map { it.streets })
+                )
+            
+            fun forPropsOwnedBy(player: Player): PropertyGroups =
+                forAllProps.filter { it.owner === player }
+        }
+    }
+    
+    
+    class ActionPropertyGroups private constructor(val owner: Player) {
+        lateinit var pawnable: PropertyGroups
+            private set
+        
+        lateinit var unpawnable: PropertyGroups
+            private set
+        
+        lateinit var restaurantAddable: StreetGroups
+            private set
+        
+        lateinit var restaurantRemovable: StreetGroups
+            private set
+        
+        fun refresh() {
+            val ownerPropertyGroups = PropertyGroups.forPropsOwnedBy(owner)
+            pawnable = ownerPropertyGroups.filter { it.canBePawned }
+            unpawnable = ownerPropertyGroups.filter { it.canBeUnpawned }
+            restaurantAddable = ownerPropertyGroups.streetGroups.filter { it.restaurantCanBeAdded }
+            restaurantRemovable = ownerPropertyGroups.streetGroups.filter { it.restaurantCanBeRemoved }
+        }
+        
+        init {
+            refresh()
+        }
+        
+        val hasPawnable: Boolean
+            get() = pawnable.any()
+        
+        val hasUnpawnable: Boolean
+            get() = unpawnable.any()
+        
+        val hasRestaurantAddable: Boolean
+            get() = restaurantAddable.any()
+        
+        val hasRestaurantRemovable: Boolean
+            get() = restaurantRemovable.any()
+        
+        companion object {
+            fun forPropsOwnedBy(player: Player) = ActionPropertyGroups(player)
+        }
+    }
     
     /**
      * Throws an exception if there's no property with the specified name.
