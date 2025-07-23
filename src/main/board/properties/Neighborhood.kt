@@ -1,7 +1,6 @@
 package singletonopoly.board.properties
 
 import singletonopoly.Misc
-import singletonopoly.Misc.joinToStringBuilder
 import singletonopoly.Misc.toStringWithCommas
 
 /**
@@ -77,31 +76,9 @@ enum class Neighborhood(street1Name: String, street2Name: String, street3Name: S
             separator = ", "
         )
     
-    /**
-     * Returns a StringBuilder that contains a heading and info about the streets in this neighborhood.
-     */
-    private fun getInfo(includeAllInfo: Boolean): CharSequence =
-        buildList(capacity = 5) {
-            add(friendlyName)
-            streets.forEach { add(it.basicInfo) }
-            if (includeAllInfo) add(extraInfo)
-        }
-        .joinToStringBuilder(separator = "\n")
     
     
-    companion object Manager {
-        fun getAllStreets(): List<Street> = entries.flatMap { it.streets }
         
-        /**
-         * Returns a StringBuilder that contains headings and info about the streets in all neighborhoods.
-         */
-        fun getStreetsInfo(includeAllInfo: Boolean): CharSequence =
-            entries.joinToStringBuilder(
-                prefix = "Streets\n",
-                transform = { it.getInfo(includeAllInfo) },
-                separator = "\n\n"
-            )
-    }
 }
 
 /*

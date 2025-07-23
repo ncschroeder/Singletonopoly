@@ -35,15 +35,5 @@ class SuperStore private constructor(nameStart: String) : Property(name = "$name
             "$BOTH_STORES_OWNED_MULTIPLIER: $ONE_STORE_OWNED_MULTIPLIER for if the owner doesn't " +
             "own the other super store as well and $BOTH_STORES_OWNED_MULTIPLIER for if they do."
         
-        /**
-         * Returns a StringBuilder that contains a heading and info about the stores.
-         */
-        fun getStoresInfo(includeAllInfo: Boolean): CharSequence =
-            StringBuilder().apply {
-                appendLine("Super Stores")
-                if (includeAllInfo) appendLine(EXTRA_INFO)
-                appendLine(newtonStore.getBasicInfo())
-                append(leibnizStore.getBasicInfo())
-            }
     }
 }

@@ -103,7 +103,7 @@ class Game {
         playerManager.winnerName?.let { println("The winner is $it!") }
         
         // Make properties unowned in case another game is started.
-        PropertyManager.makePropertiesUnowned()
+        PropertyGroups.makePropertiesUnowned()
     }
     
     class DiceRoll {
@@ -169,7 +169,7 @@ class Game {
     
     fun handleCurPlayerDroppingOutAndPropsBecomeUnowned() {
         println("${curPlayer.name} dropped out so their properties are now unowned.")
-        PropertyManager.makePropertiesUnowned(owner = curPlayer)
+        PropertyGroups.makePropertiesUnowned(owner = curPlayer)
     }
     
     
@@ -177,7 +177,7 @@ class Game {
      * Asks the current player about any actions they would like to do before they roll and take their turn.
      */
     fun askAboutPreRollAction() {
-        val propertyLists = PropertyManager.PropertyLists(curPlayer)
+        val actionPropGroups = ActionPropertyGroups.forPropsOwnedBy(curPlayer)
         
         // Valid input values
         val takeTurnValue = "tt"
@@ -208,17 +208,13 @@ class Game {
         
         preRollActionAskLoop@ while (true) {
             println(optionsStart)
-            if (propertyLists.hasPawnable) {
-                println("$pawnValue: Pawn some of your properties")
+            if (actionPropGroups.hasPawnable) {
             }
-            if (propertyLists.hasUnpawnable) {
-                println("$unpawnValue: Unpawn some of your properties")
+            if (actionPropGroups.hasUnpawnable) {
             }
-            if (propertyLists.hasRestaurantAddable) {
-                println("$addRestaurantValue: Add restaurants to some of your streets")
+            if (actionPropGroups.hasRestaurantAddable) {
             }
-            if (propertyLists.hasRestaurantRemovable) {
-                println("$removeRestaurantValue: Remove restaurants from some of your streets")
+            if (actionPropGroups.hasRestaurantRemovable) {
             }
             
             input = getFormattedInput()
@@ -240,7 +236,7 @@ class Game {
                             initiatingPlayerNeedsMoney = false
                         )
                     ) {
-                        propertyLists.refresh()
+                        actionPropGroups.refresh()
                     }
                 }
                 
@@ -291,14 +287,14 @@ class Game {
                 }
                 
                 pawnValue -> {
-                    if (propertyLists.hasPawnable) {
+                    if (actionPropGroups.hasPawnable) {
                         if (
                             askAboutPawningProperties(
                                 player = curPlayer,
-                                pawnableProperties = propertyLists.pawnable
+                                pawnableProps = actionPropGroups.pawnable
                             )
                         ) {
-                            propertyLists.refresh()
+                            actionPropGroups.refresh()
                         }
                     } else {
                         printInvalidInput()
@@ -306,9 +302,9 @@ class Game {
                 }
                 
                 unpawnValue -> {
-                    if (propertyLists.hasUnpawnable) {
                         if (askAboutCurPlayerUnpawningProperties(unpawnableProperties = propertyLists.unpawnable)) {
-                            propertyLists.refresh()
+                    if (actionPropGroups.hasUnpawnable) {
+                            actionPropGroups.refresh()
                         }
                     } else {
                         printInvalidInput()
@@ -316,9 +312,9 @@ class Game {
                 }
                 
                 addRestaurantValue -> {
-                    if (propertyLists.hasRestaurantAddable) {
                         if (askAboutCurPlayerAddingRestaurants(restaurantAddableStreets = propertyLists.restaurantAddable)) {
-                            propertyLists.refresh()
+                    if (actionPropGroups.hasRestaurantAddable) {
+                            actionPropGroups.refresh()
                         }
                     } else {
                         printInvalidInput()
@@ -326,14 +322,14 @@ class Game {
                 }
                 
                 removeRestaurantValue -> {
-                    if (propertyLists.hasRestaurantRemovable) {
+                    if (actionPropGroups.hasRestaurantRemovable) {
                         if (
                             askAboutRemovingRestaurants(
                                 player = curPlayer,
-                                restaurantRemovableStreets = propertyLists.restaurantRemovable
+                                restaurantRemovableStreets = actionPropGroups.restaurantRemovable
                             )
                         ) {
-                            propertyLists.refresh()
+                            actionPropGroups.refresh()
                         }
                     } else {
                         printInvalidInput()
@@ -440,7 +436,7 @@ class Game {
             "will go to ${newPropsOwner.name}."
         )
         newPropsOwner.incrementMoneyAndPrintUpdate(dropOutPlayer.money)
-        PropertyManager.transferOwnership(curOwner = dropOutPlayer, newOwner = newPropsOwner)
+        PropertyGroups.transferOwnership(curOwner = dropOutPlayer, newOwner = newPropsOwner)
     }
     
     fun printGotMoneyMessage(player: Player = curPlayer, messageEnd: String) {
@@ -678,7 +674,7 @@ class Game {
             }
             
             is RestaurantMaintenanceCard -> {
-                val numRestaurantsOwned: Int = PropertyManager.getNumRestaurantsOwnedBy(curPlayer)
+                val numRestaurantsOwned: Int = PropertyGroups.getNumRestaurantsOwnedBy(curPlayer)
                 println()
                 if (numRestaurantsOwned == 0) {
                     println("${curPlayer.name} doesn't own any restaurants so they don't have to pay anything.")
@@ -879,26 +875,16 @@ class Game {
             b: Go back
             """.trimIndent()
         
+        val allPropsInfo: String by lazy { PropertyGroups.getInfoForAllProps() }
+        val playerPropsInfo: String by lazy {
+            PropertyGroups.getInfoForPropsOwnedBy(playerWhoWantsToKnow)
+        }
+        
         while (true) {
             println(optionsString)
             input = getFormattedInput()
             if (input == "b") return
             
-            with(PropertyManager) {
-                println()
-                println(
-                    when (input) {
-                        basicInfoYourPropsValue -> getInfoForPropertiesOwnedBy(playerWhoWantsToKnow)
-                        
-                        basicInfoAllPropsValue -> getInfoForAllProperties(includeAllInfo = false)
-                        
-                        allInfoAllPropsValue -> getInfoForAllProperties(includeAllInfo = true)
-                        
-                        else -> INVALID_INPUT_TEXT
-                    }
-                )
-                println()
-            }
         }
     }
     
@@ -926,10 +912,8 @@ class Game {
     fun askAboutPawningOrUnpawning(
         pawning: Boolean,
         player: Player,
-        pawnableOrUnpawnableProps: PropertyManager.PropertyGroups
+        pawnableOrUnpawnableProps: PropertyGroups
     ): Boolean {
-        var selectedProps: PropertyManager.PropertyGroups
-        var totalMoneyGainOrPrice: Int
         
         val propGroupsStringStart =
             "Here are the properties owned by ${player.name} that can be ${if (pawning) "" else "un"}pawned:"
@@ -947,14 +931,16 @@ class Game {
             input = getFormattedInput()
             if (input == "b") return false
             
-            selectedProps = pawnableOrUnpawnableProps.filterByPositions(positionsInput = input)
-            if (selectedProps.none()) {
+            val selectedProps: PropertyGroups =
+                pawnableOrUnpawnableProps.filterByPositions(positionsInput = input)
+            if (selectedProps.isEmpty()) {
                 printInvalidPositionsText()
                 continue
             }
             
-            totalMoneyGainOrPrice =
-                selectedProps.sumOf { if (pawning) it.pawnGain else it.unpawnPrice }
+            val selectedPropsList: List<Property> = selectedProps.toPropList()
+            val totalMoneyGainOrPrice: Int =
+                selectedPropsList.sumOf { if (askAboutPawning) it.pawnGain else it.unpawnPrice }
             
             val confirmationStringEnd =
                 """
@@ -1001,20 +987,18 @@ class Game {
         return true
     }
     
-    fun askAboutPawning(player: Player, pawnableProps: PropertyManager.PropertyGroups): Boolean =
         askAboutPawningOrUnpawning(pawning = true, player, pawnableProps)
+    fun askAboutPawning(player: Player, pawnableProps: PropertyGroups): Boolean =
     
-    fun askAboutUnpawning(unpawnableProps: PropertyManager.PropertyGroups): Boolean =
         askAboutPawningOrUnpawning(pawning = false, curPlayer, unpawnableProps)
+    fun askAboutUnpawning(unpawnableProps: PropertyGroups): Boolean =
     
     
     fun askAboutAddingOrRemovingRestaurants(
         addingRestaurants: Boolean,
         player: Player,
-        restaurantAddableOrRemovableStreets: PropertyManager.StreetGroups
+        restaurantAddableOrRemovableStreets: StreetGroups
     ): Boolean {
-        var selectedStreets: PropertyManager.StreetGroups
-        var totalMoneyGainOrPrice: Int
         
         val streetGroupsStringStart =
             "Here are the streets owned by ${player.name} that can have a restaurant " +
@@ -1037,15 +1021,17 @@ class Game {
             input = getFormattedInput()
             if (input == "b") return false
             
-            selectedStreets = restaurantAddableOrRemovableStreets.filterByPositions(positionsInput = input)
-            if (selectedStreets.none()) {
+            val selectedStreets: StreetGroups =
+                restaurantAddableOrRemovableStreets.filterByPositions(positionsInput = input)
+            if (selectedStreets.isEmpty()) {
                 printInvalidPositionsText()
                 continue
             }
             
-            totalMoneyGainOrPrice =
-                selectedStreets.sumOf {
-                    if (addingRestaurants) it.restaurantAddPrice else it.restaurantRemovalGain
+            val selectedStreetsList: List<Street> = selectedStreets.toStreetList()
+            val totalMoneyGainOrPrice: Int =
+                selectedStreetsList.sumOf {
+                    if (askAboutAdding) it.restaurantAddPrice else it.restaurantRemovalGain
                 }
             
             val confirmationStringEnd =
@@ -1094,10 +1080,10 @@ class Game {
         return true
     }
     
-    fun askAboutAddingRestaurants(restaurantAddableStreets: PropertyManager.StreetGroups): Boolean =
         askAboutAddingOrRemovingRestaurants(addingRestaurants = true, curPlayer, restaurantAddableStreets)
+    fun askAboutAddingRestaurants(restaurantAddableStreets: StreetGroups): Boolean =
+    fun askAboutRemovingRestaurants(player: Player, restaurantRemovableStreets: StreetGroups): Boolean =
     
-    fun askAboutRemovingRestaurants(player: Player, restaurantRemovableStreets: PropertyManager.StreetGroups): Boolean =
         askAboutAddingOrRemovingRestaurants(addingRestaurants = false, player, restaurantRemovableStreets)
         
     
@@ -1115,7 +1101,7 @@ class Game {
      * by having the player either gather the money needed or drop out of the game.
      */
     fun askAboutGettingMoney(player: Player, moneyNeeded: Int, playerHasChoice: Boolean): Boolean {
-        val actionPropGroups = PropertyManager.ActionPropertyGroups.forPropsOwnedBy(player)
+        val actionPropGroups = ActionPropertyGroups.forPropsOwnedBy(player)
         
         // Valid input values
         val exitValue = "ex"
@@ -1204,7 +1190,7 @@ class Game {
     class TradeItems(private val owner: Player) {
         var money = 0
         
-        var props: PropertyManager.PropertyGroups? = null
+        var props: PropertyGroups? = null
         
         var numGetOffVacationCards = 0
         /**
@@ -1283,8 +1269,8 @@ class Game {
     fun askAboutTrading(initiatingPlayer: Player, initiatingPlayerNeedsMoney: Boolean): Boolean {
          */
         
-        val initiatingPlayerProps = PropertyManager.PropertyGroups.forPropsOwnedBy(initiatingPlayer)
-        val initiatingPlayerHasAProp: Boolean = initiatingPlayerProps.any()
+        val initiatingPlayerProps = PropertyGroups.forPropsOwnedBy(initiatingPlayer)
+        val initiatingPlayerHasAProp: Boolean = initiatingPlayerProps.isNotEmpty()
         
         // Let otherPlayersMap be a Map where the keys are stringified ints that start at 1 and the values are Players.
         val otherPlayersMap: Map<String, Player> =
@@ -1349,10 +1335,10 @@ class Game {
                 println()
             }
             
-            val otherPlayerProps = PropertyManager.PropertyGroups.forPropsOwnedBy(otherPlayer)
-            val otherPlayerHasAProp: Boolean = otherPlayerProps.any()
             
             // Prevent the player from continuing if there is nothing that can be traded besides money.
+            val otherPlayerProps = PropertyGroups.forPropsOwnedBy(otherPlayer)
+            val otherPlayerHasAProp: Boolean = otherPlayerProps.isNotEmpty()
             if (!initiatingPlayerHasAProp && !initiatingPlayer.hasAGetOffVacationCard &&
                 !otherPlayerHasAProp && !otherPlayer.hasAGetOffVacationCard
             ) {

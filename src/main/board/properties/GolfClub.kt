@@ -1,7 +1,6 @@
 package singletonopoly.board.properties
 
 import singletonopoly.Misc
-import singletonopoly.Misc.joinToStringBuilder
 import singletonopoly.Misc.toStringWithCommas
 
 class GolfClub private constructor(nameStart: String) : Property(name = "$nameStart Golf Club") {
@@ -56,15 +55,5 @@ class GolfClub private constructor(nameStart: String) : Property(name = "$nameSt
                 separator = ", "
             )
         
-        /**
-         * Returns a StringBuilder that contains a heading and info about the golf clubs.
-         */
-        fun getClubsInfo(includeAllInfo: Boolean): CharSequence =
-            buildList(capacity = 6) {
-                add("Golf Clubs")
-                allClubs.forEach { add(it.basicInfo) }
-                if (includeAllInfo) add(extraInfo)
-            }
-            .joinToStringBuilder(separator = "\n")
     }
 }
