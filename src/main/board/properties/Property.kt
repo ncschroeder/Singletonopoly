@@ -38,11 +38,9 @@ sealed class Property(val name: String) {
     /**
      * Start of some info strings.
      */
-    protected val infoStart
-        get() = "$name -> Position: $position"
     
-    open fun getBasicInfo() =
-        "$infoStart, " + (
+    open fun getInfo() =
+        "$name -> Position: $position, " + (
             owner
             ?.let { "Owner: ${it.name}, ${if (isPawned) "Pawned" else "Current Fee: $curFeeString"}" }
             ?: "Unowned, Purchase Price: $$purchasePriceString"
@@ -71,9 +69,7 @@ sealed class Property(val name: String) {
     val unpawnPrice: Int
         get() = (pawnGain * 1.1024).roundToInt()
     
-    fun getPawnInfo() = "$infoStart, Pawn Gain: $$pawnGain"
     
-    fun getUnpawnInfo() = "$infoStart, Unpawn Price: $$unpawnPrice"
     
     fun pawn() {
         isPawned = true

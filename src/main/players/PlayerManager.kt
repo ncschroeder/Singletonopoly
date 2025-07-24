@@ -2,6 +2,7 @@ package singletonopoly.players
 
 class PlayerManager(playerNames: List<String>) {
     private val players: List<Player> = playerNames.map(::Player)
+    
     private var curPlayerIndex = 0
     
     val curPlayer: Player

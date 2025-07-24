@@ -7,6 +7,10 @@ import singletonopoly.Misc
 class ActionDeck {
     private val cardsQueue: Queue<ActionCard>
     init {
+        /*
+        Use an array list to shuffle the cards since the Fisher-Yates shuffle, the shuffling algorithm
+        used by Kotlin, accesses elements by index.
+         */
         val shuffledCards: List<ActionCard> =
             arrayListOf(
                 MoneyGainCard(amount = 128),

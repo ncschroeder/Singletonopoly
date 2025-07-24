@@ -9,24 +9,24 @@ class PropertyGroups private constructor(
     val golfClubs: List<GolfClub>,
     val streetGroups: StreetGroups
 ) {
-    fun toString(start: String?, end: String? = null, sayIfNHoodIsOwned: Boolean = false) =
+    fun getInfo(heading: String, end: String? = null, sayIfNHoodIsOwned: Boolean = false): String =
         buildList(capacity = 5) {
-            if (start != null) add(start)
+            add(heading)
             
             if (superStores.isNotEmpty() || golfClubs.isNotEmpty()) {
                 add(SUPER_STORES_AND_GOLF_CLUBS_COMMON_INFO)
             }
             
             if (superStores.isNotEmpty()) {
-                add(superStores.toCharSequence(start = "Super Stores", commonInfo = SuperStore.FEES_INFO))
+                add(superStores.getInfo(heading = "Super Stores", commonInfo = SuperStore.FEES_INFO))
             }
             
             if (golfClubs.isNotEmpty()) {
-                add(golfClubs.toCharSequence(start = "Golf Clubs", commonInfo = GolfClub.FEES_INFO))
+                add(golfClubs.getInfo(heading = "Golf Clubs", commonInfo = GolfClub.FEES_INFO))
             }
             
             if (streetGroups.isNotEmpty()) {
-                add(streetGroups.toCharSequence(start = "Streets", sayIfNHoodIsOwned = sayIfNHoodIsOwned))
+                add(streetGroups.getInfo(heading = "Streets", sayIfNHoodIsOwned = sayIfNHoodIsOwned))
             }
             
             if (end != null) add(end)
@@ -37,8 +37,6 @@ class PropertyGroups private constructor(
         superStores.isEmpty() && golfClubs.isEmpty() && streetGroups.isEmpty()
     
     fun isNotEmpty(): Boolean = !isEmpty()
-    
-    // Don't name this "filter" so that the "filter" Iterable extension function can be used.
     
     fun filter(predicate: (Property) -> Boolean): PropertyGroups =
         PropertyGroups(
@@ -71,12 +69,12 @@ class PropertyGroups private constructor(
         /**
          * commonInfo is for info common to all the props in the list.
          */
-        fun List<Property>.toCharSequence(start: String, commonInfo: String): CharSequence =
+        fun List<Property>.getInfo(heading: String, commonInfo: String): CharSequence =
             buildList(capacity = size + 2) {
-                add(start)
+                add(heading)
                 add(commonInfo)
-                for (prop in this@toCharSequence) {
-                    add(prop.getBasicInfo())
+                for (prop in this@getInfo) {
+                    add(prop.getInfo())
                 }
             }
             .joinToStringBuilder(separator = "\n")
@@ -96,7 +94,7 @@ class PropertyGroups private constructor(
             .mapNotNullTo(HashSet()) { it.toIntOrNull() }
         
         fun getInfoForAllProps(): String =
-            propGroupsForAllProps.toString(start = "Info for all properties")
+            propGroupsForAllProps.getInfo(heading = "Info for all properties")
         
         /*
         In the Game.askAboutSeeingPropInfo function, this function is called without passing a props arg.
@@ -115,7 +113,7 @@ class PropertyGroups private constructor(
             if (props.isEmpty()) {
                 "${player.name} doesn't own any properties."
             } else {
-                props.toString(start = "Info for properties owned by ${player.name}")
+                props.getInfo(heading = "Info for properties owned by ${player.name}")
             }
         
         fun getPropPosition(name: String): Int {
@@ -127,7 +125,7 @@ class PropertyGroups private constructor(
             objects during the Board's initialization, which isn't going to be done when this function
             is called unless we trigger the initialization. 1 way of doing that is by accessing a property.
             */
-            Board.numSpaces
+            Board.NUM_SPACES
             
             return allPropsList.first { it.name == name }.position
         }

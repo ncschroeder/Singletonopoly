@@ -1,7 +1,6 @@
 package singletonopoly.board.properties
 
 import singletonopoly.Misc
-import singletonopoly.Misc.toStringWithCommas
 
 class GolfClub private constructor(nameStart: String) : Property(name = "$nameStart Golf Club") {
     /**
@@ -17,14 +16,14 @@ class GolfClub private constructor(nameStart: String) : Property(name = "$nameSt
                 numClubsOwnedByOwner = 0
                 fee = 0
             } else {
-                numClubsOwnedByOwner = allClubs.count { it.owner == this@GolfClub.owner }
+                numClubsOwnedByOwner = _allClubs.count { it.owner === this@GolfClub.owner }
                 fee = getFee(numClubsOwnedByOwner)
             }
         }
     }
 
     override val curFeeString
-        get() = '$' + FeeData().fee.toStringWithCommas()
+        get() = "$" + FeeData().fee
 
     companion object Manager {
         val neoshoClub = GolfClub(nameStart = "Neosho")
@@ -32,7 +31,10 @@ class GolfClub private constructor(nameStart: String) : Property(name = "$nameSt
         val monettClub = GolfClub(nameStart = "Monett")
         val auroraClub = GolfClub(nameStart = "Aurora")
         
-        val allClubs = listOf(neoshoClub, granbyClub, monettClub, auroraClub)
+        private val _allClubs = listOf(neoshoClub, granbyClub, monettClub, auroraClub)
+        
+        val allClubs
+            get() = _allClubs.toList()
         
         private fun getFee(numClubsOwnedByOwner: Int): Int =
             neoshoClub.purchasePrice / (
@@ -48,7 +50,7 @@ class GolfClub private constructor(nameStart: String) : Property(name = "$nameSt
                 }
             )
         
-        private val extraInfo: String =
+        val FEES_INFO: String =
             "Fees when the owner owns these amounts of clubs: " +
             (1..4).joinToString(
                 transform = { "$it: $${getFee(numClubsOwnedByOwner = it)}" },

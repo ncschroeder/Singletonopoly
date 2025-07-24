@@ -37,19 +37,16 @@ class Player(val name: String) {
         isInGame = false
     }
     
-    var isOnVacation = false
-        private set
     
-    var numTurnsOnVacation = 0
+    var numTurnsOnVacation: Int? = null
     
     fun sendToVacation() {
-        isOnVacation = true
-        position = Board.vacationPosition
+        numTurnsOnVacation = 0
+        position = Board.VACATION_POSITION
     }
     
     fun removeFromVacation() {
-        isOnVacation = false
-        numTurnsOnVacation = 0
+        numTurnsOnVacation = null
     }
     
     var numGetOffVacationCards = 0
@@ -94,8 +91,8 @@ class Player(val name: String) {
             if (hasAGetOffVacationCard) {
                 append(", Get Off Vacation Free Cards: $numGetOffVacationCards")
             }
-            if (isOnVacation) {
-                append(", On Vacation - Number of Turns Spent: $numTurnsOnVacation")
+            numTurnsOnVacation?.let {
+                append(", On Vacation - Number of Turns Spent: $it")
             }
         }
 }

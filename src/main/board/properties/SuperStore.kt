@@ -4,7 +4,7 @@ class SuperStore private constructor(nameStart: String) : Property(name = "$name
     override val curFeeString
         get() =
             if (isUnownedOrPawned) "$0"
-            else "A dice roll multiplied by ${FeeData().multiplier}"
+            else "A dice roll total multiplied by ${FeeData().multiplier}"
     
     /**
      * Fees for super stores are determined by a dice roll that's multiplied by a constant that differs depending
@@ -21,19 +21,17 @@ class SuperStore private constructor(nameStart: String) : Property(name = "$name
     }
     
     companion object Manager {
-        private const val ONE_STORE_OWNED_MULTIPLIER = 8
-        private const val BOTH_STORES_OWNED_MULTIPLIER = 16
-        
         val newtonStore = SuperStore(nameStart = "Newton")
         val leibnizStore = SuperStore(nameStart = "Leibniz")
-        
         val bothStores
             get() = listOf(newtonStore, leibnizStore)
         
-        private const val EXTRA_INFO =
-            "Fees are a dice roll multiplied by either $ONE_STORE_OWNED_MULTIPLIER or " +
+        private const val ONE_STORE_OWNED_MULTIPLIER = 8
+        private const val BOTH_STORES_OWNED_MULTIPLIER = 16
+        
+        const val FEES_INFO =
+            "Fees are a dice roll total multiplied by either $ONE_STORE_OWNED_MULTIPLIER or " +
             "$BOTH_STORES_OWNED_MULTIPLIER: $ONE_STORE_OWNED_MULTIPLIER for if the owner doesn't " +
             "own the other super store as well and $BOTH_STORES_OWNED_MULTIPLIER for if they do."
-        
     }
 }

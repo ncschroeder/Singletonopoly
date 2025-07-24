@@ -53,21 +53,29 @@ object Board {
         )
         .withIndex()
         .associate { (index: Int, space: Any) -> index + 1 to space }
+        .onEach { (position, space) ->
+            if (space is Property) {
+                space.position = position
+            }
+        }
     
     /**
      * Returns the space object at the position specified or null if that position is < 1 or > the number of spaces.
      */
     fun getSpace(position: Int): Any? = positionsAndSpaces[position]
     
-    val numSpaces: Int = positionsAndSpaces.size
+    val NUM_SPACES: Int = positionsAndSpaces.size
     
-    var vacationPosition: Int
-        private set
+    val VACATION_POSITION: Int =
+        positionsAndSpaces
+        .asIterable()
+        .first { (_, space) -> space === NonPropertySpace.VACATION }
+        .let { (position, _) -> position }
     
     /**
      * Has a heading and lines that say the positions of the board and what space is at each position.
      */
-    val spacesString: String
+    val SPACES_STRING: String
     
     override fun toString() = spacesString
     
@@ -76,9 +84,12 @@ object Board {
             { (position, space) ->
                 val ending: String =
                     when (space) {
-                        is Street -> "${space.name}, ${space.neighborhood.friendlyName}"
+                        is Street -> "${space.name}, ${space.nHood.friendlyName}"
+                        
                         is Property -> space.name
+                        
                         is NonPropertySpace -> space.friendlyName
+                        
                         else -> throw Exception("Board had a space that wasn't a Property nor a NonPropertySpace: $space")
                     }
                 
@@ -86,7 +97,7 @@ object Board {
                 "${if (position < 10) " " else ""}$position -> $ending"
             }
         
-        spacesString =
+        SPACES_STRING =
             positionsAndSpaces
             .asIterable()
             .joinToString(
@@ -95,13 +106,5 @@ object Board {
                 separator = "\n"
             )
         
-        
-        vacationPosition = 0
-        for ((position: Int, space: Any) in positionsAndSpaces) {
-            when (space) {
-                is Property -> space.position = position
-                NonPropertySpace.VACATION -> vacationPosition = position
-            }
-        }
     }
 }

@@ -3,29 +3,29 @@ package singletonopoly.board.properties
 import singletonopoly.Misc
 import singletonopoly.Misc.toStringWithCommas
 
-class Street(name: String, val neighborhood: Neighborhood) : Property(name) {
+class Street(name: String, val nHood: Neighborhood) : Property(name) {
+    /*
+    This must be a getter since in the Neighborhood constructor, Streets get created before
+    streetPurchasePrice is initialized.
+     */
     override val purchasePrice: Int
-        get() = neighborhood.streetPurchasePrice
+        get() = nHood.streetPurchasePrice
     
     val curFee: Int
         get() = when {
             isUnownedOrPawned -> 0
             
-            neighborhood.onePlayerOwnsAllStreets ->
-                neighborhood.getStreetFeeWhenOnePlayerOwnsAllStreets(numRestaurants = this.numRestaurants)
+            nHood.onePlayerOwnsAllStreets ->
+                nHood.getStreetFeeWhenOnePlayerOwnsAllStreets(numRestaurants = this.numRestaurants)
             
-            else -> neighborhood.streetStartingFee
+            else -> nHood.streetStartingFee
         }
     
     override val curFeeString
         get() = '$' + curFee.toStringWithCommas()
     
-    /**
-     * Property.basicInfo and if there are any restaurants on this street then the number of restaurants
-     * is mentioned as well.
-     */
-    override fun getBasicInfo(): String =
-        super.getBasicInfo().let {
+    override fun getInfo(): String =
+        super.getInfo().let {
             if (numRestaurants == 0) it
             else "$it, Number of Restaurants: $numRestaurants"
         }
@@ -42,7 +42,7 @@ class Street(name: String, val neighborhood: Neighborhood) : Property(name) {
         private set
     
     val restaurantCanBeAdded: Boolean
-        get() = !isPawned && numRestaurants < 5 && neighborhood.onePlayerOwnsAllStreets
+        get() = !isPawned && numRestaurants < 5 && nHood.onePlayerOwnsAllStreets
     
     val restaurantCanBeRemoved: Boolean
         get() = numRestaurants > 0
@@ -67,15 +67,6 @@ class Street(name: String, val neighborhood: Neighborhood) : Property(name) {
         numRestaurants = 0
     }
     
-    val restaurantAddPrice: Int = neighborhood.restaurantAddPrice
-    val restaurantRemovalGain: Int = neighborhood.restaurantRemovalGain
-    
-    private fun getRestaurantInfoStart() =
-        "$infoStart, Number of Restaurants: $numRestaurants, Current Fee: $curFeeString"
-    
-    fun getRestaurantAddInfo() =
-        "${getRestaurantInfoStart()}, Restaurant Adding Price: $$restaurantAddPrice"
-    
-    fun getRestaurantRemovalInfo() =
-        "${getRestaurantInfoStart()}, Restaurant Removal Gain: $$restaurantRemovalGain"
+    val restaurantAddingPrice: Int = nHood.restaurantAddingPrice
+    val restaurantRemovalGain: Int = nHood.restaurantRemovalGain
 }

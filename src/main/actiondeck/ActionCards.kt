@@ -1,6 +1,6 @@
 package singletonopoly.actiondeck
 
-import singletonopoly.board.properties.PropertyManager
+import singletonopoly.board.properties.PropertyGroups
 
 /*
 This file has the ActionCard abstract class and all its subclasses and objects that inherit from it.
@@ -11,16 +11,16 @@ Smart casting is used to get unique data.
 */
 
 abstract class ActionCard(val message: String)
+class MoneyGainCard(val amount: Int) : ActionCard(message = "You gain $$amount")
 
-class MoneyGainCard(val gainAmount: Int) : ActionCard(message = "You gain $$gainAmount")
+class MoneyLossCard(val amount: Int) : ActionCard(message = "You lose $$amount")
 
-class MoneyLossCard(val lossAmount: Int) : ActionCard(message = "You lose $$lossAmount")
+class GetMoneyFromOtherPlayersCard(val moneyToGetFromEachPlayer: Int) :
+    ActionCard(message = "You get $$moneyToGetFromEachPlayer from every other player")
 
-class GetMoneyFromOtherPlayersCard(val moneyAmount: Int) :
-    ActionCard(message = "You get $$moneyAmount from every other player")
+class PayMoneyToOtherPlayersCard(val moneyToPayEachPlayer: Int) :
+    ActionCard(message = "You must pay every other player $$moneyToPayEachPlayer")
 
-class GiveMoneyToOtherPlayersCard(val moneyAmount: Int) :
-    ActionCard(message = "You must pay every other player $$moneyAmount")
 class RestaurantMaintenanceCard(val feePerRestaurant: Int) :
     ActionCard(message = "You must pay $$feePerRestaurant per restaurant that you own for maintenance")
 
@@ -29,25 +29,23 @@ class MoveAheadCard(val numSpaces: Int): ActionCard(message = "Move ahead $numSp
 
 class MoveBackCard(val numSpaces: Int): ActionCard(message = "Move back $numSpaces spaces.")
 
-abstract class MoveToPropertyCard(propertyName: String, message: String) : ActionCard(message) {
-    val propertyPosition: Int = PropertyManager.getPropertyPosition(propertyName)
+abstract class MoveToPropertyCard(propName: String, message: String) : ActionCard(message) {
+    val propPosition: Int = PropertyGroups.getPropPosition(propName)
 }
 
 object LagosAvenueCard :
     MoveToPropertyCard(
-        propertyName = "Lagos Avenue",
+        propName = "Lagos Avenue",
         message = "Lagos is the most populated city in Africa. Move to Lagos Avenue."
     )
 
 object KnuthStreetCard :
     MoveToPropertyCard(
-        propertyName = "Knuth Street",
+        propName = "Knuth Street",
         message =
-            """
-            Computer scientist Donald Knuth once said:
-            "Programs are meant to be read by humans and only incidentally for computers to execute."
-            Move to Knuth Street.
-            """.trimIndent()
+            // Use single quotes for the quote since this message will be displayed within double quotes.
+            "Computer scientist Donald Knuth once said 'Programs are meant to be read by humans and " +
+            "only incidentally for computers to execute.' Move to Knuth Street."
     )
 
 object GoOnVacationCard : ActionCard(message = "Go On Vacation")

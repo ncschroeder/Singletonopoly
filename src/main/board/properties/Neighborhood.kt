@@ -4,10 +4,11 @@ import singletonopoly.Misc
 import singletonopoly.Misc.toStringWithCommas
 
 /**
- * Class with a list of streets in a neighborhood. Some members of this class access the streets in that list.
- * For example, onePlayerOwnsAllStreets and numRestaurants. Some members are for things that are shared among
- * the streets. For example, streetPurchasePrice and getStreetFeeWhen1PlayerOwnsAllStreets are used for all the
- * streets in a neighborhood and are accessed by streets via their neighborhood property.
+ * Class with a list of streets in a neighborhood. Neighborhood is often shortened to nHood in code.
+ * Some members of this class access the streets in that list. For example, onePlayerOwnsAllStreets and
+ * numRestaurants. Some members are for things that are shared among the streets. For example,
+ * streetPurchasePrice and getStreetFeeWhenOnePlayerOwnsAllStreets are used for all the streets in a
+ * neighborhood and are accessed by streets via their nHood property.
  *
  * Some benefits to using an enum:
  * 1. More concise code for construction. We just have to specify the instance name followed by constructor args.
@@ -19,6 +20,7 @@ import singletonopoly.Misc.toStringWithCommas
  */
 enum class Neighborhood(street1Name: String, street2Name: String, street3Name: String) {
     VAUXHALL("Penny Lane", "Hyde Street", "Barking Boulevard"),
+    MONROVIA("Luanda Lane", "Kinshasa Street", "Lagos Avenue"),
     OZARK("Camden Court", "Lake Shore Drive", "Osage Beach Parkway"),
     AUGUSTA("Labadie Lane", "Moselle Street", "Clover Bottom Road"),
     LITTLE_ITALY("Ezio Avenue", "Firenze Way", "Venezia Street"),
@@ -28,13 +30,16 @@ enum class Neighborhood(street1Name: String, street2Name: String, street3Name: S
     
     val friendlyName: String = Misc.createFriendlyEnumName(name)
     
-    private val streets: List<Street> =
+    private val _streets: List<Street> =
         arrayOf(street1Name, street2Name, street3Name)
-        .map { Street(name = it, neighborhood = this) }
+        .map { Street(name = it, nHood = this) }
     
-    val street1 = streets[0]
-    val street2 = streets[1]
-    val street3 = streets[2]
+    val streets: List<Street>
+        get() = _streets.toList()
+    
+    val street1 = _streets[0]
+    val street2 = _streets[1]
+    val street3 = _streets[2]
     
     val streetPurchasePrice: Int = (ordinal + 1) * 128
     val streetStartingFee: Int = streetPurchasePrice / 8
@@ -57,28 +62,32 @@ enum class Neighborhood(street1Name: String, street2Name: String, street3Name: S
             }
         )
     
-    val restaurantAddPrice: Int = streetPurchasePrice / 2
-    val restaurantRemovalGain: Int = restaurantAddPrice / 2
+    val restaurantAddingPrice: Int = streetPurchasePrice / 2
+    val restaurantRemovalGain: Int = restaurantAddingPrice / 2
     val numRestaurants: Int
-        get() = streets.sumOf { it.numRestaurants }
+        get() = _streets.sumOf { it.numRestaurants }
     
-    fun removeRestaurants() {
-        streets.forEach { it.removeAllRestaurants() }
+    fun removeAllRestaurants() {
+        _streets.forEach { it.removeAllRestaurants() }
     }
     
-    private val extraInfo: String =
-        street1.run { "Street Purchase Price: $$purchasePriceString, Pawn Gain: $$pawnGain, Unpawn Price: $$unpawnPrice, " } +
-        "Restaurant Adding Price: $$restaurantAddPrice, Restaurant Removal Gain: $$restaurantRemovalGain, " +
-        "Fee when neighborhood isn't owned by 1 player: $$streetStartingFee, Fees when neighborhood " +
-        "is owned by 1 player with these amounts of restaurants: " +
+    /**
+     * Info common to all streets.
+     */
+    val streetsCommonInfo: String =
+        street1.run {
+            "Street Purchase Price: $$purchasePriceString, Pawn Gain and Restaurant Adding Price: $$pawnGain, " +
+            "Unpawn Price: $$unpawnPrice, "
+        } +
+        "Restaurant Removal Gain: $$restaurantRemovalGain, Fee when neighborhood isn't owned by 1 player: $$streetStartingFee, " +
+        "Fees when neighborhood is owned by 1 player with these amounts of restaurants: " +
         (0..5).joinToString(
-            transform = { "$it: $${getStreetFeeWhenOnePlayerOwnsAllStreets(numRestaurants = it).toStringWithCommas()}" },
+            transform = {
+                val fee: Int = getStreetFeeWhenOnePlayerOwnsAllStreets(numRestaurants = it)
+                "$it: $${fee.toStringWithCommas()}"
+            },
             separator = ", "
         )
-    
-    
-    
-        
 }
 
 /*
