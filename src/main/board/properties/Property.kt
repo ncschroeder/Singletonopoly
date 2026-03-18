@@ -1,11 +1,10 @@
 package singletonopoly.board.properties
 
 import kotlin.math.roundToInt
-import singletonopoly.Misc.toStringWithCommas
 import singletonopoly.players.Player
 
 /**
- * Superclass for SuperStore, GolfClub, and Street classes.
+ * Superclass for SuperStore, GolfClub, and Street classes. "Property" is often shortened to "prop".
  */
 sealed class Property(val name: String) {
     /**
@@ -14,13 +13,10 @@ sealed class Property(val name: String) {
     var position = 0
     
     /**
-     * Purchase price for super stores and golf clubs is 512 so this value will be in this class and for
-     * streets, this is overridden.
+     * The purchase price for super stores and golf clubs is 512 so this value will be in this class
+     * and for streets, this is overridden.
      */
     open val purchasePrice = 512
-    
-    val purchasePriceString
-        get() = purchasePrice.toStringWithCommas()
     
     /**
      * The player that owns this property or null if this property is unowned. This should be set to a player
@@ -35,15 +31,11 @@ sealed class Property(val name: String) {
      */
     protected abstract val curFeeString: String
     
-    /**
-     * Start of some info strings.
-     */
-    
     open fun getInfo() =
         "$name -> Position: $position, " + (
             owner
             ?.let { "Owner: ${it.name}, ${if (isPawned) "Pawned" else "Current Fee: $curFeeString"}" }
-            ?: "Unowned, Purchase Price: $$purchasePriceString"
+            ?: "Unowned"
         )
     
     open fun makeUnowned() {
@@ -68,8 +60,6 @@ sealed class Property(val name: String) {
      */
     val unpawnPrice: Int
         get() = (pawnGain * 1.1024).roundToInt()
-    
-    
     
     fun pawn() {
         isPawned = true

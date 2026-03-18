@@ -44,8 +44,8 @@ class ActionDeck {
         get() = cardsQueue.element()
     
     /**
-     * Makes it so that the card that used to be the top card is now the bottom card and the card that used to be
-     * 2nd from the top is now the top card.
+     * Makes it so that the card that used to be the top card is now the bottom card and the card
+     * that used to be 2nd from the top is now the top card.
      */
     fun moveTopCardToBottom() {
         with(cardsQueue) { add(remove()) }
@@ -67,19 +67,17 @@ class ActionDeck {
     }
     
     /**
-     * Shows the content of the deck. Should only be used for testing and debugging purposes.
+     * This is only used for testing.
      */
-    override fun toString(): String {
-        // newPosition isn't shown in the message for absolute position change cards, so show it here.
-        fun cardTransform(c: ActionCard): String =
-            c.message.plus(
-                if (c is AbsolutePositionChangeCard) {
-                    " (newPosition = ${c.newPosition})"
-                } else ""
-            )
-        
-        return cardsDeque.joinToString(
-            prefix = "Top Of Deck\n", transform = ::cardTransform, separator = "\n", postfix = "\nBottom Of Deck"
+    override fun toString() =
+        cardsQueue.joinToString(
+            prefix = "Top\n",
+            transform = {
+                if (it !is MoveToPropertyCard) it.message
+                // propPosition isn't shown in the message for MoveToPropertyCards, so show it here.
+                else "${it.message} (propPosition = ${it.propPosition}"
+            },
+            separator = "\n",
+            postfix = "\nBottom"
         )
-    }
 }

@@ -1,21 +1,19 @@
 package singletonopoly
 
 import java.text.DecimalFormat
-import kotlin.math.absoluteValue
 
-// This file has a couple functions that are used in multiple classes.
+// This file has functions that are used in multiple code files.
 
 object Misc {
     private val commaAdder = DecimalFormat("#,###")
     
-    fun Int.toStringWithCommas(): String =
-        commaAdder.format(toLong())
+    fun Int.toStringWithCommas(): String = commaAdder.format(this)
     
-    fun getNumItemsString(numItems: Int, item: String) =
-        "$item${if (numItems == 1) "" else "s"}"
+    fun getNumThingsString(num: Int, thing: String) =
+        "$num $thing${if (num == 1) "" else "s"}"
     
     fun getNumGetOffVacationCardsString(num: Int) =
-        getNumItemsString(num, "get off Vacation free card")
+        getNumThingsString(num, "get off Vacation free card")
     
     fun <T> Iterable<T>.joinToStringBuilder(
         prefix: CharSequence = "",
@@ -23,6 +21,14 @@ object Misc {
         separator: CharSequence
     ) : StringBuilder =
         joinTo(buffer = StringBuilder(), prefix = prefix, transform = transform, separator = separator)
+    
+    /**
+     * Returns a set of whitespace-separated ints in s. Non-int values are ignored.
+     */
+    fun getIntsIn(s: String): Set<Int> =
+        s
+        .split(Regex("\\s+"))
+        .mapNotNullTo(HashSet()) { it.toIntOrNull() }
     
     /**
      * Returns the enum constant name with the underscores replaced with spaces and the words have a capital first

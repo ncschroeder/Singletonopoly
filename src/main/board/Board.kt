@@ -59,9 +59,6 @@ object Board {
             }
         }
     
-    /**
-     * Returns the space object at the position specified or null if that position is < 1 or > the number of spaces.
-     */
     fun getSpace(position: Int): Any? = positionsAndSpaces[position]
     
     val NUM_SPACES: Int = positionsAndSpaces.size
@@ -76,8 +73,6 @@ object Board {
      * Has a heading and lines that say the positions of the board and what space is at each position.
      */
     val SPACES_STRING: String
-    
-    override fun toString() = spacesString
     
     init {
         val spaceToString: (Map.Entry<Int, Any>) -> String =
@@ -100,11 +95,6 @@ object Board {
         SPACES_STRING =
             positionsAndSpaces
             .asIterable()
-            .joinToString(
-                prefix = "Board Spaces\n",
-                transform = spaceToString,
-                separator = "\n"
-            )
-        
+            .joinToString(prefix = "Board Spaces\n", transform = spaceToString, separator = "\n")
     }
 }

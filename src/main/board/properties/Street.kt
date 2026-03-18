@@ -4,12 +4,7 @@ import singletonopoly.Misc
 import singletonopoly.Misc.toStringWithCommas
 
 class Street(name: String, val nHood: Neighborhood) : Property(name) {
-    /*
-    This must be a getter since in the Neighborhood constructor, Streets get created before
-    streetPurchasePrice is initialized.
-     */
-    override val purchasePrice: Int
-        get() = nHood.streetPurchasePrice
+    override val purchasePrice: Int = nHood.streetPurchasePrice
     
     val curFee: Int
         get() = when {
@@ -66,7 +61,4 @@ class Street(name: String, val nHood: Neighborhood) : Property(name) {
     fun removeAllRestaurants() {
         numRestaurants = 0
     }
-    
-    val restaurantAddingPrice: Int = nHood.restaurantAddingPrice
-    val restaurantRemovalGain: Int = nHood.restaurantRemovalGain
 }

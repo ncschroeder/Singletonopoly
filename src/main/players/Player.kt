@@ -7,8 +7,14 @@ import singletonopoly.board.Board
 class Player(val name: String) {
     var position = 1
     
+    /*
+    When a player's amount of money needs to change, most of the time, that'll be done by calling
+    incrementMoneyAndPrintUpdate or decrementMoneyAndPrintUpdate, though there are a few situations
+    where the money property is set directly and a custom update message is printed.
+     */
+    
     var money = 4_096
-        private set(value) {
+        set(value) {
             field =
                 if (value >= 0) value
                 else {
@@ -36,7 +42,6 @@ class Player(val name: String) {
     fun removeFromGame() {
         isInGame = false
     }
-    
     
     var numTurnsOnVacation: Int? = null
     
@@ -77,8 +82,8 @@ class Player(val name: String) {
     }
     
     /**
-     * Returns a CharSequence with info about this player. The chars in this CharSequence will
-     * be added to the string that gets built in the PlayerManager.getPlayersInfo function.
+     * Returns a StringBuilder (CharSequence) and not a string since the chars in that StringBuilder
+     * will be added to the string that gets built in PlayerManager.getPlayerInfo.
      */
     fun getInfo(): CharSequence =
         StringBuilder().apply {

@@ -4,8 +4,8 @@ import singletonopoly.Misc
 import singletonopoly.Misc.toStringWithCommas
 
 /**
- * Class with a list of streets in a neighborhood. Neighborhood is often shortened to nHood in code.
- * Some members of this class access the streets in that list. For example, onePlayerOwnsAllStreets and
+ * Class with a list of streets in a neighborhood. "Neighborhood" is often shortened to "nHood". Some
+ * members of this class access the streets in that list. For example, onePlayerOwnsAllStreets and
  * numRestaurants. Some members are for things that are shared among the streets. For example,
  * streetPurchasePrice and getStreetFeeWhenOnePlayerOwnsAllStreets are used for all the streets in a
  * neighborhood and are accessed by streets via their nHood property.
@@ -29,6 +29,12 @@ enum class Neighborhood(street1Name: String, street2Name: String, street3Name: S
     HAMPTON("Chesapeake Avenue", "Suffolk Street", "Norfolk Avenue");
     
     val friendlyName: String = Misc.createFriendlyEnumName(name)
+    /*
+    Set streetPurchasePrice before creating Streets since the Street constructor accesses
+    the streetPurchasePrice from its Neighborhood.
+     */
+    val streetPurchasePrice: Int = (ordinal + 1) * 128
+    val streetStartingFee: Int = streetPurchasePrice / 8
     
     private val _streets: List<Street> =
         arrayOf(street1Name, street2Name, street3Name)
@@ -41,8 +47,6 @@ enum class Neighborhood(street1Name: String, street2Name: String, street3Name: S
     val street2 = _streets[1]
     val street3 = _streets[2]
     
-    val streetPurchasePrice: Int = (ordinal + 1) * 128
-    val streetStartingFee: Int = streetPurchasePrice / 8
     val onePlayerOwnsAllStreets: Boolean
         get() = street1.owner.let { it != null && it === street2.owner && it === street3.owner }
 
@@ -75,11 +79,10 @@ enum class Neighborhood(street1Name: String, street2Name: String, street3Name: S
      * Info common to all streets.
      */
     val streetsCommonInfo: String =
-        street1.run {
-            "Street Purchase Price: $$purchasePriceString, Pawn Gain and Restaurant Adding Price: $$pawnGain, " +
-            "Unpawn Price: $$unpawnPrice, "
-        } +
-        "Restaurant Removal Gain: $$restaurantRemovalGain, Fee when neighborhood isn't owned by 1 player: $$streetStartingFee, " +
+        "Street Purchase Price: $${streetPurchasePrice.toStringWithCommas()}, " +
+        "Pawn Gain and Restaurant Adding Price: $${street1.pawnGain}, Unpawn Price: $${street1.unpawnPrice}, " +
+        "Restaurant Removal Gain: $$restaurantRemovalGain, " +
+        "Fee when neighborhood isn't owned by 1 player: $$streetStartingFee, " +
         "Fees when neighborhood is owned by 1 player with these amounts of restaurants: " +
         (0..5).joinToString(
             transform = {
@@ -91,35 +94,33 @@ enum class Neighborhood(street1Name: String, street2Name: String, street3Name: S
 }
 
 /*
-The code below is used to generate the rows for the 3rd table in the Properties -> Neighborhoods and Streets
-section in the manual in the README.
+The code below was used to generate the rows for the 3rd table in the
+"Properties" -> "Neighborhoods and Streets" section in the manual in the README.
  */
-/*
-import singletonopoly.Misc.toMoneyString
 
 fun Neighborhood.getMarkdownTableRow(): String =
     buildList {
         add(friendlyName)
-        add(ordinal + 1)
+        add(ordinal + 1) // Neighborhood number
         
-        arrayOf(
-            streetPurchasePrice,
-            street1.pawnPrice,
+        listOf(
+            streetPurchasePrice.toStringWithCommas(),
+            street1.pawnGain,
             street1.unpawnPrice,
-            restaurantRemoveGain,
+            restaurantRemovalGain,
             streetStartingFee
         )
-        .forEach { add(it.toMoneyString()) }
+        .forEach { add("$" + it) }
         
         for (numRestaurants in 0..5) {
-            add(getStreetFeeWhenOnePlayerOwnsAllStreets(numRestaurants).toMoneyString())
+            val fee: Int = getStreetFeeWhenOnePlayerOwnsAllStreets(numRestaurants)
+            add('$' + fee.toStringWithCommas())
         }
     }
     .joinToString(prefix = "| ", separator = " | ", postfix = " |")
 
 fun main() {
-    for (n in Neighborhood.entries) {
-        println(n.getMarkdownTableRow())
+    Neighborhood.entries.forEach {
+        println(it.getMarkdownTableRow())
     }
 }
- */

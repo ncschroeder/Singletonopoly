@@ -56,6 +56,5 @@ class GolfClub private constructor(nameStart: String) : Property(name = "$nameSt
                 transform = { "$it: $${getFee(numClubsOwnedByOwner = it)}" },
                 separator = ", "
             )
-        
     }
 }
