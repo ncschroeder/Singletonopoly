@@ -2,6 +2,7 @@ package singletonopoly
 
 import kotlin.random.Random
 import kotlin.random.nextInt
+import singletonopoly.Misc.joinToStringBuilder
 import singletonopoly.Misc.toStringWithCommas
 import singletonopoly.actiondeck.*
 import singletonopoly.board.*
@@ -21,7 +22,10 @@ fun printInvalidInput() {
     printBlankLnAnd(INVALID_INPUT_TEXT)
 }
 
-fun promptForYOrN(message: String): Boolean {
+/**
+ * message ends with a yes or no question.
+ */
+fun promptForYOrN(message: CharSequence): Boolean {
     while (true) {
         printBlankLnAnd("$message (y/n)")
         
@@ -48,7 +52,6 @@ class Game {
     val playerManager: PlayerManager
     var curPlayer: Player
     var numDoubleRollsInARow = 0
-    var goAgain = false
     var turnOver = false
     var gameOver = false
     val actionDeck = ActionDeck()
@@ -60,11 +63,13 @@ class Game {
     lateinit var input: String
     
     // Valid input values and options for input options used in multiple functions.
+    val rollDiceVal = "rl"
+    
     val seePropInfoVal = "pr"
     val seePropInfoOption = "$seePropInfoVal: See property info"
     
-    val seePlayersInfoVal = "pl"
-    val seePlayersInfoOption = "$seePlayersInfoVal: See players info"
+    val seePlayerInfoVal = "pl"
+    val seePlayerInfoOption = "$seePlayerInfoVal: See player info"
     
     val makeTradeVal = "tr"
     val makeTradeOption = "$makeTradeVal: Make a trade with another player"
@@ -75,12 +80,19 @@ class Game {
     val removeRestaurantsVal = "rm"
     val removeRestaurantsOption = "$removeRestaurantsVal: Remove restaurants from your streets"
     
+    val dropOutVal = "dr"
+    val dropOutOption = "$dropOutVal: Drop out of the game"
+    
+    val goBackVal = "gb"
+    val goBackOption = "$goBackVal: Go back"
+    
     
     init {
         println("You started a game of Singletonopoly.")
         
         getOrderedPlayerNames().let {
             printBlankLnAnd("The order of the players is:")
+            println("The order of the players is:")
             for (name in it) println(name)
             
             playerManager = PlayerManager(it)
@@ -89,8 +101,6 @@ class Game {
         
         while (true) {
             printBlankLnAnd("It's ${curPlayer.name}'s turn.")
-            
-            // The goAgain, turnOver, and gameOver variables might change during the functions that get called.
             askAboutPreRollAction()
             if (gameOver) break
             if (!turnOver) {
@@ -101,21 +111,22 @@ class Game {
             
             // Prepare for next turn.
             turnOver = false
-            if (goAgain) {
-                goAgain = false
-            } else {
+            if (numDoubleRollsInARow == 0) {
                 curPlayer = playerManager.switchToNextPlayer()
             }
-            printBlankLnAnd("End of turn. Enter \"c\" to continue.")
-            while (getFormattedInput() != "c") { }
+            print("\nEnd of turn. Enter \"c\" to continue: ")
+            while (getFormattedInput() != "c") {
+                printInvalidInput()
+            }
         }
         
         // Unless the game is ended early, there should be a winner. Print this message if there's a winner.
         playerManager.winnerName?.let { printBlankLnAnd("The winner is $it!") }
         
         // Make properties unowned in case another game is started.
-        PropertyGroups.makePropertiesUnowned()
+        PropertyManager.makePropsUnowned()
     }
+    
     
     class DiceRoll {
         val die1Val: Int = Random.nextInt(1..6)
@@ -123,8 +134,6 @@ class Game {
         val isDoubles: Boolean = die1Val == die2Val
         val total: Int = die1Val + die2Val
     }
-    
-    
     
     
     /**
@@ -139,16 +148,13 @@ class Game {
      */
     fun getOrderedPlayerNames(): List<String> {
         val numPlayers: Int
-        
+        print("How many players? Enter a number >= 2 and <= 8: ")
         while (true) {
-            print("\nHow many players? Have this number be >= 2 && <= 8: ")
-            
             val inputInt: Int? = getFormattedInput().toIntOrNull()
             if (inputInt != null && inputInt in 2..8) {
                 numPlayers = inputInt
                 break
             }
-            
             printInvalidInput()
         }
         
@@ -156,20 +162,25 @@ class Game {
         
         val playerNamesAndRollTotals = ArrayList<NameAndRollTotal>(numPlayers)
         
-        while (playerNamesAndRollTotals.size < numPlayers) {
-            val playerNum: Int = playerNamesAndRollTotals.size + 1
-            val defaultName = "Player $playerNum"
-            printBlankLnAnd(
-                "Enter a unique name for player $playerNum or enter nothing for \"$defaultName\"."
-            )
-            input = readln().trim()
+        println()
+        
+        for (playerNum: Int in 1..numPlayers) {
+            print("Enter a unique name for player $playerNum that has 1 to 30 characters: ")
             
-            if (playerNamesAndRollTotals.any { it.name == input }) {
-                println("$input is already a name for another player. You must enter a unique name.")
-                continue
+            var name: String
+            while (true) {
+                name = readln().trim()
+                
+                when {
+                    name.length !in 1..30 -> printInvalidInput()
+                    
+                    playerNamesAndRollTotals.any { it.name == name } ->
+                        print("$name is already a name for another player. Try again: ")
+                    
+                    else -> break
+                }
             }
             
-            val name: String = input.ifEmpty { defaultName }
             with(DiceRoll()) {
                 println("$name got a $die1Val and a $die2Val for their beginning dice roll for a total of $total.")
                 playerNamesAndRollTotals.add(NameAndRollTotal(name, total))
@@ -188,7 +199,9 @@ class Game {
     
     fun handleCurPlayerDroppingOutAndPropsBecomeUnowned() {
         printBlankLnAnd("${curPlayer.name} dropped out so their properties are now unowned.")
-        PropertyGroups.makePropertiesUnowned(owner = curPlayer)
+        PropertyManager.makePropsUnowned(owner = curPlayer)
+    }
+    
     }
     
     
@@ -196,12 +209,12 @@ class Game {
      * Asks the current player about any actions they would like to do before they roll.
      */
     fun askAboutPreRollAction() {
+        val curPlayerIsOnVacation: Boolean = curPlayer.numTurnsOnVacation != null
         val actionPropGroups = ActionPropertyGroups.forPropsOwnedBy(curPlayer)
         
         // Valid input values
-        val takeTurnVal = "tt"
+        val vacationActionVal = "va"
         val seeBoardSpacesVal = "bd"
-        val dropOutVal = "dr"
         val endGameVal = "eg"
         val unpawnVal = "up"
         val addRestaurantVal = "ar"
@@ -210,18 +223,20 @@ class Game {
             """
             ${curPlayer.name}, what would you like to do?
             Enter one of the following:
-            
-            $takeTurnVal: Take your turn
+            ${
+                if (curPlayerIsOnVacation) "$vacationActionVal: Do a vacation action"
+                else "$rollDiceVal: Roll the dice and move"
+            }
             $seeBoardSpacesVal: See the spaces on the board
             $seePropInfoOption
-            $seePlayersInfoOption
+            $seePlayerInfoOption
             $makeTradeOption
-            $dropOutVal: Drop out of the game
+            $dropOutOption
             $endGameVal: End the game
             """.trimIndent()
         
         while (true) {
-            printBlankLnAnd(optionsStart)
+            println(optionsStart)
             if (actionPropGroups.hasPawnable) {
                 println(pawnOption)
             }
@@ -235,116 +250,126 @@ class Game {
                 println(removeRestaurantsOption)
             }
             
-            input = getFormattedInput()
-            
-            when (input) {
-                takeTurnVal -> return
+            while (true) {
+                input = getFormattedInput()
                 
-                seeBoardSpacesVal -> printBlankLnAnd(Board.SPACES_STRING)
-                
-                seePropInfoVal -> askAboutSeeingPropInfo(playerWhoWantsToKnow = curPlayer)
-                
-                seePlayersInfoVal -> printBlankLnAnd(playerManager.getPlayersInfo())
-                
-                makeTradeVal -> {
-                    if (
-                        askAboutTrading(
-                            initiatingPlayer = curPlayer,
-                            initiatingPlayerNeedsMoney = false
-                        )
-                    ) {
-                        actionPropGroups.refresh()
-                    }
+                if (
+                    (!curPlayerIsOnVacation && input == rollDiceVal) ||
+                    (curPlayerIsOnVacation && input == vacationActionVal)
+                ) {
+                    return
                 }
                 
-                dropOutVal -> {
-                    val message = "${curPlayer.name}, are you sure that you want to drop out?"
-                    if (promptForYOrN(message)) {
-                        curPlayer.removeFromGame()
-                        if (playerManager.onePlayerIsInGame) {
+                when (input) {
+                    seeBoardSpacesVal -> printBlankLnAnd(Board.SPACES_STRING)
+                    
+                    seePropInfoVal -> askAboutSeeingPropInfo(playerWhoWantsToKnow = curPlayer)
+                    
+                    seePlayerInfoVal -> printBlankLnAnd(playerManager.getPlayerInfo())
+                    
+                        if (
+                            askAboutTrading(
+                                initiatingPlayer = curPlayer,
+                                initiatingPlayerNeedsMoney = false
+                            )
+                        ) {
+                            actionPropGroups.refresh()
+                        }
+                    }
+                    
+                    dropOutVal -> {
+                        if (promptForYOrN("${curPlayer.name}, are you sure that you want to drop out?")) {
+                            curPlayer.removeFromGame()
+                            if (playerManager.onePlayerIsInGame) {
+                                gameOver = true
+                            } else {
+                                turnOver = true
+                                handleCurPlayerDroppingOutAndPropsBecomeUnowned()
+                            }
+                            return
+                        }
+                    }
+                    
+                    endGameVal -> {
+                        if (promptForYOrN("Are you sure that you want to end the game?")) {
                             gameOver = true
+                            return
+                        }
+                    }
+                    
+                    pawnVal -> {
+                        if (actionPropGroups.hasPawnable) {
+                            if (
+                                askAboutPawning(
+                                    player = curPlayer,
+                                    pawnableProps = actionPropGroups.pawnable
+                                )
+                            ) {
+                                actionPropGroups.refresh()
+                            }
                         } else {
-                            turnOver = true
-                            handleCurPlayerDroppingOutAndPropsBecomeUnowned()
+                            printInvalidInput()
+                            continue
                         }
-                        return
                     }
-                }
-                
-                endGameVal -> {
-                    val message = "Are you sure that you want to end the game?"
-                    if (promptForYOrN(message)) {
-                        gameOver = true
-                        return
-                    }
-                }
-                
-                pawnVal -> {
-                    if (actionPropGroups.hasPawnable) {
-                        if (
-                            askAboutPawning(
-                                player = curPlayer,
-                                pawnableProps = actionPropGroups.pawnable
-                            )
-                        ) {
-                            actionPropGroups.refresh()
+                    
+                    unpawnVal -> {
+                        if (actionPropGroups.hasUnpawnable) {
+                            if (askAboutUnpawning(unpawnableProps = actionPropGroups.unpawnable)) {
+                                actionPropGroups.refresh()
+                            }
+                        } else {
+                            printInvalidInput()
+                            continue
                         }
-                    } else {
+                    }
+                    
+                    addRestaurantVal -> {
+                        if (actionPropGroups.hasRestaurantAddable) {
+                            if (
+                                askAboutAddingRestaurants(
+                                    restaurantAddableStreets = actionPropGroups.restaurantAddable
+                                )
+                            ) {
+                                actionPropGroups.refresh()
+                            }
+                        } else {
+                            printInvalidInput()
+                            continue
+                        }
+                    }
+                    
+                    removeRestaurantsVal -> {
+                        if (actionPropGroups.hasRestaurantRemovable) {
+                            if (
+                                askAboutRemovingRestaurants(
+                                    player = curPlayer,
+                                    restaurantRemovableStreets = actionPropGroups.restaurantRemovable
+                                )
+                            ) {
+                                actionPropGroups.refresh()
+                            }
+                        } else {
+                            printInvalidInput()
+                            continue
+                        }
+                    }
+                    
+                    else ->{
                         printInvalidInput()
+                        continue
                     }
                 }
                 
-                unpawnVal -> {
-                    if (actionPropGroups.hasUnpawnable) {
-                        if (
-                            askAboutUnpawning(
-                                unpawnableProps = actionPropGroups.unpawnable
-                            )
-                        ) {
-                            actionPropGroups.refresh()
-                        }
-                    } else {
-                        printInvalidInput()
-                    }
-                }
-                
-                addRestaurantVal -> {
-                    if (actionPropGroups.hasRestaurantAddable) {
-                        if (
-                            askAboutAddingRestaurants(
-                                restaurantAddableStreets = actionPropGroups.restaurantAddable
-                            )
-                        ) {
-                            actionPropGroups.refresh()
-                        }
-                    } else {
-                        printInvalidInput()
-                    }
-                }
-                
-                removeRestaurantsVal -> {
-                    if (actionPropGroups.hasRestaurantRemovable) {
-                        if (
-                            askAboutRemovingRestaurants(
-                                player = curPlayer,
-                                restaurantRemovableStreets = actionPropGroups.restaurantRemovable
-                            )
-                        ) {
-                            actionPropGroups.refresh()
-                        }
-                    } else {
-                        printInvalidInput()
-                    }
-                }
-                
-                else -> printInvalidInput()
+                println()
+                break
             }
         }
     }
     
     
     fun handleCurPlayerMakingRevolution() {
-        printBlankLnAnd("${curPlayer.name} made a revolution!")
+        println("${curPlayer.name} made a revolution!")
         curPlayer.incrementMoneyAndPrintUpdate(512)
     }
     
@@ -362,9 +387,7 @@ class Game {
     fun handleGoOnVacation() {
         curPlayer.sendToVacation()
         turnOver = true
-        
         // If the player rolled doubles, they won't get to go again in this situation.
-        goAgain = false
         numDoubleRollsInARow = 0
     }
     
@@ -372,7 +395,7 @@ class Game {
     fun rollDiceAndMove() {
         val diceRoll = DiceRoll()
         with(diceRoll) {
-            println("${curPlayer.name} rolled a $die1Val and a $die2Val, for a total of $total.")
+            println("\n${curPlayer.name} rolled a $die1Val and a $die2Val, for a total of $total.")
         }
         
         if (diceRoll.isDoubles) {
@@ -383,7 +406,6 @@ class Game {
             }
             
             println("These are doubles so they get to go again.")
-            goAgain = true
         } else {
             numDoubleRollsInARow = 0
         }
@@ -414,7 +436,7 @@ class Game {
             }
             
             is NonPropertySpace -> {
-                println("\"$curBoardSpace\".")
+                println("\"$curBoardSpace.\"")
                 
                 when (curBoardSpace) {
                     NonPropertySpace.START,
@@ -445,9 +467,32 @@ class Game {
         newPropsOwner.incrementMoneyAndPrintUpdate(dropOutPlayer.money)
         PropertyGroups.transferOwnership(curOwner = dropOutPlayer, newOwner = newPropsOwner)
     }
-    
-    fun printGotMoneyMessage(player: Player = curPlayer, messageEnd: String) {
-        printBlankLnAnd("${player.name} got the money to $messageEnd.")
+    fun handleLandingOnUnownedProp(prop: Property) {
+        // This print statement is a continuation of print statements from evaluatePosition.
+        println(", which is unowned.")
+        val purchasePrice: Int = prop.purchasePrice
+        val message =
+            "${curPlayer.name}, you have $${curPlayer.moneyString}. Would you like to buy " +
+            "${prop.name} for $${purchasePrice.toStringWithCommas()}?"
+        
+        if (promptForYOrN(message)) {
+            if (curPlayer.money < purchasePrice) {
+                if (
+                    !askAboutGettingMoney(
+                        player = curPlayer,
+                        moneyNeeded = purchasePrice,
+                        playerHasChoice = true,
+                        gotMoneyMessageEnd = "buy ${prop.name}"
+                    )
+                ) {
+                    printBlankLnAnd("${curPlayer.name} isn't buying ${prop.name}.")
+                    return
+                }
+            }
+            
+            prop.owner = curPlayer
+            curPlayer.decrementMoneyAndPrintUpdate(purchasePrice)
+        }
     }
     
     
@@ -477,10 +522,9 @@ class Game {
                 )
             }
             
-            is GolfClub -> {
-                val feeData: GolfClub.FeeData = prop.FeeData()
-                fee = feeData.fee
-                val numClubsString = Misc.getNumItemsString(feeData.numClubsOwnedByOwner, "golf club")
+            is GolfClub -> prop.FeeData().let {
+                fee = it.fee
+                val numClubsString = Misc.getNumThingsString(it.numClubsOwnedByOwner, "golf club")
                 println("${owner.name} owns $numClubsString and the fee is $$fee.")
             }
             
@@ -511,23 +555,19 @@ class Game {
                 !askAboutGettingMoney(
                     player = curPlayer,
                     moneyNeeded = fee,
-                    playerHasChoice = false
+                    playerHasChoice = false,
+                    gotMoneyMessageEnd = "pay the fee to ${owner.name}"
                 )
             ) {
-                // Following condition is true if there are at least 2 players remaining.
                 if (!gameOver) {
-                    println()
-                    handlePlayerDroppingOutAndPropsBecomeOwnedByAnotherPlayer(
+                    handlePlayerDroppingOutAndStuffGoesToAnotherPlayer(
                         dropOutPlayer = curPlayer,
-                        newPropsOwner = owner
+                        newOwner = owner
                     )
                 }
                 
                 return
             }
-            
-            println()
-            printGotMoneyMessage(messageEnd = "pay the fee to ${owner.name}")
         }
         
         curPlayer.decrementMoneyAndPrintUpdate(fee)
@@ -535,40 +575,9 @@ class Game {
     }
     
     
-    fun handleLandingOnUnownedProp(prop: Property) {
-        // This print statement is a continuation of print statements from evaluatePosition.
-        println(", which is unowned.")
-        val purchasePrice: Int = prop.purchasePrice
-        val message =
-            "${curPlayer.name}, you have $${curPlayer.moneyString}. Would you like to buy " +
-            "${prop.name} for $${prop.purchasePriceString}?"
-        
-        if (promptForYOrN(message)) {
-            if (curPlayer.money < purchasePrice) {
-                if (
-                    !askAboutGettingMoney(
-                        player = curPlayer,
-                        moneyNeeded = purchasePrice,
-                        playerHasChoice = true
-                    )
-                ) {
-                    printBlankLnAnd("${curPlayer.name} isn't buying ${prop.name}.")
-                    return
-                }
-                
-                println()
-                printGotMoneyMessage(messageEnd = "buy ${prop.name}")
-            }
-            
-            prop.owner = curPlayer
-            curPlayer.decrementMoneyAndPrintUpdate(purchasePrice)
-        }
-    }
-    
-    
     fun handleLandingOnDrawActionCard() {
         val topCard: ActionCard = actionDeck.topCard
-        println("${curPlayer.name} drew a card from the Action Deck and it says \"${topCard.message}\".")
+        println("${curPlayer.name} drew a card from the Action Deck and it says \"${topCard.message}.\"")
         
         // Get off Vacation free cards are the only type of card where the Action Deck top card
         // won't get moved to the bottom.
@@ -587,56 +596,61 @@ class Game {
                         !askAboutGettingMoney(
                             player = curPlayer,
                             moneyNeeded = lossAmount,
-                            playerHasChoice = false
+                            playerHasChoice = false,
+                            gotMoneyMessageEnd = "handle the money loss action card"
                         )
                     ) {
-                        // Following condition is true if there are at least 2 players remaining.
                         if (!gameOver) {
                             handleCurPlayerDroppingOutAndPropsBecomeUnowned()
                         }
                         return
                     }
-                    
-                    printGotMoneyMessage(messageEnd = "handle the money loss action card")
                 }
                 
                 curPlayer.decrementMoneyAndPrintUpdate(lossAmount)
             }
             
             is PayMoneyToOtherPlayersCard -> {
-                val moneyToPayEachPlayer: Int = topCard.moneyToPayEachPlayer
                 val otherPlayers: List<Player> =
                     playerManager.getOtherPlayersInGame(excludingPlayer = curPlayer)
+                val moneyToPayEachPlayer: Int = topCard.moneyToPayEachPlayer
                 val totalMoneyToPay: Int = moneyToPayEachPlayer * otherPlayers.size
                 
-                if (curPlayer.money < totalMoneyToPay) {
+                val sentenceStart =
+                    (if (otherPlayers.size == 1) "There's 1 other player"
+                    else "There are ${otherPlayers.size} other players") +
+                    " in the game so ${curPlayer.name}"
+                
+                if (curPlayer.money >= totalMoneyToPay) {
+                    curPlayer.money -= totalMoneyToPay
+                    println("$sentenceStart lost $$totalMoneyToPay and now has $${curPlayer.moneyString}.")
+                } else {
+                    println("$sentenceStart must pay $$totalMoneyToPay.")
+                    
                     if (
                         !askAboutGettingMoney(
                             player = curPlayer,
                             moneyNeeded = totalMoneyToPay,
-                            playerHasChoice = false
+                            playerHasChoice = false,
+                            gotMoneyMessageEnd = "pay the other players"
                         )
                     ) {
-                        // Following condition is true if there are at least 2 players remaining.
                         if (!gameOver) {
                             handleCurPlayerDroppingOutAndPropsBecomeUnowned()
                         }
                         return
                     }
                     
-                    printGotMoneyMessage(messageEnd = "pay other players")
+                    curPlayer.decrementMoneyAndPrintUpdate(totalMoneyToPay)
                 }
                 
-                for (otherPlayer in otherPlayers) {
-                    curPlayer.decrementMoneyAndPrintUpdate(moneyToPayEachPlayer)
-                    otherPlayer.incrementMoneyAndPrintUpdate(moneyToPayEachPlayer)
-                }
             }
             
             is GetMoneyFromOtherPlayersCard -> {
                 val moneyToGetFromEachPlayer: Int = topCard.moneyToGetFromEachPlayer
                 val otherPlayers: List<Player> =
                     playerManager.getOtherPlayersInGame(excludingPlayer = curPlayer)
+                var numPlayersWhoPaid = 0
                 
                 for (otherPlayer in otherPlayers) {
                     if (otherPlayer.money < moneyToGetFromEachPlayer) {
@@ -644,62 +658,64 @@ class Game {
                             !askAboutGettingMoney(
                                 player = otherPlayer,
                                 moneyNeeded = moneyToGetFromEachPlayer,
-                                playerHasChoice = false
+                                playerHasChoice = false,
+                                gotMoneyMessageEnd = "pay ${curPlayer.name}"
                             )
                         ) {
-                        
-                            // Following condition is true if there's 1 player remaining.
                             if (gameOver) return
                             
-                            println()
-                            handlePlayerDroppingOutAndPropsBecomeOwnedByAnotherPlayer(
+                            handlePlayerDroppingOutAndStuffGoesToAnotherPlayer(
                                 dropOutPlayer = otherPlayer,
-                                newPropsOwner = curPlayer
+                                newOwner = curPlayer
                             )
                             continue
                         }
-                        
-                        printGotMoneyMessage(player = otherPlayer, messageEnd = "pay ${curPlayer.name}")
                     }
                     
                     otherPlayer.decrementMoneyAndPrintUpdate(moneyToGetFromEachPlayer)
-                    curPlayer.incrementMoneyAndPrintUpdate(moneyToGetFromEachPlayer)
+                    numPlayersWhoPaid++
+                }
+                
+                val moneyGained: Int = moneyToGetFromEachPlayer * numPlayersWhoPaid
+                val numPlayersWhoPaidString = Misc.getNumThingsString(numPlayersWhoPaid, "player")
+                with (curPlayer) {
+                    money += moneyGained
+                    println(
+                        "$numPlayersWhoPaidString paid so $name gained $$moneyGained and now has $$moneyString."
+                    )
                 }
             }
             
             is RestaurantMaintenanceCard -> {
-                val numRestaurantsOwned: Int = PropertyGroups.getNumRestaurantsOwnedBy(curPlayer)
-                println()
+                val numRestaurantsOwned: Int = PropertyManager.getNumRestaurantsOwnedBy(curPlayer)
                 if (numRestaurantsOwned == 0) {
                     println("${curPlayer.name} doesn't own any restaurants so they don't have to pay anything.")
                     return
                 }
                 
-                val feePerRestaurant: Int = topCard.feePerRestaurant
-                val maintenanceFee: Int = feePerRestaurant * numRestaurantsOwned
-                val numRestaurantsString = Misc.getNumItemsString(numRestaurantsOwned, "restaurant")
+                val maintenanceFee: Int = topCard.feePerRestaurant * numRestaurantsOwned
+                val maintenanceFeeString = '$' + maintenanceFee.toStringWithCommas()
+                val numRestaurantsString = Misc.getNumThingsString(numRestaurantsOwned, "restaurant")
+                val sentenceStart = "${curPlayer.name} owns $numRestaurantsString so they"
                 
-                println(
-                    "${curPlayer.name} has $numRestaurantsString and must pay $$feePerRestaurant " +
-                    "per restaurant so they owe $${maintenanceFee.toStringWithCommas()}."
-                )
-                
-                if (curPlayer.money < maintenanceFee) {
+                if (curPlayer.money >= maintenanceFee) {
+                    curPlayer.money -= maintenanceFee
+                    println("$sentenceStart lost $maintenanceFeeString and now have ${curPlayer.money}.")
+                } else {
+                    println("$sentenceStart must pay $maintenanceFeeString.")
                     if (
                         !askAboutGettingMoney(
                             player = curPlayer,
                             moneyNeeded = maintenanceFee,
-                            playerHasChoice = false
+                            playerHasChoice = false,
+                            gotMoneyMessageEnd = "pay the maintenance fee"
                         )
                     ) {
-                        // Following condition is true if there are at least 2 players remaining.
                         if (!gameOver) {
                             handleCurPlayerDroppingOutAndPropsBecomeUnowned()
                         }
                         return
                     }
-                    
-                    printGotMoneyMessage(messageEnd = "pay the maintenance fee")
                 }
                 
                 curPlayer.decrementMoneyAndPrintUpdate(maintenanceFee)
@@ -737,6 +753,10 @@ class Game {
     }
     
     
+    /**
+     * numTurnsOnVacation is from the curPlayer.numTurnsOnVacation property, which has a type of Int?.
+     * If that property isn't null, then it'll be used as the arg.
+     */
     fun askAboutVacationAction(numTurnsOnVacation: Int) {
         val turnString =
             numTurnsOnVacation.let {
@@ -753,7 +773,6 @@ class Game {
         
         // Valid input values
         val payVal = "py"
-        val rollVal = "rl"
         val getOffVacationCardVal = "gt"
         
         val feeToGetOffVacation = 128
@@ -761,119 +780,127 @@ class Game {
         val optionsString =
             """
             ${curPlayer.name}, you're on Vacation and this is your $turnString turn on Vacation.
-            What would you like to do? Type one of the following and press Enter:
             $payVal: Pay $$feeToGetOffVacation to get off Vacation
-            $rollVal: Try to roll doubles
+            $rollDiceVal: Try to roll doubles
             """
             .trimIndent()
-            .plus(
-                if (curPlayer.hasAGetOffVacationCard) {
-                    "\n$getOffVacationCardVal: Use a get off Vacation free card"
-                } else ""
-            )
-        
-        while (true) {
+            .let {
+                if (!curPlayer.hasAGetOffVacationCard) it
+                else it + "\n$getOffVacationCardVal: Use a get off Vacation free card"
+            }
+
+        outer@ while (true) {
             printBlankLnAnd(optionsString)
             
-            when (getFormattedInput()) {
-                payVal -> {
-                    if (curPlayer.money < feeToGetOffVacation) {
-                        if (
-                            !askAboutGettingMoney(
-                                player = curPlayer,
-                                moneyNeeded = feeToGetOffVacation,
-                                playerHasChoice = true
-                            )
-                        ) {
-                            continue
-                        }
-                        
-                        printGotMoneyMessage(messageEnd = "get off Vacation")
-                    }
-                    
-                    printBlankLnAnd("${curPlayer.name} chose to pay so they get to take their turn.")
-                    curPlayer.decrementMoneyAndPrintUpdate(feeToGetOffVacation)
-                    curPlayer.removeFromVacation()
-                    return
-                }
+            while (true) {
+                input = getFormattedInput()
                 
-                rollVal -> with(DiceRoll()) {
-                    printBlankLnAnd("${curPlayer.name} rolled a ${die1Val} and a ${die2Val}.")
-                    
-                    when {
-                        isDoubles -> {
-                            println("These are doubles so they're off Vacation and get to advance ${total} spaces.")
-                            curPlayer.removeFromVacation()
-                            moveCurPlayerAhead(numSpaces = total)
+                when (input) {
+                    payVal -> {
+                        if (curPlayer.money < feeToGetOffVacation) {
+                            if (
+                                !askAboutGettingMoney(
+                                    player = curPlayer,
+                                    moneyNeeded = feeToGetOffVacation,
+                                    playerHasChoice = true,
+                                    gotMoneyMessageEnd = "get off Vacation"
+                                )
+                            ) {
+                                continue@outer
+                            }
                         }
-                        
-                        numTurnsOnVacation == 2 -> {
-                            println("${curPlayer.name} spent 3 turns on Vacation so it's now over.")
-                            curPlayer.removeFromVacation()
-                        }
-                        
-                        else -> curPlayer.numTurnsOnVacation = numTurnsOnVacation + 1
-                    }
-                    
-                    turnOver = true
-                    return
-                }
-                
-                getOffVacationCardVal -> {
-                    if (curPlayer.hasAGetOffVacationCard) {
-                        printBlankLnAnd(
-                            "${curPlayer.name} chose to use a get off Vacation free card so they " +
-                            "get to take their turn."
-                        )
+
+                        curPlayer.decrementMoneyAndPrintUpdate(feeToGetOffVacation)
                         curPlayer.removeFromVacation()
-                        curPlayer.decrementNumGetOffVacationCardsAndPrintUpdate()
-                        actionDeck.insertGetOffVacationCardAtBottom()
                         return
                     }
+                    
+                    rollDiceVal -> with(DiceRoll()) {
+                        printBlankLnAnd("${curPlayer.name} rolled a $die1Val and a $die2Val.")
+                        
+                        when {
+                            isDoubles -> {
+                                println("These are doubles so they're off Vacation and get to advance $total spaces.")
+                                curPlayer.removeFromVacation()
+                                moveCurPlayerAhead(numSpaces = total)
+                            }
+                            
+                            numTurnsOnVacation == 2 -> {
+                                println("${curPlayer.name} spent 3 turns on Vacation so it's now over.")
+                                curPlayer.removeFromVacation()
+                            }
+                            
+                            else -> curPlayer.numTurnsOnVacation = numTurnsOnVacation + 1
+                        }
+                        
+                        turnOver = true
+                        return
+                    }
+                    
+                    getOffVacationCardVal -> {
+                        if (curPlayer.hasAGetOffVacationCard) {
+                            curPlayer.removeFromVacation()
+                            curPlayer.decrementNumGetOffVacationCardsAndPrintUpdate()
+                            actionDeck.insertGetOffVacationCardAtBottom()
+                            return
+                        }
+                    }
                 }
+                
+                printInvalidInput()
             }
-            
-            printInvalidInput()
         }
     }
     
     
     fun askAboutSeeingPropInfo(playerWhoWantsToKnow: Player) {
         // Valid input values
-        val allPropsInfoValue = "ap"
-        val playerPropsInfoValue = "yp"
+        val allPropsInfoVal = "ap"
+        val playerPropsInfoVal = "yp"
         
         val optionsString =
             """
             ${playerWhoWantsToKnow.name}, enter one of the following:
-            
-            $allPropsInfoValue: See info for all properties
-            $playerPropsInfoValue: See info for your properties
-            b: Go back
+            $allPropsInfoVal: See info for all properties
+            $playerPropsInfoVal: See info for your properties
+            $goBackOption
             """.trimIndent()
         
-        val allPropsInfo: String by lazy { PropertyGroups.getInfoForAllProps() }
+        val allPropsInfo: String by lazy {
+            PropertyGroups.forAllProps.getInfo(heading = "Info for All Properties")
+        }
+        
         val playerPropsInfo: String by lazy {
-            PropertyGroups.getInfoForPropsOwnedBy(playerWhoWantsToKnow)
+            PropertyGroups.forPropsOwnedBy(playerWhoWantsToKnow)
+            .let {
+                if (it.isEmpty()) "${playerWhoWantsToKnow.name} doesn't own any properties."
+                else it.getInfo(ownerOfProps = playerWhoWantsToKnow)
+            }
         }
         
         while (true) {
             printBlankLnAnd(optionsString)
-            input = getFormattedInput()
-            if (input == "b") return
             
-            printBlankLnAnd(
-                when (input) {
-                    allPropsInfoValue -> allPropsInfo
-                    
-                    playerPropsInfoValue -> playerPropsInfo
-                    
-                    else -> INVALID_INPUT_TEXT
-                }
-            )
+            while (true) {
+                val infoToPrint: String =
+                    when (getFormattedInput()) {
+                        allPropsInfoVal -> allPropsInfo
+                        
+                        playerPropsInfoVal -> playerPropsInfo
+                        
+                        goBackVal -> return
+                        
+                        else -> {
+                            printInvalidInput()
+                            continue
+                        }
+                    }
+                
+                printBlankLnAnd(infoToPrint)
+                break
+            }
         }
     }
-    
     
     
     fun printInvalidPositionsText() {
@@ -881,6 +908,9 @@ class Game {
     }
     
     
+    /**
+     * Returns true if a prop was pawned or unpawned.
+     */
     fun askAboutPawningOrUnpawning(
         askAboutPawning: Boolean,
         player: Player,
@@ -895,17 +925,19 @@ class Game {
             printBlankLnAnd(
                 "${player.name}, enter the positions of the properties you would like to " +
                 "${if (askAboutPawning) "" else "un"}pawn with each position separated by whitespace " +
-                "or enter \"b\" to go back:"
+                "or enter \"$goBackVal\" to go back:"
             )
             
-            input = getFormattedInput()
-            if (input == "b") return false
+            var selectedProps: PropertyGroups
             
-            val selectedProps: PropertyGroups =
-                pawnableOrUnpawnableProps.filterByPositions(positionsInput = input)
-            if (selectedProps.isEmpty()) {
+            while (true) {
+                input = getFormattedInput()
+                if (input == goBackVal) return false
+                
+                selectedProps = pawnableOrUnpawnableProps.filterByPositions(positionsInput = input)
+                if (selectedProps.isNotEmpty()) break
+                
                 printInvalidPositionsText()
-                continue
             }
             
             val selectedPropsList: List<Property> = selectedProps.toPropList()
@@ -914,13 +946,12 @@ class Game {
             
             val confirmationStringEnd =
                 """
-                $${totalMoneyGainOrPrice.toStringWithCommas()} will ${if (askAboutPawning) "be gained" else "have to be paid"}.
+                $${totalMoneyGainOrPrice.toStringWithCommas()} will ${if (askAboutPawning) "be gained" else "need to be paid"}.
                 ${player.name}, do you confirm this?
                 """.trimIndent()
             
             val selectedPropsConfirmationString =
-                selectedProps
-                .getInfo(
+                selectedProps.getInfo(
                     heading = "Here are the selected properties:",
                     end = confirmationStringEnd
                 )
@@ -936,14 +967,13 @@ class Game {
                         !askAboutGettingMoney(
                             player = player,
                             moneyNeeded = totalMoneyGainOrPrice,
-                            playerHasChoice = true
+                            playerHasChoice = true,
+                            gotMoneyMessageEnd = "unpawn their properties"
                         )
                     ) {
                         printBlankLnAnd("${player.name} will be taken back to the properties selection section.")
                         continue
                     }
-                    
-                    printGotMoneyMessage(player = player, messageEnd = "unpawn their properties")
                 }
                 
                 selectedPropsList.forEach { it.unpawn() }
@@ -962,6 +992,9 @@ class Game {
         askAboutPawningOrUnpawning(askAboutPawning = false, curPlayer, unpawnableProps)
     
     
+    /**
+     * Returns true if a restaurant was added or removed.
+     */
     fun askAboutAddingOrRemovingRestaurants(
         askAboutAdding: Boolean,
         player: Player,
@@ -969,7 +1002,7 @@ class Game {
     ): Boolean {
         val streetsInfoHeading =
             "Here are the streets owned by ${player.name} that can have a restaurant " +
-            "${if (askAboutAdding) "added" else "removed"}:"
+            (if (askAboutAdding) "added" else "removed") + ':'
         
         val streetsInfo =
             restaurantAddableOrRemovableStreets
@@ -981,62 +1014,62 @@ class Game {
             printBlankLnAnd(
                 "${player.name}, enter the positions of the streets you would like to " +
                 (if (askAboutAdding) "add a restaurant to" else "remove a restaurant from") +
-                " with each position separated by whitespace or enter \"b\" to go back:"
+                " with each position separated by whitespace or enter \"$goBackVal\" to go back:"
             )
             
-            input = getFormattedInput()
-            if (input == "b") return false
-            
-            val selectedStreets: StreetGroups =
-                restaurantAddableOrRemovableStreets.filterByPositions(positionsInput = input)
-            if (selectedStreets.isEmpty()) {
+            var selectedStreets: StreetGroups
+            while (true) {
+                input = getFormattedInput()
+                if (input == goBackVal) return false
+                
+                selectedStreets =
+                    restaurantAddableOrRemovableStreets.filterByPositions(positionsInput = input)
+                if (selectedStreets.isNotEmpty()) break
+                
                 printInvalidPositionsText()
-                continue
             }
             
             val selectedStreetsList: List<Street> = selectedStreets.toStreetList()
-            val totalMoneyGainOrPrice: Int =
+            val totalMoneyPriceOrGain: Int =
                 selectedStreetsList.sumOf {
-                    if (askAboutAdding) it.restaurantAddingPrice else it.restaurantRemovalGain
+                    if (askAboutAdding) it.nHood.restaurantAddingPrice
+                    else it.nHood.restaurantRemovalGain
                 }
             
             val confirmationStringEnd =
                 """
-                $${totalMoneyGainOrPrice.toStringWithCommas()} will ${if (askAboutAdding) "have to be paid" else "be gained"}.
+                $${totalMoneyPriceOrGain.toStringWithCommas()} will ${if (askAboutAdding) "need to be paid" else "be gained"}.
                 ${player.name}, do you confirm this?
                 """.trimIndent()
             
             val selectedStreetsConfirmationString =
-                selectedStreets
-                .getInfo(
+                selectedStreets.getInfo(
                     heading = "Here are the selected streets:",
                     end = confirmationStringEnd
                 )
-                .toString()
             
             if (!promptForYOrN(selectedStreetsConfirmationString)) continue
             
             if (!askAboutAdding) {
                 selectedStreetsList.forEach { it.removeRestaurant() }
-                player.incrementMoneyAndPrintUpdate(totalMoneyGainOrPrice)
+                player.incrementMoneyAndPrintUpdate(totalMoneyPriceOrGain)
             } else {
-                if (player.money < totalMoneyGainOrPrice) {
+                if (player.money < totalMoneyPriceOrGain) {
                     if (
                         !askAboutGettingMoney(
                             player = player,
-                            moneyNeeded = totalMoneyGainOrPrice,
-                            playerHasChoice = true
+                            moneyNeeded = totalMoneyPriceOrGain,
+                            playerHasChoice = true,
+                            gotMoneyMessageEnd = "add restaurants to their streets"
                         )
                     ) {
                         printBlankLnAnd("${player.name} will be taken back to the streets selection section.")
                         continue
                     }
-                    
-                    printGotMoneyMessage(player = player, messageEnd = "add restaurants to their streets")
                 }
                 
                 selectedStreetsList.forEach { it.addRestaurant() }
-                player.decrementMoneyAndPrintUpdate(totalMoneyGainOrPrice)
+                player.decrementMoneyAndPrintUpdate(totalMoneyPriceOrGain)
             }
             
             return true
@@ -1050,7 +1083,6 @@ class Game {
     fun askAboutRemovingRestaurants(player: Player, restaurantRemovableStreets: StreetGroups): Boolean =
         askAboutAddingOrRemovingRestaurants(askAboutAdding = false, player, restaurantRemovableStreets)
     
-        
     
     /**
      * This is the function for implementing the Money Getting Section described in the manual. This function
@@ -1067,18 +1099,20 @@ class Game {
      *
      * Returns true if the player gets the money needed and false otherwise.
      */
-    fun askAboutGettingMoney(player: Player, moneyNeeded: Int, playerHasChoice: Boolean): Boolean {
+    fun askAboutGettingMoney(
+        player: Player,
+        moneyNeeded: Int,
+        playerHasChoice: Boolean,
+        gotMoneyMessageEnd: String
+    ): Boolean {
         val actionPropGroups = ActionPropertyGroups.forPropsOwnedBy(player)
-        
-        // Valid input value
-        val exitVal = "ex"
         
         while (player.money < moneyNeeded) {
             printBlankLnAnd(
                 """
                 ${player.name}, you need $${moneyNeeded.toStringWithCommas()} and currently have $${player.moneyString}.
                 Select one of the following options to get more money:
-                $exitVal: ${if (playerHasChoice) "Go back" else "Drop out of the game"}
+                ${if (playerHasChoice) goBackOption else dropOutOption}
                 $makeTradeOption
                 """.trimIndent()
             )
@@ -1089,52 +1123,65 @@ class Game {
                 println(removeRestaurantsOption)
             }
             
-            when (getFormattedInput()) {
-                exitVal -> {
-                    if (!playerHasChoice) {
-                        player.removeFromGame()
-                        if (playerManager.onePlayerIsInGame) {
-                            gameOver = true
+            while (true) {
+                when (getFormattedInput()) {
+                    goBackVal -> {
+                        if (playerHasChoice) return false
+                        else printInvalidInput()
+                    }
+                    
+                    dropOutVal -> {
+                        if (!playerHasChoice) {
+                            player.removeFromGame()
+                            if (playerManager.onePlayerIsInGame) {
+                                gameOver = true
+                            }
+                            return false
+                        } else {
+                            printInvalidInput()
                         }
                     }
-                    return false
-                }
-                
-                makeTradeVal -> {
-                    if (askAboutTrading(initiatingPlayer = player, initiatingPlayerNeedsMoney = true)) {
-                        actionPropGroups.refresh()
-                    }
-                }
-                
-                pawnVal -> {
-                    if (actionPropGroups.hasPawnable) {
-                        if (askAboutPawning(player = player, pawnableProps = actionPropGroups.pawnable)) {
+                    
+                    makeTradeVal -> {
+                        if (askAboutTrading(initiatingPlayer = player, initiatingPlayerNeedsMoney = true)) {
                             actionPropGroups.refresh()
                         }
-                    } else {
-                        printInvalidInput()
+                        break
                     }
-                }
-                
-                removeRestaurantsVal -> {
-                    if (actionPropGroups.hasRestaurantRemovable) {
-                        if (
-                            askAboutRemovingRestaurants(
-                                player = player,
-                                restaurantRemovableStreets = actionPropGroups.restaurantRemovable
-                            )
-                        ) {
-                            actionPropGroups.refresh()
+                    
+                    pawnVal -> {
+                        if (actionPropGroups.hasPawnable) {
+                            if (askAboutPawning(player = player, pawnableProps = actionPropGroups.pawnable)) {
+                                actionPropGroups.refresh()
+                            }
+                            break
+                        } else {
+                            printInvalidInput()
                         }
-                    } else {
-                        printInvalidInput()
                     }
+                    
+                    removeRestaurantsVal -> {
+                        if (actionPropGroups.hasRestaurantRemovable) {
+                            if (
+                                askAboutRemovingRestaurants(
+                                    player = player,
+                                    restaurantRemovableStreets = actionPropGroups.restaurantRemovable
+                                )
+                            ) {
+                                actionPropGroups.refresh()
+                            }
+                            break
+                        } else {
+                            printInvalidInput()
+                        }
+                    }
+                    
+                    else -> printInvalidInput()
                 }
-                
-                else -> printInvalidInput()
             }
         }
         
+        println("\n${player.name} got the money to $gotMoneyMessageEnd.")
         return true
     }
     
@@ -1198,10 +1245,10 @@ class Game {
                 
                 printBlankLnAnd(
                     if (nHood.numRestaurants == 1) {
-                        "There's 1 restaurant in the ${nHood.friendlyName} neighborhood so this will be sold."
+                        "There's 1 restaurant in the ${nHood.friendlyName} neighborhood so this'll be sold."
                     } else {
                         "There are ${nHood.numRestaurants} restaurants in the ${nHood.friendlyName} " +
-                        "neighborhood so these will be sold."
+                        "neighborhood so these'll be sold."
                     }
                 )
                 
@@ -1229,12 +1276,10 @@ class Game {
      * Returns true if a trade was made and false otherwise.
      */
     fun askAboutTrading(initiatingPlayer: Player, initiatingPlayerNeedsMoney: Boolean): Boolean {
-         */
-        
         val initiatingPlayerProps = PropertyGroups.forPropsOwnedBy(initiatingPlayer)
         val initiatingPlayerHasAProp: Boolean = initiatingPlayerProps.isNotEmpty()
         
-        // Let otherPlayersMap be a Map where the keys are stringified ints that start at 1 and the values are Players.
+        // Let otherPlayersMap be a map where the keys are stringified ints that start at 1 and the values are Players.
         val otherPlayersMap: Map<String, Player> =
             playerManager
             .getOtherPlayersInGame(excludingPlayer = initiatingPlayer)
@@ -1245,52 +1290,62 @@ class Game {
         val cancelVal = "cn"
         val cancelOption = "$cancelVal: Cancel the trade"
         
-        val goToStartVal = "st"
-        val goToStartOption = "$goToStartVal: Go to the start of the trade process"
-        
         val nextPartVal = "nx"
         val nextPartSentencePart = "\"$nextPartVal\" to go to the next part of the trade process"
         
-        val first3OptionsString =
-            """
-            ${initiatingPlayer.name}, enter one of the following:
-            $seePropInfoOption
-            $seePlayersInfoOption
-            $cancelOption
-            """.trimIndent()
+        val goToStartVal = "st"
+        val goToStartOption = "$goToStartVal: Go to the start of the trade process"
         
-        val makeTradeOptionsString =
+        val tryAgainVal = "ta"
+        
+        val playerOptionsText: CharSequence =
             otherPlayersMap
             .asIterable()
-            .joinToString(
+            .joinToStringBuilder(
                 transform = { (intString, player) -> "${intString}: Make a trade with ${player.name}" },
                 separator = "\n"
             )
         
+        val startOptionsString =
+            """
+            ${initiatingPlayer.name}, enter one of the following:
+            $seePropInfoOption
+            $seePlayerInfoOption
+            $cancelOption
+            $playerOptionsText
+            """.trimIndent()
+        
         mainTradingLoop@ while (true) {
             val otherPlayer: Player
             
-            while (true) {
-                printBlankLnAnd(first3OptionsString)
-                println(makeTradeOptionsString)
-                input = getFormattedInput()
+            startOptionsLoop@ while (true) {
+                printBlankLnAnd(startOptionsString)
                 
-                when (input) {
-                    seePropInfoVal ->
-                        askAboutSeeingPropInfo(playerWhoWantsToKnow = initiatingPlayer)
+                while (true) {
+                    input = getFormattedInput()
                     
-                    seePlayersInfoVal -> printBlankLnAnd(playerManager.getPlayersInfo())
-                    
-                    cancelVal -> return false
-                    
-                    else -> {
-                        // Check if a valid number was entered. If so, set otherPlayer to the correct player.
-                        val nullableOtherPlayer: Player? = otherPlayersMap[input]
-                        if (nullableOtherPlayer != null) {
-                            otherPlayer = nullableOtherPlayer
+                    when (input) {
+                        seePropInfoVal -> {
+                            askAboutSeeingPropInfo(playerWhoWantsToKnow = initiatingPlayer)
                             break
                         }
-                        printInvalidInput()
+                        
+                        seePlayerInfoVal -> {
+                            printBlankLnAnd(playerManager.getPlayerInfo())
+                            break
+                        }
+                        
+                        cancelVal -> return false
+                        
+                        else -> {
+                            // Check if a valid number was entered. If so, set otherPlayer to the correct player.
+                            val nullableOtherPlayer: Player? = otherPlayersMap[input]
+                            if (nullableOtherPlayer != null) {
+                                otherPlayer = nullableOtherPlayer
+                                break@startOptionsLoop
+                            }
+                            printInvalidInput()
+                        }
                     }
                 }
             }
@@ -1299,7 +1354,8 @@ class Game {
             val otherPlayerHasAProp: Boolean = otherPlayerProps.isNotEmpty()
             
             // Prevent the initiating player from continuing if there's nothing that can be traded besides money.
-            if (!initiatingPlayerHasAProp && !initiatingPlayer.hasAGetOffVacationCard &&
+            if (
+                !initiatingPlayerHasAProp && !initiatingPlayer.hasAGetOffVacationCard &&
                 !otherPlayerHasAProp && !otherPlayer.hasAGetOffVacationCard
             ) {
                 printBlankLnAnd(
@@ -1323,25 +1379,23 @@ class Game {
             val wantedItems = TradeItems(owner = otherPlayer)
             
             selectWantedItemsLoop@ while (true) {
+                println()
+                
                 val askAboutMoneyAmount: Boolean =
                     initiatingPlayerNeedsMoney ||
-                    run {
-                        val message =
-                            "${initiatingPlayer.name}, would you like any money from ${otherPlayer.name}?"
-                        promptForYOrN(message)
-                    }
+                    promptForYOrN("${initiatingPlayer.name}, would you like any money from ${otherPlayer.name}?")
                 
                 if (askAboutMoneyAmount) {
+                    print("${otherPlayer.name} has $${otherPlayer.moneyString}. Enter an amount")
+                    println(
+                        if (initiatingPlayerNeedsMoney) {
+                            ". You need money so entering an amount is mandatory."
+                        } else {
+                            " or $nextPartSentencePart:"
+                        }
+                    )
+                    
                     while (true) {
-                        print("\n${otherPlayer.name} has $${otherPlayer.moneyString}. Enter an amount")
-                        println(
-                            if (initiatingPlayerNeedsMoney) {
-                                ". You need money so entering an amount is mandatory."
-                            } else {
-                                " or $nextPartSentencePart:"
-                            }
-                        )
-                        
                         input = getFormattedInput()
                         if (!initiatingPlayerNeedsMoney && input == nextPartVal) {
                             break
@@ -1356,22 +1410,22 @@ class Game {
                         
                         printInvalidInput()
                     }
+                    
+                    println()
                 }
                 
                 if (otherPlayerHasAProp) {
-                    val message =
+                    val question =
                         "${initiatingPlayer.name}, would you like any properties from ${otherPlayer.name}?"
                     
-                    if (promptForYOrN(message)) {
-                        val propsInfo: String =
-                            PropertyGroups.getInfoForPropsOwnedBy(otherPlayer, otherPlayerProps)
-
+                    if (promptForYOrN(question)) {
+                        printBlankLnAnd(otherPlayerProps.getInfo(ownerOfProps = otherPlayer))
+                        printBlankLnAnd(
+                            "Enter the positions of all the properties you would like with each " +
+                            "position separated by whitespace or enter $nextPartSentencePart:"
+                        )
+                        
                         while (true) {
-                            printBlankLnAnd(propsInfo)
-                            printBlankLnAnd(
-                                "Enter the positions of all the properties you would like with each " +
-                                "position separated by whitespace or enter $nextPartSentencePart:"
-                            )
                             input = getFormattedInput()
                             if (input == nextPartVal) break
                             
@@ -1381,26 +1435,29 @@ class Game {
                                 wantedItems.props = selectedProps
                                 break
                             }
-
+                            
                             printInvalidPositionsText()
                         }
-                    }
+                        
+                        println()
+                }
                 }
                 
                 if (otherPlayer.hasAGetOffVacationCard) {
-                    val message =
+                    val question =
                         "${initiatingPlayer.name}, would you like any get off Vacation free cards " +
                         "from ${otherPlayer.name}?"
                     
-                    if (promptForYOrN(message)) {
+                    if (promptForYOrN(question)) {
                         val numGetOffVacationCardsString =
                             Misc.getNumGetOffVacationCardsString(otherPlayer.numGetOffVacationCards)
-
+                        
+                        println(
+                            "${otherPlayer.name} has $numGetOffVacationCardsString. " +
+                            "How many would you like? Enter an amount or $nextPartSentencePart:"
+                        )
+                        
                         while (true) {
-                            printBlankLnAnd(
-                                "${otherPlayer.name} has $numGetOffVacationCardsString. " +
-                                "How many would you like? Enter an amount or $nextPartSentencePart:"
-                            )
                             input = getFormattedInput()
                             if (input == nextPartVal) break
                             
@@ -1409,9 +1466,11 @@ class Game {
                                 wantedItems.numGetOffVacationCards = cardsAmount
                                 break
                             }
-
+                            
                             printInvalidInput()
                         }
+                        
+                        println()
                     }
                 }
                 
@@ -1419,20 +1478,19 @@ class Game {
                     break@selectWantedItemsLoop
                 }
                 
+                println(
+                    """
+                    ${initiatingPlayer.name}, you didn't select anything for what you want.
+                    Enter one of the following:
+                    $tryAgainVal: Try to select something again
+                    $goToStartOption
+                    $cancelOption
+                    """.trimIndent()
+                )
+                
                 while (true) {
-                    printBlankLnAnd(
-                        """
-                        ${initiatingPlayer.name}, you didn't select anything for what you want.
-                        Enter one of the following:
-                        
-                        ta: Try to select something again
-                        $goToStartOption
-                        $cancelOption
-                        """.trimIndent()
-                    )
-                    
                     when (getFormattedInput()) {
-                        "ta" -> continue@selectWantedItemsLoop
+                        tryAgainVal -> continue@selectWantedItemsLoop
                         
                         goToStartVal -> continue@mainTradingLoop
                         
@@ -1449,18 +1507,23 @@ class Game {
             val offeredItems = TradeItems(owner = initiatingPlayer)
             
             selectItemsToOfferLoop@ while (true) {
-                // Only give the initiating player the choice of offering money if they are not in need of money
-                // and they chose that they didn't want any money.
+                println()
+                
+                /*
+                Only give the initiating player the choice of offering money if they don't need money
+                and chose that they didn't want any.
+                 */
                 if (!initiatingPlayerNeedsMoney && wantedItems.money == 0) {
-                    val message =
+                    val question =
                         "${initiatingPlayer.name}, would you like to offer ${otherPlayer.name} any money?"
                     
-                    if (promptForYOrN(message)) {
+                    if (promptForYOrN(question)) {
+                        println(
+                            "${initiatingPlayer.name}, you have $${initiatingPlayer.moneyString}, " +
+                            "how much of it would you like to offer? Enter an amount or $nextPartSentencePart:"
+                        )
+                        
                         while (true) {
-                            printBlankLnAnd(
-                                "${initiatingPlayer.name}, you have $${initiatingPlayer.moneyString}, " +
-                                "how much of it would you like to offer? Enter an amount or $nextPartSentencePart:"
-                            )
                             input = getFormattedInput()
                             if (input == nextPartVal) break
                             
@@ -1469,27 +1532,26 @@ class Game {
                                 offeredItems.money = moneyAmount
                                 break
                             }
-
+                            
                             printInvalidInput()
                         }
+                        
+                        println()
                     }
                 }
                 
                 if (initiatingPlayerHasAProp) {
-                    val message =
+                    val question =
                         "${initiatingPlayer.name}, would you like to offer ${otherPlayer.name} any properties?"
                     
-                    if (promptForYOrN(message)) {
-                        val propsInfo: String =
-                            PropertyGroups.getInfoForPropsOwnedBy(initiatingPlayer, initiatingPlayerProps)
+                    if (promptForYOrN(question)) {
+                        printBlankLnAnd(initiatingPlayerProps.getInfo(ownerOfProps = initiatingPlayer))
+                        printBlankLnAnd(
+                            "Enter the positions of the properties you would like to offer with each " +
+                            "position separated by whitespace or enter $nextPartSentencePart:"
+                        )
                         
                         while (true) {
-                            printBlankLnAnd(propsInfo)
-                            printBlankLnAnd(
-                                "Enter the positions of the properties you would like to offer with each " +
-                                "position separated by whitespace or enter $nextPartSentencePart:"
-                            )
-                            
                             input = getFormattedInput()
                             if (input == nextPartVal) break
                             
@@ -1502,25 +1564,30 @@ class Game {
 
                             printInvalidPositionsText()
                         }
+                        
+                        println()
                     }
                 }
                 
-                // Only ask the initiating player if they would like to offer any get off Vacation free cards
-                // if they have one and they chose that they didn't want any.
+                /*
+                Only ask the initiating player if they would like to offer any get off Vacation free
+                cards if they have one and chose that they didn't want any.
+                 */
                 if (initiatingPlayer.hasAGetOffVacationCard && wantedItems.numGetOffVacationCards == 0) {
-                    val message =
+                    val question =
                         "${initiatingPlayer.name}, would you like to offer ${otherPlayer.name} " +
                         "any get off Vacation free cards?"
                     
-                    if (promptForYOrN(message)) {
+                    if (promptForYOrN(question)) {
                         val numGetOffVacationCardsString =
                             Misc.getNumGetOffVacationCardsString(initiatingPlayer.numGetOffVacationCards)
                         
+                        println(
+                            "${initiatingPlayer.name}, you have $numGetOffVacationCardsString. " +
+                            "How many would you like to offer? Enter an amount or $nextPartSentencePart:"
+                        )
+                        
                         while (true) {
-                            printBlankLnAnd(
-                                "${initiatingPlayer.name}, you have $numGetOffVacationCardsString. " +
-                                "How many would you like to offer? Enter an amount or $nextPartSentencePart:"
-                            )
                             input = getFormattedInput()
                             if (input == nextPartVal) break
                             
@@ -1532,6 +1599,8 @@ class Game {
 
                             printInvalidInput()
                         }
+                        
+                        println()
                     }
                 }
                 
@@ -1539,20 +1608,19 @@ class Game {
                     break@selectItemsToOfferLoop
                 }
                 
+                println(
+                    """
+                    ${initiatingPlayer.name}, you didn't offer anything.
+                    Enter one of the following:
+                    $tryAgainVal: Try to offer something again
+                    $goToStartOption
+                    $cancelOption
+                    """.trimIndent()
+                )
+                
                 while (true) {
-                    printBlankLnAnd(
-                        """
-                        ${initiatingPlayer.name}, you didn't offer anything.
-                        Enter one of the following:
-                        
-                        ta: Try to offer something again
-                        $goToStartOption
-                        $cancelOption
-                        """.trimIndent()
-                    )
-                    
                     when (getFormattedInput()) {
-                        "ta" -> continue@selectItemsToOfferLoop
+                        tryAgainVal -> continue@selectItemsToOfferLoop
                         
                         goToStartVal -> continue@mainTradingLoop
                         
@@ -1566,29 +1634,31 @@ class Game {
             
             // Part for the initiating player to confirm what they want and what they offer.
             
-            val offeredItemsString = offeredItems.toString()
-            val wantedItemsString = wantedItems.toString()
-            
-            while (true) {
-                printBlankLnAnd("For this trade, ${initiatingPlayer.name} will give ${otherPlayer.name} the following:")
-                println(offeredItemsString)
-                printBlankLnAnd("${otherPlayer.name} will give ${initiatingPlayer.name} the following:")
-                println(wantedItemsString)
+            val tradeString =
+                """
+                For this trade, ${initiatingPlayer.name} will give ${otherPlayer.name} the following:
+                $offeredItems
                 
+                ${otherPlayer.name} will give ${initiatingPlayer.name} the following:
+                $wantedItems
+                """.trimIndent()
+            
+            initiatingPlayerConfirmLoop@ while (true) {
+                printBlankLnAnd(tradeString)
                 printBlankLnAnd(
                     """
                     ${initiatingPlayer.name}, do you confirm the trade?
                     Enter "y", "n", or one of the following:
                     $seePropInfoOption
-                    $seePlayersInfoOption
+                    $seePlayerInfoOption
                     """.trimIndent()
                 )
                 
-                when (getFormattedInput()) {
-                    "y" -> break
-                    
-                    "n" -> {
-                        while (true) {
+                while (true) {
+                    when (getFormattedInput()) {
+                        "y" -> break@initiatingPlayerConfirmLoop
+                        
+                        "n" -> {
                             printBlankLnAnd(
                                 """
                                 ${initiatingPlayer.name}, enter one of the following:
@@ -1597,55 +1667,69 @@ class Game {
                                 """.trimIndent()
                             )
                             
-                            when (getFormattedInput()) {
-                                goToStartVal -> continue@mainTradingLoop
-                                
-                                cancelVal -> return false
-                                
-                                else -> printInvalidInput()
+                            while (true) {
+                                when (getFormattedInput()) {
+                                    goToStartVal -> continue@mainTradingLoop
+                                    
+                                    cancelVal -> return false
+                                    
+                                    else -> printInvalidInput()
+                                }
                             }
                         }
+                        
+                        seePropInfoVal -> {
+                            askAboutSeeingPropInfo(playerWhoWantsToKnow = initiatingPlayer)
+                            continue@initiatingPlayerConfirmLoop
+                        }
+                        
+                        seePlayerInfoVal -> {
+                            printBlankLnAnd(playerManager.getPlayerInfo())
+                            continue@initiatingPlayerConfirmLoop
+                        }
+                        
+                        else -> printInvalidInput()
                     }
-                    
-                    seePropInfoVal ->
-                        askAboutSeeingPropInfo(playerWhoWantsToKnow = initiatingPlayer)
-                    
-                    seePlayersInfoVal -> printBlankLnAnd(playerManager.getPlayersInfo())
-                    
-                    else -> printInvalidInput()
                 }
             }
             
             
             // Part for the other player to accept or deny the trade and make the changes if accepted.
             
-            while (true) {
+            otherPlayerConfirmLoop@ while (true) {
                 printBlankLnAnd(
                     """
                     ${otherPlayer.name}, do you accept the trade?
                     Enter "y", "n", or one of the following:
                     $seePropInfoOption
-                    $seePlayersInfoOption
+                    $seePlayerInfoOption
                     """.trimIndent()
                 )
                 
-                when (getFormattedInput()) {
-                    "y" -> {
-                        offeredItems.transferItemsTo(otherPlayer)
-                        wantedItems.transferItemsTo(initiatingPlayer)
-                        return true
+                while (true) {
+                    when (getFormattedInput()) {
+                        "y" -> {
+                            offeredItems.transferItemsTo(otherPlayer)
+                            wantedItems.transferItemsTo(initiatingPlayer)
+                            return true
+                        }
+                        
+                        "n" -> return false
+                        
+                        seePropInfoVal -> {
+                            askAboutSeeingPropInfo(playerWhoWantsToKnow = otherPlayer)
+                            printBlankLnAnd(tradeString)
+                            continue@otherPlayerConfirmLoop
+                        }
+                        
+                        seePlayerInfoVal -> {
+                            printBlankLnAnd(playerManager.getPlayerInfo())
+                            printBlankLnAnd(tradeString)
+                            continue@otherPlayerConfirmLoop
+                        }
+                        
+                        else -> printInvalidInput()
                     }
-                    
-                    "n" -> {
-                        printBlankLnAnd("${otherPlayer.name} denies the trade.")
-                        return false
-                    }
-                    
-                    seePropInfoVal ->
-                        askAboutSeeingPropInfo(playerWhoWantsToKnow = otherPlayer)
-                    
-                    seePlayersInfoVal -> printBlankLnAnd(playerManager.getPlayersInfo())
-                    else -> printInvalidInput()
                 }
             }
         }
