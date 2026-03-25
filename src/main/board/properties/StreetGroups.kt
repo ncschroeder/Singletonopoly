@@ -1,32 +1,28 @@
 package singletonopoly.board.properties
 
-import singletonopoly.Misc
 import singletonopoly.Misc.joinToStringBuilder
 import singletonopoly.board.Board
 import singletonopoly.board.properties.PropertyManager.getInfo
 
+/**
+ * In streetGroupsList, streets are grouped by neighborhood. Each inner list contains streets that are
+ * in the same neighborhood.
+ */
 class StreetGroups private constructor(private val streetGroupsList: List<List<Street>>) {
     /**
      * Returns a StringBuilder (CharSequence) and not a string since the chars in that StringBuilder
      * will be added to the string built in PropertyGroups.getInfo.
      */
-    fun getInfo(heading: String, end: String? = null, sayIfNHoodIsOwned: Boolean = false): CharSequence =
-        buildList(capacity = streetGroupsList.size + 2) {
-            add(heading)
-            
-            for (streetGroup: List<Street> in streetGroupsList) {
+    fun getInfo(heading: String): CharSequence =
+        streetGroupsList
+        .joinToStringBuilder(
+            prefix = heading + "\n\n",
+            transform = { streetGroup: List<Street> ->
                 val nHood = streetGroup.first().nHood
-                val infoHeading: String =
-                    nHood.friendlyName.let {
-                        if (sayIfNHoodIsOwned && nHood.onePlayerOwnsAllStreets) "$it (Owned)"
-                        else it
-                    }
-                add(streetGroup.getInfo(heading = infoHeading, commonInfo = nHood.streetsCommonInfo))
-            }
-            
-            if (end != null) add(end)
-        }
-        .joinToStringBuilder(separator = "\n\n")
+                streetGroup.getInfo(heading = nHood.friendlyName, commonInfo = nHood.streetsCommonInfo)
+            },
+            separator = "\n\n"
+        )
     
     fun isEmpty(): Boolean = streetGroupsList.isEmpty()
     
@@ -37,8 +33,11 @@ class StreetGroups private constructor(private val streetGroupsList: List<List<S
             streetGroupsList.mapNotNull { it.filter(predicate).takeIf { it.isNotEmpty() } }
         )
     
+    /**
+     * positionsInput contains user input.
+     */
     fun filterByPositions(positionsInput: String): StreetGroups {
-        val positionsSet: Set<Int> = Misc.getIntsIn(positionsInput)
+        val positionsSet: Set<Int> = PropertyGroups.getIntsIn(positionsInput)
         return filter { it.position in positionsSet }
     }
     

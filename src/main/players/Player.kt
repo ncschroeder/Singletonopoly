@@ -43,15 +43,18 @@ class Player(val name: String) {
         isInGame = false
     }
     
-    var numTurnsOnVacation: Int? = null
+    var numTurnsSpentOnVacation: Int? = null
+    
+    val isOnVacation: Boolean
+        get() = numTurnsSpentOnVacation != null
     
     fun sendToVacation() {
-        numTurnsOnVacation = 0
+        numTurnsSpentOnVacation = 0
         position = Board.VACATION_POSITION
     }
     
     fun removeFromVacation() {
-        numTurnsOnVacation = null
+        numTurnsSpentOnVacation = null
     }
     
     var numGetOffVacationCards = 0
@@ -69,16 +72,12 @@ class Player(val name: String) {
     
     fun incrementNumGetOffVacationCardsAndPrintUpdate(amount: Int = 1) {
         numGetOffVacationCards += amount
-        println(
-            "$name gained ${Misc.getNumGetOffVacationCardsString(amount)} and now has $numGetOffVacationCards."
-        )
+        println("$name gained ${Misc.getNumGetOffVacationCardsString(amount)} and now has $numGetOffVacationCards.")
     }
     
     fun decrementNumGetOffVacationCardsAndPrintUpdate(amount: Int = 1) {
         numGetOffVacationCards -= amount
-        println(
-            "$name lost ${Misc.getNumGetOffVacationCardsString(amount)} and now has $numGetOffVacationCards."
-        )
+        println("$name lost ${Misc.getNumGetOffVacationCardsString(amount)} and now has $numGetOffVacationCards.")
     }
     
     /**
@@ -96,7 +95,7 @@ class Player(val name: String) {
             if (hasAGetOffVacationCard) {
                 append(", Get Off Vacation Free Cards: $numGetOffVacationCards")
             }
-            numTurnsOnVacation?.let {
+            numTurnsSpentOnVacation?.let {
                 append(", On Vacation - Number of Turns Spent: $it")
             }
         }

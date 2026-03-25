@@ -23,8 +23,6 @@ class SuperStore private constructor(nameStart: String) : Property(name = "$name
     companion object Manager {
         val newtonStore = SuperStore(nameStart = "Newton")
         val leibnizStore = SuperStore(nameStart = "Leibniz")
-        val bothStores
-            get() = listOf(newtonStore, leibnizStore)
         
         private const val ONE_STORE_OWNED_MULTIPLIER = 8
         private const val BOTH_STORES_OWNED_MULTIPLIER = 16

@@ -44,7 +44,7 @@ class GolfClub private constructor(nameStart: String) : Property(name = "$nameSt
                     3 -> 2
                     4 -> 1
                     else -> {
-                        Misc.printError("numClubsOwnedByOwner arg for getFee was $numClubsOwnedByOwner")
+                        Misc.printError("numClubsOwnedByOwner arg for getFee was $numClubsOwnedByOwner.")
                         neoshoClub.purchasePrice
                     }
                 }

@@ -43,17 +43,20 @@ object LagosAvenueCard :
         message = "Lagos is the most populated city in Africa. Move to Lagos Avenue"
     )
 
+/**
+ * Single quotation marks are used for the quote in the message since that message will be displayed
+ * within double quotation marks.
+ */
 object KnuthStreetCard :
     MoveToPropertyCard(
         propName = "Knuth Street",
         message =
-            // Use single quotes for the quote since this message will be displayed within double quotes.
             "Computer scientist Donald Knuth once said 'Programs are meant to be read by humans and " +
             "only incidentally for computers to execute.' Move to Knuth Street"
     )
 
-object GoOnVacationCard : ActionCard(message = "Go On Vacation")
+object GoOnVacationCard : ActionCard(message = "Go on vacation")
 
 object GetOffVacationFreeCard :
-    ActionCard(message = "Get off Vacation free. Keep this card and use it when needed, or trade it.")
+    ActionCard(message = "Get off vacation free. Keep this card and use it when needed, or trade it")
 

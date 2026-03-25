@@ -4,7 +4,7 @@ import kotlin.math.roundToInt
 import singletonopoly.players.Player
 
 /**
- * Superclass for SuperStore, GolfClub, and Street classes. "Property" is often shortened to "prop".
+ * Superclass for SuperStore, GolfClub, and Street classes. "Property" is often shortened to "prop."
  */
 sealed class Property(val name: String) {
     /**

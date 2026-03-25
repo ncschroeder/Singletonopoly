@@ -51,12 +51,9 @@ object PropertyManager {
         getPropsOwnedBy(player)
         .sumOf { if (it is Street) it.numRestaurants else 0 }
     
-    fun makePropsUnowned() {
-        allProps.forEach { it.makeUnowned() }
-    }
-    
-    fun makePropsUnowned(owner: Player) {
-        getPropsOwnedBy(owner).forEach { it.makeUnowned() }
+    fun makePropsUnowned(owner: Player? = null) {
+        (owner?.let(::getPropsOwnedBy) ?: allProps)
+        .forEach { it.makeUnowned() }
     }
     
     fun transferOwnership(curOwner: Player, newOwner: Player) {

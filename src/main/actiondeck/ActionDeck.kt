@@ -57,7 +57,7 @@ class ActionDeck {
         } else {
             Misc.printError(
                 "The Action Deck had removeGetOffVacationCardAtTop called when the top card wasn't a " +
-                "GetOffVacationFreeCard"
+                "GetOffVacationFreeCard."
             )
         }
     }

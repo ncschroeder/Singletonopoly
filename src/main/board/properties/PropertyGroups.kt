@@ -1,6 +1,5 @@
 package singletonopoly.board.properties
 
-import singletonopoly.Misc
 import singletonopoly.board.properties.PropertyManager.getInfo
 import singletonopoly.players.Player
 
@@ -9,27 +8,25 @@ class PropertyGroups private constructor(
     val golfClubs: List<GolfClub>,
     val streetGroups: StreetGroups
 ) {
-    fun getInfo(heading: String, end: String? = null, sayIfNHoodIsOwned: Boolean = false): String =
-        buildList(capacity = 6) {
+    fun getInfo(heading: String): String =
+        buildList(capacity = 5) {
             add(heading)
             
             if (superStores.isNotEmpty() || golfClubs.isNotEmpty()) {
                 add(PropertyManager.SUPER_STORES_AND_GOLF_CLUBS_COMMON_INFO)
-            }
-            
-            if (superStores.isNotEmpty()) {
-                add(superStores.getInfo(heading = "Super Stores", commonInfo = SuperStore.FEES_INFO))
-            }
-            
-            if (golfClubs.isNotEmpty()) {
-                add(golfClubs.getInfo(heading = "Golf Clubs", commonInfo = GolfClub.FEES_INFO))
+                
+                if (superStores.isNotEmpty()) {
+                    add(superStores.getInfo(heading = "Super Stores", commonInfo = SuperStore.FEES_INFO))
+                }
+                
+                if (golfClubs.isNotEmpty()) {
+                    add(golfClubs.getInfo(heading = "Golf Clubs", commonInfo = GolfClub.FEES_INFO))
+                }
             }
             
             if (streetGroups.isNotEmpty()) {
-                add(streetGroups.getInfo(heading = "Streets", sayIfNHoodIsOwned = sayIfNHoodIsOwned))
+                add(streetGroups.getInfo(heading = "Streets"))
             }
-            
-            if (end != null) add(end)
         }
         .joinToString(separator = "\n\n")
     
@@ -37,7 +34,7 @@ class PropertyGroups private constructor(
      * Used in askAboutSeeingPropInfo and askAboutTrading on PropertyGroups objects returned by
      * PropertyGroups.forPropsOwnedBy.
      */
-    fun getInfo(ownerOfProps: Player) =
+    fun getInfo(ownerOfProps: Player): String =
         getInfo(heading = "Info for Properties Owned by ${ownerOfProps.name}")
 
     fun isEmpty(): Boolean =
@@ -52,8 +49,11 @@ class PropertyGroups private constructor(
             streetGroups = streetGroups.filter(predicate)
         )
     
+    /**
+     * positionsInput contains user input.
+     */
     fun filterByPositions(positionsInput: String): PropertyGroups {
-        val positionsSet: Set<Int> = Misc.getIntsIn(positionsInput)
+        val positionsSet: Set<Int> = getIntsIn(positionsInput)
         return filter { it.position in positionsSet }
     }
     
@@ -63,12 +63,20 @@ class PropertyGroups private constructor(
     companion object {
         val forAllProps =
             PropertyGroups(
-                superStores = SuperStore.bothStores,
+                superStores = listOf(SuperStore.newtonStore, SuperStore.leibnizStore),
                 golfClubs = GolfClub.allClubs,
                 streetGroups = StreetGroups.forAllStreets()
             )
         
         fun forPropsOwnedBy(player: Player): PropertyGroups =
             forAllProps.filter { it.owner === player }
+        
+        /**
+         * Returns a set of whitespace-separated ints in s. Non-int values are ignored.
+         */
+        fun getIntsIn(s: String): Set<Int> =
+            s
+            .split(Regex("\\s+"))
+            .mapNotNullTo(HashSet()) { it.toIntOrNull() }
     }
 }
