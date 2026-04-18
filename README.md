@@ -377,10 +377,20 @@ A roll of 2 dice will be generated for each player after their name is entered. 
 
 After all names are entered, the order of the players is determined and shown and then the game starts and the 1<sup>st</sup> player takes their turn.
 
+#### Screenshot
+
+![Beginning](/Images/Screenshots/beginning.JPG)
+
 
 ### Playing the Game
 
 Money is used for buying properties, buying restaurants for streets, and paying fees. Players start with :heavy_dollar_sign:4,096 (2<sup>12</sup>). Along with this, there are other references to powers of 2 throughout the game.
+
+#### Screenshot
+
+Invalid input
+
+![Invalid input](/Images/Screenshots/invalid_input.JPG)
 
 At the beginning of a player's turn, they have options to do things.
 
@@ -401,6 +411,45 @@ Things that can conditionally be done if the player has at least 1 property wher
 
 When a player decides to roll the dice and move, 2 dice will be rolled for them. :game_die: :game_die: I'm going to use the variables $p$ to represent the player's current position and $d$ to represent the sum of the values of the dice. There are 40 board spaces. If $p + d \leq 40$, the player's new position is $(p + d)$. If $p + d > 40$, the player made a revolution around the board and their new position is the difference between $(p + d)$ and $40$. For example, if $p + d = 42$, the new position is 2. After a revolution, a player gains :heavy_dollar_sign:512. The player's new position will be evaluated and appropriate action will be taken. If the values of both dice are the same, also called *rolling doubles*, that player gets to go again. If a player rolls doubles thrice, or 3 times, in a row, they'll be sent to [vacation](#vacation-desert_island-beach_umbrella).
 
+<details>
+<summary>Screenshots</summary>
+<br/>
+
+All options that can be done at the beginning of a turn
+
+![All options that can be done at the beginning of a turn](/Images/Screenshots/beginning_of_turn_options.JPG)
+
+Rolling the dice and moving
+
+![Rolling the dice and moving](/Images/Screenshots/rolling_dice_and_moving.JPG)
+
+Making a revolution
+
+![Making a revolution](/Images/Screenshots/making_revolution.JPG)
+
+Rolling doubles
+
+![Rolling doubles](/Images/Screenshots/rolling_doubles.JPG)
+
+A player dropping out
+
+![A player dropping out](/Images/Screenshots/dropping_out.JPG)
+
+</details>
+
+<details>
+<summary>Screenshots</summary>
+<br/>
+
+Using the option
+
+![Ending the game early](/Images/Screenshots/ending_game.JPG)
+
+A player dropping out
+
+![A player dropping out](/Images/Screenshots/dropping_out_and_ending_game.JPG)
+
+</details>
 
 
 ### The Board
@@ -477,6 +526,20 @@ Here are all the spaces on the board. The spaces with streets have the street na
 |    39    | Suffolk Street, Hampton      |
 |    40    | Norfolk Avenue, Hampton      |
 
+<details>
+<summary>Screenshots</summary>
+<br/>
+
+Landing on "Break Time"
+
+![Landing on "Break Time"](/Images/Screenshots/landing_on_break_time.JPG)
+
+Seeing the spaces on the board
+
+![Seeing the spaces on the board](/Images/Screenshots/board_spaces.JPG)
+
+</details>
+
 
 ### Properties
 
@@ -484,11 +547,25 @@ The 3 types of properties are super stores, golf clubs, and streets. There are s
 
 All properties are unowned at the beginning. If a player lands on an unowned property, they'll have the option to buy it. If they want to buy it but don't have enough money, they'll be sent to the [money getting section](#money-getting-section-heavy_dollar_sign) and if they get the money, the property will be given to them. If a player lands on a property that's owned by someone else and unpawned, they'll have to pay a fee to the owner. If they can't pay the fee, they'll be sent to the money getting section and if they decide to drop out, their money and properties will go to the owner of the property.
 
+##### Screenshots
 
+Buying a street
+
+![Buying a street](/Images/Screenshots/buying_street.JPG)
+
+A player landing on a property owned by them
+
+![A player landing on a property owned by them](/Images/Screenshots/player_landing_on_prop_owned_by_them.JPG)
 
 #### Super Stores &nbsp; :department_store:
 
 There are 2 super stores: Newton Super Store and Leibniz Super Store. Each one has a purchase price of :heavy_dollar_sign:512 (2<sup>9</sup>), a pawn price of :heavy_dollar_sign:256 (2<sup>8</sup>), and an unpawn price of :heavy_dollar_sign:282. The fee for a super store is a dice roll multiplied by either 8 or 16, 16 for if the owner of that super store owns the other super store as well and 8 for if they don’t.
+
+##### Screenshot
+
+Landing on an owned super store
+
+![Landing on an owned super store](/Images/Screenshots/landing_on_owned_super_store.JPG)
 
 <details>
 <summary>Name Origins</summary>
@@ -507,6 +584,12 @@ There are 4 golf clubs: Neosho Golf Club, Granby Golf Club, Monett Golf Club, an
 |           2           |  $128 |
 |           3           |  $256 |
 |           4           |  $512 |
+
+##### Screenshot
+
+Landing on an owned golf club
+
+![Landing on an owned golf club](/Images/Screenshots/landing_on_owned_golf_club.JPG)
 
 <details>
 <summary>Name Origins</summary>
@@ -601,11 +684,22 @@ All of this info, along with some info from the "Pawning" section (the next sect
 
 The Markdown for the rows of the table above was generated programmatically by the code at the end of [`Neighborhood.kt`](https://github.com/ncschroeder/Singletonopoly/blob/master/src/main/board/properties/Neighborhood.kt).
 
+##### Screenshot
+
+Landing on an owned street
+
+![Landing on an owned street](/Images/Screenshots/landing_on_owned_street.JPG)
 
 
 #### Pawning
 
 Players can pawn a property to get some money but anybody who lands on a pawned property won't need to pay a fee. A pawned property must be unpawned in order to require players who land there to pay a fee. The money that a player gains from pawning a property is half of its purchase price. The money needed to unpawn is calculated by taking the pawn price, adding a 10.24% $(\frac{2^{10}}{100})$ fee, and rounding this to the nearest whole number. Streets must have no restaurants on them in order to be pawned, so if any restaurants get bought, then they must be sold.
+
+##### Screenshot
+
+Landing on a pawned property
+
+![Landing on a pawned property](/Images/Screenshots/landing_on_pawned_prop.JPG)
 
 #### Seeing Property Info
 
@@ -622,10 +716,22 @@ flowchart TD
     H --Yes--> I[Mention number of restaurants]
 ```
 
+<details>
+<summary>Screenshots</summary>
+<br/>
 
+Info for properties owned by a player
 
+![Info for properties owned by a player part 1](/Images/Screenshots/info_for_props_owned_by_player_part_1.JPG)
+![Info for properties owned by a player part 2](/Images/Screenshots/info_for_props_owned_by_player_part_2.JPG)
 
+Info for all properties
 
+![Info for all properties part 1](/Images/Screenshots/info_for_all_props_part_1.JPG)
+![Info for all properties part 2](/Images/Screenshots/info_for_all_props_part_2.JPG)
+![Info for all properties part 3](/Images/Screenshots/info_for_all_props_part_3.JPG)
+
+</details>
 
 ```mermaid
 flowchart TD
@@ -649,6 +755,26 @@ flowchart TD
     M --No--> A
 ```
 
+<details>
+<summary>Screenshots</summary>
+<br/>
+
+Pawning
+
+![Pawning a property part 1](/Images/Screenshots/pawning_part_1.JPG)
+![Pawning a property part 2](/Images/Screenshots/pawning_part_2.JPG)
+
+Buying a Restaurant
+
+![Buying a restaurant part 1](/Images/Screenshots/buying_restaurant_part_1.JPG)
+![Buying a restaurant part 2](/Images/Screenshots/buying_restaurant_part_1.JPG)
+
+Invalid Input
+
+![Pawning invalid input](/Images/Screenshots/pawning_invalid_input.JPG)
+
+</details>
+
 
 ### Money Getting Section :heavy_dollar_sign:
 
@@ -656,11 +782,33 @@ When a player needs money, they'll be sent here. Sometimes a player is in a situ
 
 When a player is at this section, they're given some options. If the player chose to be in their situation, then the 1<sup>st</sup> option is to go back but if they do this, then they won't do the thing they needed money for. Otherwise, the 1<sup>st</sup> option is to drop out of the game. The 2<sup>nd</sup> option is to try to make a trade with another player. Other options are pawning properties and selling restaurants on streets but each of these options are available only if the player has at least 1 property where that action can be done. If the player chooses an option other than the first one and gets enough money to do the thing they needed money for, then they'll exit the money getting section and do that thing. Otherwise, they'll stay in the money getting section and be prompted to do another option.
 
+<details>
+<summary>Screenshots</summary>
+<br/>
+
+Going back
+
+![Going to money getting section and going back](/Images/Screenshots/money_getting_section_going_back.JPG)
+
+Pawning to get money
+
+![Money getting section pawning part 1](/Images/Screenshots/money_getting_section_pawning_part_1.JPG)
+![Money getting section pawning part 2](/Images/Screenshots/money_getting_section_pawning_part_2.JPG)
+
+Player didn't choose
+
+![Player didn't choose to go to money getting section](/Images/Screenshots/money_getting_section_didnt_choose.JPG)
+
+</details>
+
 
 ### Seeing Player Info
 
 A player can choose to see player info at the beginning of their turn or during some parts of trading. The order of the players is the same as the order that was determined at the beginning. For each player, the 1<sup>st</sup> thing mentioned about them is their name. If they're out of the game, that'll be the only other thing mentioned about them. Otherwise, their position and money will be mentioned. If they have any get off vacation free cards, that'll be mentioned. If they're on vacation, that'll be mentioned along with how many turns they spent there.
 
+#### Screenshot
+
+![Player info](/Images/Screenshots/player_info.JPG)
 
 
 ### Action Deck and Action Cards
@@ -697,10 +845,54 @@ Here are the messages of all cards in the deck:
 
 - If a player lands on the "Draw Action Card" space at position 6 of the board and draws the "Move back 8 spaces" card, they'll get moved to position 38 and will luckily be able to make a revolution and collect :heavy_dollar_sign:512 once they move at least another 3 spaces forward.
 
+<details>
+<summary>Screenshots</summary>
+<br/>
+
+Drawing get money from other players card
+
+![Drawing get money from other players card](/Images/Screenshots/drawing_get_money_from_other_players_card.JPG)
+
+Drawing pay other players card
+
+![Drawing pay other players card](/Images/Screenshots/drawing_pay_other_players_card.JPG)
+
+Drawing restaurant maintenance card
+
+![Drawing restaurant maintenance card](/Images/Screenshots/drawing_restaurant_maintenance_card.JPG)
+
+Drawing move ahead card
+
+![Drawing move ahead card](/Images/Screenshots/drawing_move_ahead_card.JPG)
+
+Drawing Knuth Street card
+
+![Drawing Knuth Street card](/Images/Screenshots/drawing_knuth_street_card.JPG)
+
+Drawing get off vacation free card
+
+![Drawing get off vacation free card](/Images/Screenshots/drawing_get_off_vacation_free_card.JPG)
+
+</details>
+
 
 ### Vacation :desert_island: :beach_umbrella:
 
 When a player lands on the "Go on Vacation" space on the board, draws an Action Card with this same message, or rolls doubles thrice, or 3 times, in a row, that player will be sent to vacation and their position will be changed to the "Vacation" space on the board. The player is stuck on this space for as long as they're on vacation. On the player's next turn, they'll have the choice of either trying to roll doubles, paying :heavy_dollar_sign:128 (2<sup>7</sup>) to get off vacation, or using a get off vacation free card if they drew one from the Action Deck or got one from a trade. If they try to roll doubles and succeed, then the player is off vacation and get to advance the amount they rolled. Even though they rolled doubles, they won't get to go again. A player can be on vacation for a max of 3 turns by trying to roll doubles and failing for 2 turns. If they fail to roll doubles on their 3<sup>rd</sup> turn, then they get off vacation.
+
+<details>
+<summary>Screenshots</summary>
+<br/>
+
+Rolling on vacation
+
+![Rolling on vacation](/Images/Screenshots/vacation_rolling.JPG)
+
+Paying on vacation
+
+![Paying on vacation](/Images/Screenshots/vacation_paying.JPG)
+
+</details>
 
 
 ### Trading
@@ -712,5 +904,18 @@ When a player lands on the "Go on Vacation" space on the board, draws an Action 
 
 
 
+#### Screenshots
 
+Trying to trading at the start of a game
+
+![Trying to trade at the start of a game](/Images/Screenshots/trade_at_start.JPG)
+
+The IP not selecting anything that they would like
+
+![The IP not selecting anything that they would like](/Images/Screenshots/trade_not_selecting.JPG)
+
+A successful trade
+
+![A successful trade part 1](/Images/Screenshots/trade_part_1.JPG)
+![A successful trade part 2](/Images/Screenshots/trade_part_2.JPG)
 
