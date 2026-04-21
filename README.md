@@ -597,7 +597,7 @@ Landing on an owned golf club
 
 [Neosho](https://en.wikipedia.org/wiki/Neosho,_Missouri), [Granby](https://en.wikipedia.org/wiki/Granby,_Missouri), [Monett](https://en.wikipedia.org/wiki/Monett,_Missouri), and [Aurora](https://en.wikipedia.org/wiki/Aurora,_Missouri) are Missouri towns along [US Route 60](https://en.wikipedia.org/wiki/U.S._Route_60_in_Missouri) southwest of [Springfield](https://en.wikipedia.org/wiki/Springfield,_Missouri). That's a route I traveled on a few times during my time living in Springfield and attending Missouri State University.
 
-![Southwestern Missouri Map](/Images/SW_Missouri_Map.JPG)
+![Southwestern Missouri map](/images/maps/sw_missouri.JPG)
 
 </details>
 
@@ -623,32 +623,30 @@ There are 24 streets around the board that are grouped into 8 neighborhoods. If 
 
     In the map below, the red dots form the outline of Vauxhall.
 
-![Vauxhall Map](/Images/Vauxhall_Map.JPG)
+    ![London map](/images/maps/london.JPG)
 
-![England Map](/Images/England_Map.JPG)
+
 - [Monrovia, Liberia](https://en.wikipedia.org/wiki/Monrovia); [Luanda, Angola](https://en.wikipedia.org/wiki/Luanda); [Kinshasa, Democratic Republic of the Congo](https://en.wikipedia.org/wiki/Kinshasa); and [Lagos, Nigeria](https://en.wikipedia.org/wiki/Lagos) are cities in Africa. :earth_africa: Fun fact: Monrovia was named after 6<sup>th</sup> U.S. president James Monroe.
 
+    ![Western Africa map](/images/maps/western_africa.JPG)
 
-![Africa Map](/Images/Africa_Map.JPG)
 
 - The Ozark neighborhood is [Lake of the Ozarks](https://en.wikipedia.org/wiki/Lake_of_the_Ozarks) themed. :speedboat: :bikini: :sunrise: :swimming_man: [Camden County](https://en.wikipedia.org/wiki/Camden_County,_Missouri) is where most of the lake and surrounding area is. [Lake Shore Drive](https://en.wikipedia.org/wiki/Lake_Shore_Drive) is a road in Chicago but goes with the theme. [Osage Beach](https://en.wikipedia.org/wiki/Osage_Beach,_Missouri) is a city by the lake and there’s a road there called Osage Beach Parkway.
 
     In the map below, the red dots form the outline of Camden County.
 
-![Lake of the Ozarks Map](/Images/Lake_of_the_Ozarks_Map.JPG)
-    
+    ![Lake of the Ozarks map](/images/maps/lake_of_the_ozarks.JPG)
 
-    ![Area Around Union Map](/Images/Area_Around_Union_Map.JPG)
 
 - [Augusta](https://en.wikipedia.org/wiki/Augusta,_Missouri), [Labadie](https://en.wikipedia.org/wiki/Labadie,_Missouri), [Moselle](https://en.wikipedia.org/wiki/Moselle,_Missouri), and [Clover Bottom](https://en.wikipedia.org/wiki/Clover_Bottom,_Missouri) are communities close to [Union, Missouri](https://en.wikipedia.org/wiki/Union,_Missouri), where I spent much of my life.
 
-![Italy Map](/Images/Italy_Map.JPG)
+    ![Area around Union map](/images/maps/area_around_union.JPG)
 
 
 - The Little Italy neighborhood is, of course, [Italy](https://en.wikipedia.org/wiki/Italy) themed. [Ezio Auditore da Firenze](https://en.wikipedia.org/wiki/Ezio_Auditore_da_Firenze) is the protagonist in 3 [*Assassin’s Creed*](https://en.wikipedia.org/wiki/Assassin%27s_Creed) games and is from Florence. [Florence](https://en.wikipedia.org/wiki/Florence) and [Venice](https://en.wikipedia.org/wiki/Venice) are cities in Italy and the Italian names for them are Firenze and Venezia, respectively.
 
+    ![Italy map](/images/maps/italy.JPG)
 
-![Hampton Roads Map](/Images/Hampton_Roads_Map.JPG)
 
 - [Carl Friedrich Gauss](https://en.wikipedia.org/wiki/Carl_Friedrich_Gauss), [Leonhard Euler](https://en.wikipedia.org/wiki/Leonhard_Euler), [Srinivasa Ramanujan](https://en.wikipedia.org/wiki/Srinivasa_Ramanujan), and [Euclid](https://en.wikipedia.org/wiki/Euclid) were mathematicians. Euclid Avenue is also a street in St. Louis. :fleur_de_lis:
 
@@ -656,6 +654,7 @@ There are 24 streets around the board that are grouped into 8 neighborhoods. If 
 
 - [Hampton](https://en.wikipedia.org/wiki/Hampton,_Virginia), [Chesapeake](https://en.wikipedia.org/wiki/Chesapeake,_Virginia), [Suffolk](https://en.wikipedia.org/wiki/Suffolk,_Virginia), and [Norfolk](https://en.wikipedia.org/wiki/Norfolk,_Virginia) are cities in the [Hampton Roads region of eastern Virginia](https://en.wikipedia.org/wiki/Hampton_Roads).
 
+    ![Hampton Roads map](/images/maps/hampton_roads.JPG)
 
 </details>
 
