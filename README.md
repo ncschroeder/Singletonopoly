@@ -379,7 +379,8 @@ After all names are entered, the order of the players is determined and shown an
 
 #### Screenshot
 
-![Beginning](/Images/Screenshots/beginning.JPG)
+![Beginning](/images/screenshots/beginning.JPG)
+
 
 
 ### Playing the Game
@@ -390,7 +391,7 @@ Money is used for buying properties, buying restaurants for streets, and paying 
 
 Invalid input
 
-![Invalid input](/Images/Screenshots/invalid_input.JPG)
+![Invalid input](/images/screenshots/invalid_input.JPG)
 
 At the beginning of a player's turn, they have options to do things.
 
@@ -417,23 +418,23 @@ When a player decides to roll the dice and move, 2 dice will be rolled for them.
 
 All options that can be done at the beginning of a turn
 
-![All options that can be done at the beginning of a turn](/Images/Screenshots/beginning_of_turn_options.JPG)
+![All options that can be done at the beginning of a turn](/images/screenshots/beginning_of_turn_options.JPG)
 
 Rolling the dice and moving
 
-![Rolling the dice and moving](/Images/Screenshots/rolling_dice_and_moving.JPG)
+![Rolling the dice and moving](/images/screenshots/rolling_dice_and_moving.JPG)
 
 Making a revolution
 
-![Making a revolution](/Images/Screenshots/making_revolution.JPG)
+![Making a revolution](/images/screenshots/making_revolution.JPG)
 
 Rolling doubles
 
-![Rolling doubles](/Images/Screenshots/rolling_doubles.JPG)
+![Rolling doubles](/images/screenshots/rolling_doubles.JPG)
 
 A player dropping out
 
-![A player dropping out](/Images/Screenshots/dropping_out.JPG)
+![A player dropping out](/images/screenshots/dropping_out.JPG)
 
 </details>
 
@@ -443,11 +444,11 @@ A player dropping out
 
 Using the option
 
-![Ending the game early](/Images/Screenshots/ending_game.JPG)
+![Ending the game early](/images/screenshots/ending_game.JPG)
 
 A player dropping out
 
-![A player dropping out](/Images/Screenshots/dropping_out_and_ending_game.JPG)
+![A player dropping out](/images/screenshots/dropping_out_and_ending_game.JPG)
 
 </details>
 
@@ -532,11 +533,11 @@ Here are all the spaces on the board. The spaces with streets have the street na
 
 Landing on "Break Time"
 
-![Landing on "Break Time"](/Images/Screenshots/landing_on_break_time.JPG)
+![Landing on "Break Time"](/images/screenshots/landing_on_break_time.JPG)
 
 Seeing the spaces on the board
 
-![Seeing the spaces on the board](/Images/Screenshots/board_spaces.JPG)
+![Seeing the spaces on the board](/images/screenshots/board_spaces.JPG)
 
 </details>
 
@@ -551,11 +552,11 @@ All properties are unowned at the beginning. If a player lands on an unowned pro
 
 Buying a street
 
-![Buying a street](/Images/Screenshots/buying_street.JPG)
+![Buying a street](/images/screenshots/buying_street.JPG)
 
 A player landing on a property owned by them
 
-![A player landing on a property owned by them](/Images/Screenshots/player_landing_on_prop_owned_by_them.JPG)
+![A player landing on a property owned by them](/images/screenshots/player_landing_on_prop_owned_by_them.JPG)
 
 #### Super Stores &nbsp; :department_store:
 
@@ -565,7 +566,7 @@ There are 2 super stores: Newton Super Store and Leibniz Super Store. Each one h
 
 Landing on an owned super store
 
-![Landing on an owned super store](/Images/Screenshots/landing_on_owned_super_store.JPG)
+![Landing on an owned super store](/images/screenshots/landing_on_owned_super_store.JPG)
 
 <details>
 <summary>Name Origins</summary>
@@ -589,7 +590,7 @@ There are 4 golf clubs: Neosho Golf Club, Granby Golf Club, Monett Golf Club, an
 
 Landing on an owned golf club
 
-![Landing on an owned golf club](/Images/Screenshots/landing_on_owned_golf_club.JPG)
+![Landing on an owned golf club](/images/screenshots/landing_on_owned_golf_club.JPG)
 
 <details>
 <summary>Name Origins</summary>
@@ -688,7 +689,7 @@ The Markdown for the rows of the table above was generated programmatically by t
 
 Landing on an owned street
 
-![Landing on an owned street](/Images/Screenshots/landing_on_owned_street.JPG)
+![Landing on an owned street](/images/screenshots/landing_on_owned_street.JPG)
 
 
 #### Pawning
@@ -699,7 +700,7 @@ Players can pawn a property to get some money but anybody who lands on a pawned 
 
 Landing on a pawned property
 
-![Landing on a pawned property](/Images/Screenshots/landing_on_pawned_prop.JPG)
+![Landing on a pawned property](/images/screenshots/landing_on_pawned_prop.JPG)
 
 #### Seeing Property Info
 
@@ -722,14 +723,14 @@ flowchart TD
 
 Info for properties owned by a player
 
-![Info for properties owned by a player part 1](/Images/Screenshots/info_for_props_owned_by_player_part_1.JPG)
-![Info for properties owned by a player part 2](/Images/Screenshots/info_for_props_owned_by_player_part_2.JPG)
+![Info for properties owned by a player part 1](/images/screenshots/info_for_props_owned_by_player_part_1.JPG)
+![Info for properties owned by a player part 2](/images/screenshots/info_for_props_owned_by_player_part_2.JPG)
 
 Info for all properties
 
-![Info for all properties part 1](/Images/Screenshots/info_for_all_props_part_1.JPG)
-![Info for all properties part 2](/Images/Screenshots/info_for_all_props_part_2.JPG)
-![Info for all properties part 3](/Images/Screenshots/info_for_all_props_part_3.JPG)
+![Info for all properties part 1](/images/screenshots/info_for_all_props_part_1.JPG)
+![Info for all properties part 2](/images/screenshots/info_for_all_props_part_2.JPG)
+![Info for all properties part 3](/images/screenshots/info_for_all_props_part_3.JPG)
 
 </details>
 
@@ -761,17 +762,17 @@ flowchart TD
 
 Pawning
 
-![Pawning a property part 1](/Images/Screenshots/pawning_part_1.JPG)
-![Pawning a property part 2](/Images/Screenshots/pawning_part_2.JPG)
+![Pawning a property part 1](/images/screenshots/pawning_part_1.JPG)
+![Pawning a property part 2](/images/screenshots/pawning_part_2.JPG)
 
 Buying a Restaurant
 
-![Buying a restaurant part 1](/Images/Screenshots/buying_restaurant_part_1.JPG)
-![Buying a restaurant part 2](/Images/Screenshots/buying_restaurant_part_1.JPG)
+![Buying a restaurant part 1](/images/screenshots/buying_restaurant_part_1.JPG)
+![Buying a restaurant part 2](/images/screenshots/buying_restaurant_part_1.JPG)
 
 Invalid Input
 
-![Pawning invalid input](/Images/Screenshots/pawning_invalid_input.JPG)
+![Pawning invalid input](/images/screenshots/pawning_invalid_input.JPG)
 
 </details>
 
@@ -788,16 +789,16 @@ When a player is at this section, they're given some options. If the player chos
 
 Going back
 
-![Going to money getting section and going back](/Images/Screenshots/money_getting_section_going_back.JPG)
+![Going to money getting section and going back](/images/screenshots/money_getting_section_going_back.JPG)
 
 Pawning to get money
 
-![Money getting section pawning part 1](/Images/Screenshots/money_getting_section_pawning_part_1.JPG)
-![Money getting section pawning part 2](/Images/Screenshots/money_getting_section_pawning_part_2.JPG)
+![Money getting section pawning part 1](/images/screenshots/money_getting_section_pawning_part_1.JPG)
+![Money getting section pawning part 2](/images/screenshots/money_getting_section_pawning_part_2.JPG)
 
 Player didn't choose
 
-![Player didn't choose to go to money getting section](/Images/Screenshots/money_getting_section_didnt_choose.JPG)
+![Player didn't choose to go to money getting section](/images/screenshots/money_getting_section_didnt_choose.JPG)
 
 </details>
 
@@ -808,7 +809,7 @@ A player can choose to see player info at the beginning of their turn or during 
 
 #### Screenshot
 
-![Player info](/Images/Screenshots/player_info.JPG)
+![Player info](/images/screenshots/player_info.JPG)
 
 
 ### Action Deck and Action Cards
@@ -851,27 +852,27 @@ Here are the messages of all cards in the deck:
 
 Drawing get money from other players card
 
-![Drawing get money from other players card](/Images/Screenshots/drawing_get_money_from_other_players_card.JPG)
+![Drawing get money from other players card](/images/screenshots/drawing_get_money_from_other_players_card.JPG)
 
 Drawing pay other players card
 
-![Drawing pay other players card](/Images/Screenshots/drawing_pay_other_players_card.JPG)
+![Drawing pay other players card](/images/screenshots/drawing_pay_other_players_card.JPG)
 
 Drawing restaurant maintenance card
 
-![Drawing restaurant maintenance card](/Images/Screenshots/drawing_restaurant_maintenance_card.JPG)
+![Drawing restaurant maintenance card](/images/screenshots/drawing_restaurant_maintenance_card.JPG)
 
 Drawing move ahead card
 
-![Drawing move ahead card](/Images/Screenshots/drawing_move_ahead_card.JPG)
+![Drawing move ahead card](/images/screenshots/drawing_move_ahead_card.JPG)
 
 Drawing Knuth Street card
 
-![Drawing Knuth Street card](/Images/Screenshots/drawing_knuth_street_card.JPG)
+![Drawing Knuth Street card](/images/screenshots/drawing_knuth_street_card.JPG)
 
 Drawing get off vacation free card
 
-![Drawing get off vacation free card](/Images/Screenshots/drawing_get_off_vacation_free_card.JPG)
+![Drawing get off vacation free card](/images/screenshots/drawing_get_off_vacation_free_card.JPG)
 
 </details>
 
@@ -886,11 +887,11 @@ When a player lands on the "Go on Vacation" space on the board, draws an Action 
 
 Rolling on vacation
 
-![Rolling on vacation](/Images/Screenshots/vacation_rolling.JPG)
+![Rolling on vacation](/images/screenshots/vacation_rolling.JPG)
 
 Paying on vacation
 
-![Paying on vacation](/Images/Screenshots/vacation_paying.JPG)
+![Paying on vacation](/images/screenshots/vacation_paying.JPG)
 
 </details>
 
@@ -908,14 +909,14 @@ Paying on vacation
 
 Trying to trading at the start of a game
 
-![Trying to trade at the start of a game](/Images/Screenshots/trade_at_start.JPG)
+![Trying to trade at the start of a game](/images/screenshots/trade_at_start.JPG)
 
 The IP not selecting anything that they would like
 
-![The IP not selecting anything that they would like](/Images/Screenshots/trade_not_selecting.JPG)
+![The IP not selecting anything that they would like](/images/screenshots/trade_not_selecting.JPG)
 
 A successful trade
 
-![A successful trade part 1](/Images/Screenshots/trade_part_1.JPG)
-![A successful trade part 2](/Images/Screenshots/trade_part_2.JPG)
+![A successful trade part 1](/images/screenshots/trade_part_1.JPG)
+![A successful trade part 2](/images/screenshots/trade_part_2.JPG)
 
