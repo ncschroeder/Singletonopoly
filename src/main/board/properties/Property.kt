@@ -52,14 +52,14 @@ sealed class Property(val name: String) {
     val canBeUnpawned: Boolean
         get() = isPawned
     
-    val pawnGain: Int
+    val pawnPrice: Int
         get() = purchasePrice / 2
     
     /**
      * Pawn price plus a 10.24% fee.
      */
     val unpawnPrice: Int
-        get() = (pawnGain * 1.1024).roundToInt()
+        get() = (pawnPrice * 1.1024).roundToInt()
     
     fun pawn() {
         isPawned = true

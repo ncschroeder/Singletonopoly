@@ -8,7 +8,7 @@ object PropertyManager {
     val SUPER_STORES_AND_GOLF_CLUBS_COMMON_INFO: String =
         SuperStore.newtonStore.run {
             "For Super Stores and Golf Clubs: Purchase Price: $$purchasePrice, " +
-            "Pawn Gain: $$pawnGain, Unpawn Price: $$unpawnPrice"
+            "Pawn Price: $$pawnPrice, Unpawn Price: $$unpawnPrice"
         }
     
     /**

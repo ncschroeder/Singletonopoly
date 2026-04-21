@@ -31,7 +31,7 @@ class Street(name: String, val nHood: Neighborhood) : Property(name) {
     }
     
     override val canBePawned: Boolean
-        get() = !isPawned && numRestaurants == 0
+        get() = super.canBePawned && numRestaurants == 0
     
     var numRestaurants = 0
         private set

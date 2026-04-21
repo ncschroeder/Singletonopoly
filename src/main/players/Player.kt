@@ -28,12 +28,12 @@ class Player(val name: String) {
     
     fun incrementMoneyAndPrintUpdate(amount: Int) {
         money += amount
-        println("$name gained $$amount and now has $$moneyString.")
+        println("$name gained $${amount.toStringWithCommas()} and now has $$moneyString.")
     }
     
     fun decrementMoneyAndPrintUpdate(amount: Int) {
         money -= amount
-        println("$name lost $$amount and now has $$moneyString.")
+        println("$name lost $${amount.toStringWithCommas()} and now has $$moneyString.")
     }
     
     var isInGame = true
@@ -96,7 +96,7 @@ class Player(val name: String) {
                 append(", Get Off Vacation Free Cards: $numGetOffVacationCards")
             }
             numTurnsSpentOnVacation?.let {
-                append(", On Vacation - Number of Turns Spent: $it")
+                append(", On Vacation - Turns Spent: $it")
             }
         }
 }

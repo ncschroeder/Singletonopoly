@@ -24,7 +24,7 @@ enum class Neighborhood(
     street2Name: String,
     street3Name: String
 ) {
-    VAUXHALL("Vauxhall", "Penny Lane", "Hyde Street", "Barking Boulevard"),
+    VAUXHALL("Vauxhall", "Newburn Street", "Thames Avenue", "Hyde Street"),
     MONROVIA("Monrovia", "Luanda Lane", "Kinshasa Street", "Lagos Avenue"),
     OZARK("Ozark", "Camden Court", "Lake Shore Drive", "Osage Beach Parkway"),
     AUGUSTA("Augusta", "Labadie Lane", "Moselle Street", "Clover Bottom Road"),
@@ -70,8 +70,8 @@ enum class Neighborhood(
             }
         )
     
-    val restaurantAddingPrice: Int = streetPurchasePrice / 2
-    val restaurantRemovalGain: Int = restaurantAddingPrice / 2
+    val restaurantPurchasePrice: Int = streetPurchasePrice / 2
+    val restaurantSellingPrice: Int = restaurantPurchasePrice / 2
     val numRestaurants: Int
         get() = _streets.sumOf { it.numRestaurants }
     
@@ -85,11 +85,11 @@ enum class Neighborhood(
     val streetsCommonInfo: String =
         arrayOf(
             "Purchase Price: $${streetPurchasePrice.toStringWithCommas()}",
-            "Pawn Gain and Restaurant Adding Price: $${street1.pawnGain}",
+            "Pawn and Restaurant Purchase Price: $${street1.pawnPrice}",
             "Unpawn Price: $${street1.unpawnPrice}",
-            "Restaurant Removal Gain: $$restaurantRemovalGain",
-            "Fee when neighborhood isn't owned by 1 player: $$streetStartingFee",
-            "Fees when neighborhood is owned by 1 player with these amounts of restaurants: " +
+            "Restaurant Selling Price: $$restaurantSellingPrice",
+            "Starting Fee: $$streetStartingFee",
+            "Fees when all streets are owned by 1 player with these amounts of restaurants: " +
                 (0..5).joinToString(
                     transform = {
                         val fee: Int = getStreetFeeWhenOnePlayerOwnsAllStreets(numRestaurants = it)
@@ -113,9 +113,9 @@ fun Neighborhood.getMarkdownTableRow(): String =
         
         listOf(
             streetPurchasePrice.toStringWithCommas(),
-            street1.pawnGain,
+            street1.pawnPrice,
             street1.unpawnPrice,
-            restaurantRemovalGain,
+            restaurantSellingPrice,
             streetStartingFee
         )
         .forEach { add("$" + it) }
