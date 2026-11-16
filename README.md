@@ -1,6 +1,11 @@
 # Singletonopoly
 
-This is a game with a command line interface made using Kotlin. All of the Kotlin files in this repo are copies of the files in an IntelliJ IDEA project of mine. The Game.kt file has the `main` function and the `Game` class, which has most of the code for playing a game. The other Kotlin files have classes, [object declarations (singletons)](https://kotlinlang.org/docs/object-declarations.html#object-declarations-overview), and Misc.kt has functions. Some files have documentation. Some, such as the `PlayerManager` class, seem simple enough that they don't need documentation. Some, such as the `ActionDeck` class, have some code that's explained by some info in the manual.
+This is a game with a command line interface made using Kotlin. All of the Kotlin files in this repo are copies of the files in an IntelliJ IDEA project of mine. The `Game.kt` file has the `main` function and the `Game` class, which has most of the code for playing a game. The other Kotlin files have classes and [object declarations (singletons)](https://kotlinlang.org/docs/object-declarations.html#object-declarations-overview). Some files have documentation. Some, such as the `PlayerManager` class, seem simple enough that they don't need documentation. Some, such as the `ActionDeck` class, have some code that's explained by some info in the manual.
+
+
+## Collapsible Sections
+
+In case it's not obvious, the black triangles or play buttons below are where collapsible sections are and they can be expanded and collapsed by clicking on the triangle or to the right of it.
 
 
 ## Game Objective
@@ -12,16 +17,17 @@ Roll some dice, move around a board, and buy some properties. Get money from oth
 
 I did this project with my now-favorite language Kotlin. At the time I started this project, I think my favorite language was Java :coffee:. I decided to use Kotlin because I had a little experience from using it for an Android development course in college. I'm glad I learned it and decided to use it.
 
-Kotlin is statically typed and similar to C# and Java in terms of features, though much of the syntax is different. I think Kotlin is more similar to C#; however, a notable similarity Kotlin has with Java is that Kotlin code can be compiled to Java bytecode! Kotlin code can also be compiled to native binaries or transpiled to front-end JavaScript.
+<details>
+<summary>More Info</summary>
+<br/>
+
+Kotlin is statically typed and similar to C# and Java in terms of features, though much of the syntax is different. I think Kotlin is more similar to C#. However, a notable similarity Kotlin has with Java is that Kotlin code can be compiled to Java bytecode! Kotlin code can also be compiled to native binaries or transpiled to front-end JavaScript.
 
 Here's a [Kotlin Docs article that gives a brief overview of syntax and some features of the language and has links to more detailed documentation articles](https://kotlinlang.org/docs/basic-syntax.html). You can also use the menu on the left edge of that page to access other articles. Here's the [Kotlin Standard Library documentation](https://kotlinlang.org/api/latest/jvm/stdlib/). If you go to the page for a class or function in the Standard Library, not only does that page describe the class or function but it also provides a link to the source code. Throughout the rest of the "Language Used" section, including the collapsible section below, I'll give some links to pages in the Kotlin Docs and Standard Library documentation.
 
 I like the features of Kotlin. Some of my favorite ones include [null safety](https://kotlinlang.org/docs/null-safety.html), [lambda features](https://kotlinlang.org/docs/lambdas.html#lambda-expressions-and-anonymous-functions) such as how `it` is the implicit param and the last expression is the return value, [extension functions](https://kotlinlang.org/docs/extensions.html), [destructuring](https://kotlinlang.org/docs/destructuring-declarations.html), and the ability to [name args when calling functions](https://kotlinlang.org/docs/functions.html#named-arguments). I also like the abundance of functions that the Standard Library provides.
 
-More info about Kotlin features used in this project is in the collapsible section below.
-
-<details>
-<summary>More Info</summary>
+Below is info about some Kotlin features that I used.
 
 #### Destructuring
 
@@ -36,7 +42,7 @@ There are several object declarations used, including some companion objects. Mo
 The `Property` class is sealed :zipper_mouth_face:. More info about sealed classes can be found [here](https://kotlinlang.org/docs/sealed-classes.html). The 3 subclasses of `Property` are `Street`, `GolfClub`, and `SuperStore`. The benefit to using a sealed class is in the [`handleLandingOnOwnedProp` function in the `Game` class](https://github.com/ncschroeder/Singletonopoly/blob/13077747ecc30be97e008dd03af5b4461074ce5e/src/main/Game.kt#L518-L593).
 
 <details>
-<summary>Part of handleLandingOnOwnedProp</summary>
+<summary>Part of <code>handleLandingOnOwnedProp</code></summary>
 <br/>
 
 ```kotlin
@@ -215,7 +221,8 @@ cardsQueue = ArrayDeque(cards)
 The `run`, `with`, and `apply` scope functions have a param named `block` and the type of it is `T.() -> Unit`, where `T` is a type param. The [`buildList`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/build-list.html) function has a param named `builderAction` and the type of it is `MutableList<E>.() -> Unit`, where `E` is a type param. These types are functions with a receiver and the receiver type is the type before the `.()`. This type of function can be created with a lambda and inside that lambda, you can access members of the receiver type without needing an instance of that type.
 
 <details>
-<summary>buildList Usage</summary>
+<summary><code>buildList</code> Usage</summary>
+<br/>
 
 This is in the [`PropertyManager` object](https://github.com/ncschroeder/Singletonopoly/blob/master/src/main/board/properties/PropertyManager.kt):
 
@@ -251,6 +258,7 @@ In this project, there are several times when collection multi-step processing i
 
 <details>
 <summary>Intermediate Collection Example</summary>
+<br/>
 
 This is in the [`PropertyManager` object](https://github.com/ncschroeder/Singletonopoly/blob/master/src/main/board/properties/PropertyManager.kt) and was mentioned in the previous section, "Functions with Receivers":
 
@@ -290,30 +298,60 @@ Though, I'd have to add a `joinToStringBuilder` extension function to `Sequence<
 ## Project History
 
 <details>
+<summary>Info</summary>
+<br/>
 
 During the spring of 2020, I thought it would be interesting to make computerized versions of some board games. I was also planning on doing an independent study course over the summer. I came up with the idea of making computerized versions of some board games for the independent study course. I proposed my idea to one of my professors who would be a sponsor for the course and they accepted. I decided that Monopoly would be one of the games I would implement. I decided to make a parody, which in time would be called Singletonopoly. I thought this game would be challenging but not overwhelming to implement. I decided to use Kotlin because I had a little experience by using it for an Android development course, the professor of which was the professor I proposed my idea to.
 
-I started the work in June 2020. The independent study course came to an end at the end of July. By that time, I wasn't done but submitted my work to the professor and then got an A for the course and got my Bachelor's degree in Computer Science. :man_student: I spent more time to finish the project and got a finished version uploaded to GitHub in October. Refactoring was done and other changes were made throughout 2021, 2022, and 2023.
+I started the work in June 2020. The independent study course came to an end at the end of July. By that time, I wasn't done but submitted my work to the professor and then got an A for the course and got my Bachelor's degree in computer science. :man_student: I spent more time to finish the project and got a finished version uploaded to GitHub in October. Refactoring was done and minor changes to the game were made since then.
 
-One part of the project that got changed significantly was the manual. This started off having 10 sections, ~1,200 words, and no lists, tables, flowcharts, pie charts :pie: :chart_with_upwards_trend:, nor emojis. :slightly_smiling_face: I was able to come up with a lot more stuff that could be added to the manual and now, as mentioned in the "Manual" section, it has 15 sections, ~4,500 words, 7 lists, 5 tables, 3 flowcharts, 1 pie chart, and ~40 emojis.
+One part of the project that got changed significantly was the manual. This started off having 10 sections and no screenshots, tables, flowcharts, pie charts :pie: :chart_with_upwards_trend:, nor emojis. :slightly_smiling_face: I was able to come up with a lot more stuff that could be added to the manual and now, it has 19 sections, 44 screenshots, 5 tables, 2 flowcharts, 1 pie chart, and ~50 emojis.
 
-### Refactoring Examples
+</details>
+
+<details>
+<summary>Refactoring Examples</summary>
+<br/>
+
+Though I almost had my Bachelor's degree in computer science when I started on this project, I was still naive about some programming things.
 
 #### Higher-Order Functions
 
-In early versions of this project, something that I didn't use very much are higher-order functions. Some examples are in the `PlayerManager` class. Here's some old code for finding the count of players that are in the game:
+In early versions of this project, something that I didn't use very much are higher-order functions. Some examples are in the [`PlayerManager` class](https://github.com/ncschroeder/Singletonopoly/blob/master/src/main/players/PlayerManager.kt). Here's some old code for finding the count of players that are in the game:
 
-https://github.com/ncschroeder/Singletonopoly/blob/19bbbdd34e26252db5399f8cca1456611c915755/PlayerManager.kt#L138-L147
+```kotlin
+val numberOfPlayersInGame: Int
+    get() {
+        var count = 0
+        for (player in players) {
+            if (player.isInGame) {
+                count++
+            }
+        }
+        return count
+    }
+```
 
-In the current version, that count is found using `players.count { it.isInGame }`.
+That count is now found using `players.count { it.isInGame }`.
 
-Here's some old code for building a string that contains info about players:
+Here's some old code for building a string with info about players:
 
-https://github.com/ncschroeder/Singletonopoly/blob/e5c09b1f3ce4883acd655f0636b6247a3b49c253/PlayerManager.kt#L142-L148
+```kotlin
+override fun toString(): String {
+    var string = "Player Info"
+    for (player in players) {
+        string += "\n" + player
+    }
+    return string
+}
+```
 
 Here's the current implementation:
 
-https://github.com/ncschroeder/Singletonopoly/blob/5698b1b60623068af849a7a02126efa571dba267/PlayerManager.kt#L22-L23
+```kotlin
+fun getPlayerInfo(): String =
+    players.joinToString(prefix = "Player Info\n", transform = { it.getInfo() }, separator = "\n")
+```
 
 #### Enums
 
@@ -332,14 +370,38 @@ private val boardSpaces = arrayOf(
 
 As a result of that, the `getBoardSpace` function would possibly return those strings and then the `evaluatePosition` function in the `Game` class would have to use string literals to check a result, as seen in this code snippet:
 
-https://github.com/ncschroeder/Singletonopoly/blob/19bbbdd34e26252db5399f8cca1456611c915755/Game.kt#L370-L385
+```kotlin
+fun evaluatePosition() {
+    print("${currentPlayer.name} has landed on position ${currentPlayer.position} which is ")
+    when (val currentBoardSpace = board.getBoardSpace(currentPlayer.position)) {
+        is String -> {
+            println("\"$currentBoardSpace\".")
+            when (currentBoardSpace) {
+                "Start", "Vacation", "Break Time" -> println("This space has no effect")
+
+                "Go On Vacation" -> {
+                    currentPlayer.sendToVacation() 
+                    // Following condition will be true if the player rolled doubles. The player will not get to 
+                    // go again for this case. 
+                    if (goAgain) { 
+                        goAgain = false 
+                    }
+                }
+                ...
+            }
+        }
+        ...
+    }
+    ...
+}
+```
 
 This is bad because of the possibility of typos. Since an enum is used now, typos aren't a problem since there'll be a compilation error if you misspell the name of an enum or one of its constants. Though, you don't even have to type out the enum or constant name. You can just start typing the enum name and then your IDE should display an autocomplete option with that name. You can select this and type a `.` and then your IDE should display autocomplete options with the enum constant names and you can select one.
 
-The `Board` object now has a `spacesMap` and the values of that map come from the elements of an array and some of these elements are instances of the `NonPropertySpace` enum like this:
+The `Board` object now has a `positionsAndSpaces` map and the values of that map come from the elements of an array and some of those elements are instances of the `NonPropertySpace` enum like this:
 
 ```kotlin
-private val spacesMap: Map<Int, Any> =
+private val positionsAndSpaces: Map<Int, Any> =
     arrayOf(
         NonPropertySpace.START,
         ...
@@ -353,14 +415,44 @@ private val spacesMap: Map<Int, Any> =
 
 As a result of this, the `getSpace` function will possibly return a `NonPropertySpace` and then the `evaluatePosition` function can easily check if an instance of that got returned and which instance got returned, as seen in this code snippet:
 
-https://github.com/ncschroeder/Singletonopoly/blob/5698b1b60623068af849a7a02126efa571dba267/Game.kt#L372-L388
+```kotlin
+fun evaluatePosition() {
+    print("They landed on position ${curPlayer.position}, which is ")
+    
+    when (val curBoardSpace: Any? = Board.getSpace(curPlayer.position)) {
+        is Property -> ...
+        
+        is NonPropertySpace -> {
+            println("\"$curBoardSpace")
+            
+            when (curBoardSpace) {
+                NonPropertySpace.START,
+                NonPropertySpace.VACATION,
+                NonPropertySpace.BREAK_TIME -> println(",\" which has no effect.")
+                
+                NonPropertySpace.GO_ON_VACATION -> {
+                    println(".\"")
+                    handleGoOnVacation()
+                }
+                
+                NonPropertySpace.DRAW_ACTION_CARD -> {
+                    println(".\"")
+                    handleLandingOnDrawActionCard()
+                }
+            }
+        }
+        
+        ...
+    }
+}
+```
 
 </details>
 
 
 ## Manual
 
-This manual has a lot of info about the game but virtually no info about the implementation of it. There are 15 sections, ~4,500 words, 7 lists, 5 tables, 3 flowcharts, 1 pie chart :pie: :chart_with_upwards_trend:, and ~40 emojis. :slightly_smiling_face:
+This is similar to the manual of a physical board game. It has info about how to play the game and how it works. There are 19 sections, 44 screenshots, 5 tables, 3 flowcharts, 1 pie chart :pie: :chart_with_upwards_trend:, and ~50 emojis. :slightly_smiling_face:
 
 The flowcharts and pie chart are generated by the diagramming and charting tool Mermaid :mermaid: and were conveniently able to be added by adding some code to the Markdown. Here's a [*GitHub Docs* article on creating diagrams](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-diagrams) and here's the [Mermaid website](https://mermaid.js.org/).
 
@@ -368,10 +460,13 @@ There are also some mathematical expressions in this manual that can be written 
 
 ### Players: 2-8
 
+### Game Objective
+
+Roll some dice, move around a board, and buy some properties. Get money from other players when they land on your properties. :heavy_dollar_sign: :moneybag: :money_with_wings: :money_mouth_face: Remove other players from the game by making them lose all their money and properties. Be the last person remaining in the game. In other words, make the set of players in the game a singleton set that consists of only you.
+
 ### Beginning
 
 The game will ask for the number of players and names of them. Leading and trailing whitespace will be ignored. The names must be 1-20 characters and unique, meaning that 2 names can’t contain the same characters in the same order. An uppercase letter and the corresponding lowercase letter are different characters. If a name is entered that's the same as a name that was entered for a previous player, then a message saying this will be shown and a new name will need to be entered. The names entered here will be shown throughout the game.
-
 
 A roll of 2 dice will be generated for each player after their name is entered. :game_die: :game_die: Just like standard physical dice, each die rolled here and throughout the game has a minimum value of 1 and a maximum value of 6. The order of the players will be determined by these dice rolls in descending order, meaning that higher rolls go first. If there are ties, then the order of the players that tied will be randomized. For example; if 1 player gets a 12, 2 players get a 10, and 1 player gets a 7; then the player that got the 12 will be 1<sup>st</sup> and the player that got the 7 will be last and the order of the other 2 players will be randomized and one of them will be 2<sup>nd</sup> and the other will be 3<sup>rd</sup>.
 
@@ -382,16 +477,24 @@ After all names are entered, the order of the players is determined and shown an
 ![Beginning](/images/screenshots/beginning.JPG)
 
 
+### Money
 
-### Playing the Game
+Money is used for buying properties, buying restaurants for streets, and paying fees for landing on owned properties or drawing Action Cards. Players start with :heavy_dollar_sign:4,096 (2<sup>12</sup>). Along with this, there are other references to powers of 2 throughout the game.
 
-Money is used for buying properties, buying restaurants for streets, and paying fees. Players start with :heavy_dollar_sign:4,096 (2<sup>12</sup>). Along with this, there are other references to powers of 2 throughout the game.
+
+### User Input
+
+Throughout the game, users are prompted to enter input. Valid input values will be shown. For yes and no questions, valid input is "y" or "n". Sometimes, a list of input options is shown. Each option has a value to enter followed by a colon followed by what the option is for. Other times, valid values are 2 letters or a single whole number. For these, the value will be shown followed by a colon followed by what the value is for. When property positions must be entered as explained in the ["Process for Pawning, Unpawning, ..." section](#process-for-pawning-unpawning-and-buying-and-selling-restaurants), valid values are a group of 1 or more whitespace-separated whole numbers. During trading, whole numbers for an amount of money or get off vacation free cards can be entered.
+
+Like entering the names at the beginning, leading and trailing whitespace is ignored. However, the letter inputs are case-***in***sensitive. For example, the input value for a player to roll the dice and move is "rl". Valid input for this includes but isn't limited to "rl", " &nbsp; &nbsp; Rl &nbsp; &nbsp; ", and "RL". If invalid input is entered, then a message will be shown and new input will need to be entered. Usually, this message is "Invalid input. Try again: ". One of the situations where a different message is shown is if a non-unique name is entered at the beginning. The other situation is when property positions must be entered but no valid ones are, as explained in the ["Process for Pawning, Unpawning, ..." section](#process-for-pawning-unpawning-and-buying-and-selling-restaurants).
 
 #### Screenshot
 
 Invalid input
 
 ![Invalid input](/images/screenshots/invalid_input.JPG)
+
+### Taking Turns
 
 At the beginning of a player's turn, they have options to do things.
 
@@ -400,7 +503,7 @@ Things that can always be done:
 - See board spaces
 - See property info
 - See player info
-- Make a trade
+- Trade
 - Drop out
 - End the game
 
@@ -410,7 +513,11 @@ Things that can conditionally be done if the player has at least 1 property wher
 - Buy restaurants for streets
 - Sell restaurants on streets
 
+These options will only be shown if they can be done.
+
 When a player decides to roll the dice and move, 2 dice will be rolled for them. :game_die: :game_die: I'm going to use the variables $p$ to represent the player's current position and $d$ to represent the sum of the values of the dice. There are 40 board spaces. If $p + d \leq 40$, the player's new position is $(p + d)$. If $p + d > 40$, the player made a revolution around the board and their new position is the difference between $(p + d)$ and $40$. For example, if $p + d = 42$, the new position is 2. After a revolution, a player gains :heavy_dollar_sign:512. The player's new position will be evaluated and appropriate action will be taken. If the values of both dice are the same, also called *rolling doubles*, that player gets to go again. If a player rolls doubles thrice, or 3 times, in a row, they'll be sent to [vacation](#vacation-desert_island-beach_umbrella).
+
+If a player decides to drop out at the beginning of their turn, their properties will become unowned.
 
 <details>
 <summary>Screenshots</summary>
@@ -437,6 +544,11 @@ A player dropping out
 ![A player dropping out](/images/screenshots/dropping_out.JPG)
 
 </details>
+
+
+### Ending the Game
+
+The game ends when the "End game" option is used at the beginning of a player's turn or when there are 2 players remaining in the game and one of them drops out.
 
 <details>
 <summary>Screenshots</summary>
@@ -466,7 +578,7 @@ As mentioned in the previous section, there are 40 spaces:
 - Go on Vacation
 - Vacation
 
-Here's a pie chart that displays the percentages of each type of space:
+Here's a pie chart :pie: :chart_with_upwards_trend: that shows the percentages of each type of space:
 
 ```mermaid
 pie
@@ -482,7 +594,11 @@ pie
 
 The "Start," "Break Time," and "Vacation" spaces have no effect when landing on them. The effects of the other spaces are described in their section in this manual.
 
-Here are all the spaces on the board. The spaces with streets have the street name shown followed by their neighborhood.
+<details>
+<summary>All Board Spaces</summary>
+<br/>
+
+The spaces with streets have the street name shown followed by their neighborhood.
 
 | Position | Space                        |
 | :------: | ---------------------------- |
@@ -500,7 +616,7 @@ Here are all the spaces on the board. The spaces with streets have the street na
 |    12    | Break Time                   |
 |    13    | Lake Shore Drive, Ozark      |
 |    14    | Osage Beach Parkway, Ozark   |
-|    15    | Labadie Avenue, Augusta      |
+|    15    | Labadie Lane, Augusta        |
 |    16    | Draw Action Card             |
 |    17    | Moselle Street, Augusta      |
 |    18    | Granby Golf Club             |
@@ -527,9 +643,9 @@ Here are all the spaces on the board. The spaces with streets have the street na
 |    39    | Suffolk Street, Hampton      |
 |    40    | Norfolk Avenue, Hampton      |
 
-<details>
-<summary>Screenshots</summary>
-<br/>
+</details>
+
+#### Screenshots
 
 Landing on "Break Time"
 
@@ -539,8 +655,6 @@ Seeing the spaces on the board
 
 ![Seeing the spaces on the board](/images/screenshots/board_spaces.JPG)
 
-</details>
-
 
 ### Properties
 
@@ -548,7 +662,7 @@ The 3 types of properties are super stores, golf clubs, and streets. There are s
 
 All properties are unowned at the beginning. If a player lands on an unowned property, they'll have the option to buy it. If they want to buy it but don't have enough money, they'll be sent to the [money getting section](#money-getting-section-heavy_dollar_sign) and if they get the money, the property will be given to them. If a player lands on a property that's owned by someone else and unpawned, they'll have to pay a fee to the owner. If they can't pay the fee, they'll be sent to the money getting section and if they decide to drop out, their money and properties will go to the owner of the property.
 
-##### Screenshots
+#### Screenshots
 
 Buying a street
 
@@ -570,8 +684,9 @@ Landing on an owned super store
 
 <details>
 <summary>Name Origins</summary>
+<br/>
 
-[Isaac Newton](https://en.wikipedia.org/wiki/Isaac_Newton) and [Gottfried Leibniz](https://en.wikipedia.org/wiki/Gottfried_Wilhelm_Leibniz) were mathematicians who invented and developed calculus.
+Isaac Newton and Gottfried Leibniz were mathematicians who invented and developed calculus.
 
 </details>
 
@@ -594,10 +709,9 @@ Landing on an owned golf club
 
 <details>
 <summary>Name Origins</summary>
+<br/>
 
-[Neosho](https://en.wikipedia.org/wiki/Neosho,_Missouri), [Granby](https://en.wikipedia.org/wiki/Granby,_Missouri), [Monett](https://en.wikipedia.org/wiki/Monett,_Missouri), and [Aurora](https://en.wikipedia.org/wiki/Aurora,_Missouri) are Missouri towns along [US Route 60](https://en.wikipedia.org/wiki/U.S._Route_60_in_Missouri) southwest of [Springfield](https://en.wikipedia.org/wiki/Springfield,_Missouri). That's a route I traveled on a few times during my time living in Springfield and attending Missouri State University.
-
-![Southwestern Missouri map](/images/maps/sw_missouri.JPG)
+Neosho, Granby, Monett, and Aurora are Missouri towns along US Route 60 southwest of Springfield. That's a route I traveled on a few times during my time living in Springfield and attending Missouri State University.
 
 </details>
 
@@ -610,7 +724,7 @@ There are 24 streets around the board that are grouped into 8 neighborhoods. If 
 | Vauxhall     | Newburn Street    | Thames Avenue     | Hyde Street         |
 | Monrovia     | Luanda Lane       | Kinshasa Street   | Lagos Avenue        |
 | Ozark        | Camden Court      | Lake Shore Drive  | Osage Beach Parkway |
-| Augusta      | Labadie Avenue    | Moselle Street    | Clover Bottom Road  |
+| Augusta      | Labadie Lane      | Moselle Street    | Clover Bottom Road  |
 | Little Italy | Ezio Avenue       | Firenze Way       | Venezia Street      |
 | Gauss        | Euler Street      | Ramanujan Road    | Euclid Avenue       |
 | Turing       | Dijkstra Drive    | Knuth Street      | Ritchie Road        |
@@ -619,46 +733,25 @@ There are 24 streets around the board that are grouped into 8 neighborhoods. If 
 <details>
 <summary>Name Origins</summary>
 
-- The Vauxhall neighborhood is [London](https://en.wikipedia.org/wiki/London) themed. Vauxhall is a [area in London](https://en.wikipedia.org/wiki/Vauxhall) and an [English car company](https://en.wikipedia.org/wiki/Vauxhall_Motors). Newburn Street is a street in Vauxhall. The [River Thames](https://en.wikipedia.org/wiki/River_Thames) flows through London. [Hyde Park](https://en.wikipedia.org/wiki/Hyde_Park,_London) is a famous park in London.
+- The Vauxhall neighborhood is London themed. Vauxhall is a area in central London and an English car company. Newburn Street is a street in Vauxhall. The River Thames flows through London. Hyde Park is a famous park in London.
 
-    In the map below, the red dots form the outline of Vauxhall.
+- Monrovia, Liberia; Luanda, Angola; Kinshasa, Democratic Republic of the Congo; and Lagos, Nigeria are cities in western Africa. :earth_africa: Fun fact: Monrovia was named after 5<sup>th</sup> U.S. president James Monroe.
 
-    ![London map](/images/maps/london.JPG)
+- The Ozark neighborhood is Lake of the Ozarks themed. :speedboat: :bikini: :sunrise: :swimming_man: Camden County is where most of the lake and surrounding area is. Lake Shore Drive is a road in Chicago but goes with the theme. Osage Beach is a city by the lake and there’s a road there called Osage Beach Parkway.
 
+- Augusta, Labadie, Moselle, and Clover Bottom are communities close to Union, Missouri, where I spent much of my life.
 
-- [Monrovia, Liberia](https://en.wikipedia.org/wiki/Monrovia); [Luanda, Angola](https://en.wikipedia.org/wiki/Luanda); [Kinshasa, Democratic Republic of the Congo](https://en.wikipedia.org/wiki/Kinshasa); and [Lagos, Nigeria](https://en.wikipedia.org/wiki/Lagos) are cities in Africa. :earth_africa: Fun fact: Monrovia was named after 6<sup>th</sup> U.S. president James Monroe.
+- The Little Italy neighborhood is, of course, Italy themed. Ezio Auditore da Firenze is the protagonist in 3 *Assassin’s Creed* games and is from Florence. Florence and Venice are cities in Italy and the Italian names for them are Firenze and Venezia, respectively.
 
-    ![Western Africa map](/images/maps/western_africa.JPG)
+- Carl Friedrich Gauss, Leonhard Euler, Srinivasa Ramanujan, and Euclid were mathematicians. Euclid Avenue is also a street in St. Louis.
 
+- Alan Turing, Edsger Dijkstra, Donald Knuth, and Dennis Ritchie are or were computer scientists, with Knuth being the only one still alive at the time of this writing.
 
-- The Ozark neighborhood is [Lake of the Ozarks](https://en.wikipedia.org/wiki/Lake_of_the_Ozarks) themed. :speedboat: :bikini: :sunrise: :swimming_man: [Camden County](https://en.wikipedia.org/wiki/Camden_County,_Missouri) is where most of the lake and surrounding area is. [Lake Shore Drive](https://en.wikipedia.org/wiki/Lake_Shore_Drive) is a road in Chicago but goes with the theme. [Osage Beach](https://en.wikipedia.org/wiki/Osage_Beach,_Missouri) is a city by the lake and there’s a road there called Osage Beach Parkway.
-
-    In the map below, the red dots form the outline of Camden County.
-
-    ![Lake of the Ozarks map](/images/maps/lake_of_the_ozarks.JPG)
-
-
-- [Augusta](https://en.wikipedia.org/wiki/Augusta,_Missouri), [Labadie](https://en.wikipedia.org/wiki/Labadie,_Missouri), [Moselle](https://en.wikipedia.org/wiki/Moselle,_Missouri), and [Clover Bottom](https://en.wikipedia.org/wiki/Clover_Bottom,_Missouri) are communities close to [Union, Missouri](https://en.wikipedia.org/wiki/Union,_Missouri), where I spent much of my life.
-
-    ![Area around Union map](/images/maps/area_around_union.JPG)
-
-
-- The Little Italy neighborhood is, of course, [Italy](https://en.wikipedia.org/wiki/Italy) themed. [Ezio Auditore da Firenze](https://en.wikipedia.org/wiki/Ezio_Auditore_da_Firenze) is the protagonist in 3 [*Assassin’s Creed*](https://en.wikipedia.org/wiki/Assassin%27s_Creed) games and is from Florence. [Florence](https://en.wikipedia.org/wiki/Florence) and [Venice](https://en.wikipedia.org/wiki/Venice) are cities in Italy and the Italian names for them are Firenze and Venezia, respectively.
-
-    ![Italy map](/images/maps/italy.JPG)
-
-
-- [Carl Friedrich Gauss](https://en.wikipedia.org/wiki/Carl_Friedrich_Gauss), [Leonhard Euler](https://en.wikipedia.org/wiki/Leonhard_Euler), [Srinivasa Ramanujan](https://en.wikipedia.org/wiki/Srinivasa_Ramanujan), and [Euclid](https://en.wikipedia.org/wiki/Euclid) were mathematicians. Euclid Avenue is also a street in St. Louis. :fleur_de_lis:
-
-- [Alan Turing](https://en.wikipedia.org/wiki/Alan_Turing), [Edsger Dijkstra](https://en.wikipedia.org/wiki/Edsger_W._Dijkstra), [Donald Knuth](https://en.wikipedia.org/wiki/Donald_Knuth), and [Dennis Ritchie](https://en.wikipedia.org/wiki/Dennis_Ritchie) are or were computer scientists, with Knuth being the only one still alive at the time of this writing.
-
-- [Hampton](https://en.wikipedia.org/wiki/Hampton,_Virginia), [Chesapeake](https://en.wikipedia.org/wiki/Chesapeake,_Virginia), [Suffolk](https://en.wikipedia.org/wiki/Suffolk,_Virginia), and [Norfolk](https://en.wikipedia.org/wiki/Norfolk,_Virginia) are cities in the [Hampton Roads region of eastern Virginia](https://en.wikipedia.org/wiki/Hampton_Roads).
-
-    ![Hampton Roads map](/images/maps/hampton_roads.JPG)
+- Hampton, Chesapeake, Suffolk, and Norfolk are cities in the Hampton Roads region of eastern Virginia.
 
 </details>
 
-Each neighborhood has a number associated with it and these are shown in the 2<sup>nd</sup> table below. The purchase price of each street in a neighborhood is the neighborhood number divided by 8. The starting fee of a street is the purchase price divided by 8. This is what the fee is if the owner owns 1 or 2 of the streets in the neighborhood of that street. If a player owns all 3 of the streets in a neighborhood, then the fees for those streets increase and restaurants can be bought for them to increase the fees more. Streets can have a max of 5 restaurants. The purchase price of a restaurant is half of the street purchase price. Players can sell restaurants back for half of their purchase price. For neighborhoods where a player owns all streets, the fee for a street is the street starting fee × (2<var>n</var> + 2), where <var>n</var> is the number of restaurants on that street. This gives us the following values:
+Each neighborhood has a number associated with it and these are shown in the 2<sup>nd</sup> table below. The purchase price of each street in a neighborhood is the neighborhood number divided by 8. The starting fee of a street is the purchase price divided by 8. This is what the fee is if the owner owns 1 or 2 of the streets in the neighborhood of that street. If a player owns all 3 of the streets in a neighborhood, then the fees for those streets increase and restaurants can be bought for them to increase the fees more. The process for buying and selling restaurants is explained in the ["Process for Pawning, Unpawning, ..." section](#process-for-pawning-unpawning-and-buying-and-selling-restaurants). Streets can have a max of 5 restaurants. The purchase price of a restaurant is half of the street purchase price. Players can sell restaurants back for half of their purchase price. For neighborhoods where a player owns all streets, the fee for a street is the street starting fee × (2<var>n</var> + 2), where <var>n</var> is the number of restaurants on that street. This gives us the following values:
 
 | Number of Restaurants | Street Starting Fee Multiplier |
 | :-------------------: | :----------------------------: |
@@ -693,7 +786,7 @@ Landing on an owned street
 
 #### Pawning
 
-Players can pawn a property to get some money but anybody who lands on a pawned property won't need to pay a fee. A pawned property must be unpawned in order to require players who land there to pay a fee. The money that a player gains from pawning a property is half of its purchase price. The money needed to unpawn is calculated by taking the pawn price, adding a 10.24% $(\frac{2^{10}}{100})$ fee, and rounding this to the nearest whole number. Streets must have no restaurants on them in order to be pawned, so if any restaurants get bought, then they must be sold.
+Players can pawn a property to get some money but anybody who lands on a pawned property won't need to pay a fee. A pawned property must be unpawned in order to require players who land there to pay a fee. The money that a player gains from pawning a property is half of its purchase price. The money needed to unpawn is calculated by taking the pawn price, adding a 10.24% $(\frac{2^{10}}{100})$ fee, and rounding this to the nearest whole number. Streets must have no restaurants on them in order to be pawned, so if any restaurants get bought, then they must be sold. The process for pawning and unpawning is explained in the ["Process for Pawning, Unpawning, ..." section](#process-for-pawning-unpawning-and-buying-and-selling-restaurants).
 
 ##### Screenshot
 
@@ -703,6 +796,9 @@ Landing on a pawned property
 
 #### Seeing Property Info
 
+At the beginning of a turn, after landing on an unowned property, and during some parts of trading; a player can choose to see property info. If they choose that, they can then choose whether to see info about all properties or just theirs. Also during trading, if the initiating player wants or wants to offer properties, info will be shown about relevant properties. When a player wants to pawn, unpawn, or buy or sell restaurants; info will be shown about the properties where that action can be done.
+
+Some info is common to multiple properties. Super stores and golf clubs have the same purchase, pawn, and unpawn prices. Streets in the same neighborhood have a lot of common info. Some info is unique to a property. The unique info that gets mentioned is illustrated by the following flowchart:
 
 ```mermaid
 flowchart TD
@@ -715,6 +811,8 @@ flowchart TD
     G --> H{Is it a street with at least 1 restaurant?}
     H --Yes--> I[Mention number of restaurants]
 ```
+
+If there's at least 1 super store or golf club to show info for, common info for super stores and golf clubs will be shown first. If there's at least 1 super store to show info for, a "Super Stores" heading, fees info for super stores, and unique info about the stores will be shown. If there's at least 1 golf club to show info for, a "Golf Clubs" heading, fees info for golf clubs, and unique info about the clubs will be shown. If there's at least 1 street to show info for, a heading will first be shown. Most of the time, this heading is "Streets". Then, for each neighborhood that has at least 1 street to show info for, a heading with that neighborhood name, common info for streets in that neighborhood, and unique info about the streets will be shown.
 
 <details>
 <summary>Screenshots</summary>
@@ -732,6 +830,10 @@ Info for all properties
 ![Info for all properties part 3](/images/screenshots/info_for_all_props_part_3.JPG)
 
 </details>
+
+#### Process for Pawning, Unpawning, and Buying and Selling Restaurants
+
+When a player chooses the option for doing one of these actions, info is shown about the properties that can have the action done. This info is shown the same way as explained in the "Seeing Property Info" section (the previous section). The player is then prompted to enter the positions of the properties they would like to do the action on with each position separated by whitespace or "gb" to go back. Non-whole-number values or invalid positions entered will be ignored. If there are no valid positions entered, then the message "No valid positions were entered. Try again: " will be shown and the player will need to enter new input. The process is illustrated by the following flowchart:
 
 ```mermaid
 flowchart TD
@@ -780,7 +882,7 @@ Invalid Input
 
 When a player needs money, they'll be sent here. Sometimes a player is in a situation where they need money and chose to be in that situation. For example, they land on an unowned property and try to buy it without having enough money. Other times, a player needs money and didn’t choose to be in that situation. For example, they land on a property owned by someone else and don't have enough money to pay the fee.
 
-When a player is at this section, they're given some options. If the player chose to be in their situation, then the 1<sup>st</sup> option is to go back but if they do this, then they won't do the thing they needed money for. Otherwise, the 1<sup>st</sup> option is to drop out of the game. The 2<sup>nd</sup> option is to try to make a trade with another player. Other options are pawning properties and selling restaurants on streets but each of these options are available only if the player has at least 1 property where that action can be done. If the player chooses an option other than the first one and gets enough money to do the thing they needed money for, then they'll exit the money getting section and do that thing. Otherwise, they'll stay in the money getting section and be prompted to do another option.
+When a player is at this section, they're given some options. If the player chose to be in their situation, then the 1<sup>st</sup> option is to go back but if they do this, then they won't do the thing they needed money for. Otherwise, the 1<sup>st</sup> option is to drop out of the game. The 2<sup>nd</sup> option is to try to make a trade with another player. Other options are pawning properties and selling restaurants on streets but each of these options are available only if the player has at least 1 property where that action can be done. If the player chooses an option other than the 1<sup>st</sup> one and gets enough money to do the thing they needed money for, then they'll exit the money getting section and do that thing. Otherwise, they'll stay in the money getting section and be prompted to do another option.
 
 <details>
 <summary>Screenshots</summary>
@@ -897,16 +999,29 @@ Paying on vacation
 
 ### Trading
 
+Players can trade money, properties, and get off vacation free cards with each other. A player can initiate a trade at the beginning of their turn or if they're sent to the [money getting section](#money-getting-section-heavy_dollar_sign). If they initiate a trade after being sent to the money getting section, they'll need to select an amount of money to get from the other player.
+
+First, the initiating player (IP) will be prompted to either see property info, see player info, cancel the trade, or select a player to trade with. After they select a player to trade with, some checks will take place and the trade process will be restarted if any of the following are true:
 - The 2 players can’t trade anything besides money.
-- The initiating player went to the trading section from the money getting section and selected to trade with a player that doesn’t have money.
+- The IP initiated a trade after being sent to the money getting section and selected to trade with a player that doesn’t have money.
+Otherwise, the IP will then be prompted to select what they want from the other player and then what they offer.
 
 
+If the IP wants money or get off vacation free cards from the other player, they won't be able to offer that thing. If the IP wants or wants to offer properties, info about those properties will be shown the same way as described in the ["Seeing Property Info" section](#seeing-property-info). They'll select the properties the same way as described in the ["Process for Pawning, Unpawning, ..." section](#process-for-pawning-unpawning-and-buying-and-selling-restaurants).
 
+If the IP doesn't select anything that they want or doesn't offer anything, they'll be prompted to either try that part again, go to the start of the trade process, or cancel the trade. There's no gift-giving in Singletonopoly. :gift: The closest to this is having a trade where 1 player gives :heavy_dollar_sign:1 and the other player gives any item(s).
 
+After the IP selects what they want and offer, info about the items will be shown. The IP will be prompted to confirm the trade, deny it, or see property or player info. If they deny, they'll be prompted to either go to the start of the trade process or cancel the trade. If they confirm, the other player will then be prompted to accept the trade, deny it, or see property or player info. If they accept, the necessary changes are made.
 
-#### Screenshots
+If the IP wants a street that's in a neighborhood where all the streets are owned by the other player or offer a street that's in a neighborhood where they own all the streets and then the trade is agreed upon by both players, all restaurants on the streets in that neighborhood will be sold. A note about this will be shown when the info about the items involved in a trade are shown. The money for selling those restaurants will go to the player who owned them.
 
-Trying to trading at the start of a game
+Any pawned properties that get traded will remain pawned.
+
+<details>
+<summary>Screenshots</summary>
+<br/>
+
+Trying to trade at the start of a game
 
 ![Trying to trade at the start of a game](/images/screenshots/trade_at_start.JPG)
 
@@ -918,4 +1033,6 @@ A successful trade
 
 ![A successful trade part 1](/images/screenshots/trade_part_1.JPG)
 ![A successful trade part 2](/images/screenshots/trade_part_2.JPG)
+
+</details>
 
